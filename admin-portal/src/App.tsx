@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
-import { LogOut, ShieldCheck } from 'lucide-react'
-import { supabase } from './lib/supabase'
-import Login from './Login'
 import './App.css'
+import Header from './components/layout/Header'
+import Sidebar from './components/layout/Sidebar'
+import { supabase } from './lib/supabase'
+import Dashboard from './pages/Dashboard'
 
 function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     const syncAdminSession = async () => {
@@ -22,24 +24,29 @@ function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    setIsAdmin(false)
-  }
+  const handleLogout = () => setIsAdmin(false)
 
-  if (isLoading) return <main className="session-loading" aria-label="Loading admin session" />
-  if (!isAdmin) return <Login />
+  //if (isLoading) return <main className="session-loading" aria-label="Loading admin session" />
+  //if (!isAdmin) return <Login />
 
   return (
-    <main className="dashboard-shell">
-      <section className="dashboard-card">
-        <div className="dashboard-icon"><ShieldCheck size={24} /></div>
-        <p className="eyebrow">Library Admin</p>
-        <h1>Welcome back.</h1>
-        <p className="dashboard-copy">Your administrative workspace is ready for today.</p>
-        <button className="logout-button" type="button" onClick={handleLogout}><LogOut size={17} />Sign out</button>
-      </section>
-    </main>
+    <div className="admin-layout">
+      {sidebarOpen && (
+        <div
+          className="sidebar-backdrop"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <div className="admin-main">
+        <Header
+          onLogout={handleLogout}
+          onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
+        />
+        <Dashboard />
+      </div>
+    </div>
   )
 }
 
