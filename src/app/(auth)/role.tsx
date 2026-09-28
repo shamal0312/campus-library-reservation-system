@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useAuth } from '@/contexts/auth-context';
 import { USER_ROLE_LABELS, type UserRole } from '@/types/account';
 
 const ROLES: {
@@ -19,20 +18,6 @@ const ROLES: {
 export default function RoleScreen() {
   const insets = useSafeAreaInsets();
   const [selectedRole, setSelectedRole] = useState<UserRole>('lecturer');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { saveRole } = useAuth();
-
-  async function handleContinue() {
-    setErrorMessage(null);
-    setIsSubmitting(true);
-    const result = await saveRole(selectedRole);
-    setIsSubmitting(false);
-
-    if (result.error) {
-      setErrorMessage(result.error);
-    }
-  }
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 24 }]}>
@@ -89,13 +74,8 @@ export default function RoleScreen() {
 
       <View style={styles.spacer} />
 
-      {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
-
-      <Pressable
-        style={[styles.button, isSubmitting && styles.buttonDisabled]}
-        onPress={handleContinue}
-        disabled={isSubmitting}>
-        <Text style={styles.buttonText}>{isSubmitting ? 'Saving...' : 'Continue'}</Text>
+      <Pressable style={styles.button}>
+        <Text style={styles.buttonText}>Continue</Text>
       </Pressable>
     </View>
   );
@@ -181,15 +161,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#3B5CCC',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  error: {
-    marginBottom: 12,
-    color: '#D92D20',
-    fontSize: 14,
-    textAlign: 'center',
   },
   buttonText: {
     color: '#ffffff',

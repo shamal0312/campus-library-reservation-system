@@ -13,8 +13,6 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useAuth } from '@/contexts/auth-context';
-
 const ICON = '#98A2B3';
 
 type FieldIcon = {
@@ -87,45 +85,6 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { signUp } = useAuth();
-
-  async function handleCreateAccount() {
-    if (!fullName.trim() || !universityId.trim() || !phone.trim() || !email.trim() || !password || !confirmPassword) {
-      setErrorMessage('Fill in every field.');
-      return;
-    }
-    if (!email.includes('@')) {
-      setErrorMessage('Enter a valid university email.');
-      return;
-    }
-    if (password.length < 6) {
-      setErrorMessage('Password must be at least 6 characters.');
-      return;
-    }
-    if (password !== confirmPassword) {
-      setErrorMessage('Passwords do not match.');
-      return;
-    }
-
-    setErrorMessage(null);
-    setIsSubmitting(true);
-    const result = await signUp({ fullName, universityId, phone, email, password });
-    setIsSubmitting(false);
-
-    if (result.error) {
-      setErrorMessage(result.error);
-      return;
-    }
-
-    if (!result.session) {
-      setErrorMessage('Account created. Confirm the email, then log in to choose your role.');
-      return;
-    }
-
-    router.push('/role');
-  }
 
   return (
     <KeyboardAvoidingView
@@ -191,13 +150,8 @@ export default function RegisterScreen() {
           secureVisible={showConfirmPassword}
         />
 
-        {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
-
-        <Pressable
-          style={[styles.button, isSubmitting && styles.buttonDisabled]}
-          onPress={handleCreateAccount}
-          disabled={isSubmitting}>
-          <Text style={styles.buttonText}>{isSubmitting ? 'Creating account...' : 'Create Account'}</Text>
+        <Pressable style={styles.button} onPress={() => router.push('/role')}>
+          <Text style={styles.buttonText}>Create Account</Text>
         </Pressable>
 
         <Text style={styles.footer}>
@@ -262,18 +216,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
   buttonText: {
     color: '#ffffff',
     fontSize: 17,
     fontWeight: '600',
-  },
-  error: {
-    color: '#D92D20',
-    fontSize: 14,
-    textAlign: 'center',
   },
   footer: {
     textAlign: 'center',
