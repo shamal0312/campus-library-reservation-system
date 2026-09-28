@@ -1,33 +1,233 @@
-import { Link } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
+import { useState } from 'react';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export default function RegisterScreen() {
+const ICON = '#98A2B3';
+
+type FieldIcon = {
+  ios: 'person' | 'person.text.rectangle' | 'phone' | 'envelope' | 'lock';
+  android: 'person' | 'badge' | 'call' | 'mail' | 'lock';
+  web: 'person' | 'badge' | 'call' | 'mail' | 'lock';
+};
+
+type FieldProps = {
+  icon: FieldIcon;
+  placeholder: string;
+  value: string;
+  onChangeText: (value: string) => void;
+  secureTextEntry?: boolean;
+  keyboardType?: 'default' | 'email-address' | 'phone-pad';
+  autoCapitalize?: 'none' | 'words';
+  onToggleSecure?: () => void;
+  secureVisible?: boolean;
+};
+
+function Field({
+  icon,
+  placeholder,
+  value,
+  onChangeText,
+  secureTextEntry,
+  keyboardType = 'default',
+  autoCapitalize = 'none',
+  onToggleSecure,
+  secureVisible,
+}: FieldProps) {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Create Account</Text>
-      <Link href="/role" style={styles.link}>
-        Select Your Role
-      </Link>
+    <View style={styles.field}>
+      <SymbolView name={icon} size={20} tintColor={ICON} />
+      <TextInput
+        style={styles.input}
+        placeholder={placeholder}
+        placeholderTextColor={ICON}
+        value={value}
+        onChangeText={onChangeText}
+        secureTextEntry={secureTextEntry}
+        keyboardType={keyboardType}
+        autoCapitalize={autoCapitalize}
+        autoCorrect={false}
+      />
+      {onToggleSecure ? (
+        <Pressable onPress={onToggleSecure} hitSlop={8}>
+          <SymbolView
+            name={{
+              ios: secureVisible ? 'eye.slash' : 'eye',
+              android: secureVisible ? 'visibility_off' : 'visibility',
+              web: secureVisible ? 'visibility_off' : 'visibility',
+            }}
+            size={20}
+            tintColor={ICON}
+          />
+        </Pressable>
+      ) : null}
     </View>
   );
 }
 
+export default function RegisterScreen() {
+  const insets = useSafeAreaInsets();
+  const [fullName, setFullName] = useState('');
+  const [universityId, setUniversityId] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.screen}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
+        <Pressable style={styles.backButton} onPress={() => router.back()} hitSlop={8}>
+          <SymbolView
+            name={{ ios: 'chevron.left', android: 'arrow_back', web: 'arrow_back' }}
+            size={22}
+            tintColor="#1A1D26"
+          />
+        </Pressable>
+
+        <Text style={styles.title}>Create Your Account</Text>
+        <Text style={styles.subtitle}>Join smart library and get access to all the facilities</Text>
+
+        <Field
+          icon={{ ios: 'person', android: 'person', web: 'person' }}
+          placeholder="Full Name"
+          value={fullName}
+          onChangeText={setFullName}
+          autoCapitalize="words"
+        />
+        <Field
+          icon={{ ios: 'person.text.rectangle', android: 'badge', web: 'badge' }}
+          placeholder="Student ID / Staff ID"
+          value={universityId}
+          onChangeText={setUniversityId}
+        />
+        <Field
+          icon={{ ios: 'phone', android: 'call', web: 'call' }}
+          placeholder="Phone Number"
+          value={phone}
+          onChangeText={setPhone}
+          keyboardType="phone-pad"
+        />
+        <Field
+          icon={{ ios: 'envelope', android: 'mail', web: 'mail' }}
+          placeholder="University Email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+        />
+        <Field
+          icon={{ ios: 'lock', android: 'lock', web: 'lock' }}
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry={!showPassword}
+          onToggleSecure={() => setShowPassword((current) => !current)}
+          secureVisible={showPassword}
+        />
+        <Field
+          icon={{ ios: 'lock', android: 'lock', web: 'lock' }}
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry={!showConfirmPassword}
+          onToggleSecure={() => setShowConfirmPassword((current) => !current)}
+          secureVisible={showConfirmPassword}
+        />
+
+        <Pressable style={styles.button} onPress={() => router.push('/role')}>
+          <Text style={styles.buttonText}>Create Account</Text>
+        </Pressable>
+
+        <Text style={styles.footer}>
+          Already have an account?{' '}
+          <Text style={styles.footerLink} onPress={() => router.push('/login')}>
+            Login
+          </Text>
+        </Text>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
     backgroundColor: '#ffffff',
-    gap: 16,
+  },
+  content: {
+    paddingHorizontal: 24,
+    gap: 14,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
   },
   title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#111111',
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#1A1D26',
+    textAlign: 'center',
   },
-  link: {
+  subtitle: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: '#8B93A7',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  field: {
+    height: 54,
+    borderRadius: 14,
+    backgroundColor: '#F4F6FA',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    gap: 12,
+  },
+  input: {
+    flex: 1,
     fontSize: 16,
-    color: '#208AEF',
+    color: '#1A1D26',
+  },
+  button: {
+    marginTop: 10,
+    height: 52,
+    borderRadius: 14,
+    backgroundColor: '#3B5CCC',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    color: '#ffffff',
+    fontSize: 17,
+    fontWeight: '600',
+  },
+  footer: {
+    textAlign: 'center',
+    color: '#8B93A7',
+    fontSize: 15,
+  },
+  footerLink: {
+    color: '#3B5CCC',
+    fontWeight: '700',
   },
 });
