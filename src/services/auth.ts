@@ -1,3 +1,5 @@
+import type { Session } from '@supabase/supabase-js';
+
 import { supabase } from '@/lib/supabase';
 import type { UserRole } from '@/types/account';
 
@@ -63,4 +65,14 @@ export async function getSession() {
     session: data.session,
     error: error?.message ?? null,
   };
+}
+
+export function subscribeToAuthChanges(onChange: (session: Session | null) => void) {
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange((_event, session) => {
+    onChange(session);
+  });
+
+  return () => subscription.unsubscribe();
 }
