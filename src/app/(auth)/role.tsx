@@ -17,20 +17,23 @@ const ROLES: {
 
 export default function RoleScreen() {
   const insets = useSafeAreaInsets();
-  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+  const [selectedRole, setSelectedRole] = useState<UserRole>('lecturer');
 
   return (
-    <View style={[styles.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 }]}>
-      <Pressable style={styles.backButton} onPress={() => router.back()} hitSlop={8}>
-        <SymbolView
-          name={{ ios: 'chevron.left', android: 'arrow_back', web: 'arrow_back' }}
-          size={22}
-          tintColor="#1A1D26"
-        />
-      </Pressable>
+    <View style={[styles.screen, { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 24 }]}>
+      <View style={styles.header}>
+        <Pressable style={styles.backButton} onPress={() => router.back()} hitSlop={8}>
+          <SymbolView
+            name={{ ios: 'chevron.left', android: 'arrow_back', web: 'arrow_back' }}
+            size={20}
+            tintColor="#1A1D26"
+          />
+        </Pressable>
+        <Text style={styles.title}>Select Your Role</Text>
+      </View>
 
-      <Text style={styles.title}>Select Your Role</Text>
-      <Text style={styles.subtitle}>Choose how you want to use Smart Library</Text>
+      <Text style={styles.subtitle}>Choose how you want to use{'\n'}Smart Library</Text>
+      <Text style={styles.sectionLabel}>Registration Role</Text>
 
       <View style={styles.cards}>
         {ROLES.map((item) => {
@@ -38,16 +41,32 @@ export default function RoleScreen() {
           return (
             <Pressable
               key={item.role}
-              style={[styles.card, selected && styles.cardSelected]}
+              style={[styles.card, selected ? styles.cardSelected : styles.cardIdle]}
               onPress={() => setSelectedRole(item.role)}>
-              <SymbolView
-                name={{ ios: item.ios, android: item.android, web: item.android }}
-                size={36}
-                tintColor={selected ? '#3B5CCC' : '#1A1D26'}
-              />
-              <Text style={[styles.cardLabel, selected && styles.cardLabelSelected]}>
-                {USER_ROLE_LABELS[item.role]}
-              </Text>
+              <View style={styles.cardTop}>
+                <SymbolView
+                  name={{ ios: item.ios, android: item.android, web: item.android }}
+                  size={34}
+                  tintColor="#3B5CCC"
+                />
+                <SymbolView
+                  name={
+                    selected
+                      ? { ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' }
+                      : { ios: 'circle', android: 'radio_button_unchecked', web: 'radio_button_unchecked' }
+                  }
+                  size={24}
+                  tintColor={selected ? '#3B5CCC' : '#C5CAD3'}
+                />
+              </View>
+              <View style={styles.cardBottom}>
+                <Text style={styles.cardLabel}>{USER_ROLE_LABELS[item.role]}</Text>
+                <SymbolView
+                  name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }}
+                  size={22}
+                  tintColor="#98A2B3"
+                />
+              </View>
             </Pressable>
           );
         })}
@@ -55,7 +74,7 @@ export default function RoleScreen() {
 
       <View style={styles.spacer} />
 
-      <Pressable style={[styles.button, !selectedRole && styles.buttonDisabled]} disabled={!selectedRole}>
+      <Pressable style={styles.button}>
         <Text style={styles.buttonText}>Continue</Text>
       </Pressable>
     </View>
@@ -65,58 +84,73 @@ export default function RoleScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 24,
+    backgroundColor: '#F3F5F8',
+    paddingHorizontal: 20,
+  },
+  header: {
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   backButton: {
+    position: 'absolute',
+    left: 0,
     width: 40,
     height: 40,
+    borderRadius: 20,
+    backgroundColor: '#ffffff',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
   },
   title: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: '700',
     color: '#1A1D26',
-    textAlign: 'center',
   },
   subtitle: {
-    marginTop: 8,
-    marginBottom: 28,
+    marginTop: 16,
     fontSize: 15,
     lineHeight: 22,
     color: '#8B93A7',
     textAlign: 'center',
   },
-  cards: {
-    flexDirection: 'row',
-    gap: 14,
-  },
-  card: {
-    flex: 1,
-    minHeight: 160,
-    borderRadius: 18,
-    backgroundColor: '#F4F6FA',
-    borderWidth: 2,
-    borderColor: '#F4F6FA',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 12,
-    gap: 14,
-  },
-  cardSelected: {
-    backgroundColor: '#EEF2FF',
-    borderColor: '#3B5CCC',
-  },
-  cardLabel: {
+  sectionLabel: {
+    marginTop: 28,
+    marginBottom: 12,
     fontSize: 16,
     fontWeight: '600',
     color: '#1A1D26',
-    textAlign: 'center',
   },
-  cardLabelSelected: {
-    color: '#3B5CCC',
+  cards: {
+    gap: 14,
+  },
+  card: {
+    borderRadius: 16,
+    paddingHorizontal: 18,
+    paddingTop: 16,
+    paddingBottom: 14,
+    gap: 18,
+  },
+  cardSelected: {
+    backgroundColor: '#E4EBFF',
+  },
+  cardIdle: {
+    backgroundColor: '#E7E9EE',
+  },
+  cardTop: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  cardBottom: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  cardLabel: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#1A1D26',
   },
   spacer: {
     flex: 1,
@@ -128,12 +162,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  buttonDisabled: {
-    opacity: 0.45,
-  },
   buttonText: {
     color: '#ffffff',
     fontSize: 17,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });
