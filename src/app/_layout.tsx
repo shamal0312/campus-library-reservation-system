@@ -8,6 +8,10 @@ import { AuthProvider, useAuth } from '@/contexts/auth-context';
 
 SplashScreen.preventAutoHideAsync();
 
+export const unstable_settings = {
+  anchor: '(auth)',
+};
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
@@ -35,6 +39,10 @@ function RootNavigator() {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Protected guard={false}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="profile" />
+      </Stack.Protected>
       <Stack.Screen name="(auth)" />
     </Stack>
   );
