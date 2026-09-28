@@ -1,15 +1,20 @@
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useAuth } from '@/contexts/auth-context';
+import GetStartedScreen from './(auth)/get-started';
+
 export default function HomeScreen() {
+  const { session, account, isLoading } = useAuth();
+  const isSignedIn = !isLoading && !!session && !!account?.role;
+
+  if (!isSignedIn) {
+    return <GetStartedScreen />;
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>
-        Campus Library Reservation System
-      </Text>
-
-      <Text style={styles.subtitle}>
-        Base project setup successfully.
-      </Text>
+      <Text style={styles.title}>Campus Library Reservation System</Text>
+      <Text style={styles.subtitle}>Base project setup successfully.</Text>
     </View>
   );
 }
