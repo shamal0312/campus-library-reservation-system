@@ -14,6 +14,8 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useAuth } from '@/contexts/auth-context';
+
 const ICON = '#98A2B3';
 
 function GoogleIcon() {
@@ -44,6 +46,31 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { signIn } = useAuth();
+
+  async function handleLogin() {
+    if (!email.trim() || !password) {
+      setErrorMessage('Enter your university email and password.');
+      return;
+    }
+
+    setErrorMessage(null);
+    setIsSubmitting(true);
+    const result = await signIn(email, password);
+    setIsSubmitting(false);
+
+    if (result.error || !result.session) {
+      setErrorMessage(result.error ?? 'Could not sign in.');
+      return;
+    }
+
+    const role = result.session.user.user_metadata?.role;
+    if (role !== 'student' && role !== 'lecturer') {
+      router.replace('/role');
+    }
+  }
 
   return (
     <KeyboardAvoidingView
@@ -113,8 +140,13 @@ export default function LoginScreen() {
           <Text style={styles.forgotText}>Forgot password?</Text>
         </Pressable>
 
-        <Pressable style={styles.button}>
-          <Text style={styles.buttonText}>Login</Text>
+        {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
+
+        <Pressable
+          style={[styles.button, isSubmitting && styles.buttonDisabled]}
+          onPress={handleLogin}
+          disabled={isSubmitting}>
+          <Text style={styles.buttonText}>{isSubmitting ? 'Signing in...' : 'Login'}</Text>
         </Pressable>
 
         <View style={styles.dividerRow}>
@@ -197,6 +229,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#3B5CCC',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  error: {
+    color: '#D92D20',
+    fontSize: 14,
+    textAlign: 'center',
   },
   buttonText: {
     color: '#ffffff',
