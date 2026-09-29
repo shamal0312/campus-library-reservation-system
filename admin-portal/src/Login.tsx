@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { AlertCircle, Eye, EyeOff, Library, LoaderCircle, LockKeyhole, Mail, Radio } from 'lucide-react'
-import { supabase } from './lib/supabase'
+import { supabase, checkIsAdmin } from './lib/supabase'
 
 function Login() {
   const [email, setEmail] = useState('')
@@ -20,8 +20,8 @@ function Login() {
       setIsLoading(false)
       return
     }
-    const { data: profile, error: profileError } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
-    if (profileError || profile?.role !== 'admin') {
+    const isAdmin = await checkIsAdmin(data.user)
+    if (!isAdmin) {
       await supabase.auth.signOut()
       setError('Access Denied: Student accounts must use the mobile application.')
     }

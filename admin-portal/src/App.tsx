@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import './App.css'
 import Header from './components/layout/Header'
 import Sidebar from './components/layout/Sidebar'
-import { supabase } from './lib/supabase'
+import { supabase, checkIsAdmin } from './lib/supabase'
 import Dashboard from './pages/Dashboard'
+import Login from './Login'
 
 function App() {
   const [isLoading, setIsLoading] = useState(true)
@@ -11,23 +12,28 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
-    const syncAdminSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
+    const syncAdminSession = async (currentSession: any = null) => {
+      const session = currentSession || (await supabase.auth.getSession()).data.session
       if (session?.user) {
-        const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single()
-        setIsAdmin(profile?.role === 'admin')
-      } else setIsAdmin(false)
+        const isAdminUser = await checkIsAdmin(session.user)
+        setIsAdmin(isAdminUser)
+      } else {
+        setIsAdmin(false)
+      }
       setIsLoading(false)
     }
     void syncAdminSession()
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => void syncAdminSession())
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => void syncAdminSession(session))
     return () => subscription.unsubscribe()
   }, [])
 
-  const handleLogout = () => setIsAdmin(false)
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    setIsAdmin(false)
+  }
 
-  //if (isLoading) return <main className="session-loading" aria-label="Loading admin session" />
-  //if (!isAdmin) return <Login />
+  if (isLoading) return <main className="session-loading" aria-label="Loading admin session" />
+  if (!isAdmin) return <Login />
 
   return (
     <div className="admin-layout">
