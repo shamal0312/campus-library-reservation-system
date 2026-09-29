@@ -1602,3 +1602,486 @@ td.student-name {
     font-size: 20px;
   }
 }
+
+/* ==========================================================================
+   SEATS & READING ROOM PAGE
+   ========================================================================== */
+
+.seats-page {
+  flex: 1;
+  min-height: 0;
+  padding: 24px 28px 48px;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.seats-page::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.seats-page::-webkit-scrollbar-track {
+  background: transparent;
+}
+.seats-page::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+.seats-page::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.seats-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 20px;
+  align-items: start;
+}
+
+/* Floor Map Container
+   ========================================================================== */
+
+.floor-map-container {
+  background: #fff;
+  border: 1px solid #e8edf3;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+  overflow: hidden;
+}
+
+.floor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px;
+  border-bottom: 1px solid #eef1f6;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.floor-info h2 {
+  margin: 0 0 6px;
+  color: #1a2332;
+  font-family: 'Manrope', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.floor-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.stat-divider {
+  color: #cbd5e1;
+}
+
+.occupied-text {
+  color: #f59e0b;
+  font-weight: 500;
+}
+
+.reserved-text {
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+.floor-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 999px;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-indicator-open {
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+  animation: pulse 2.2s ease-in-out infinite;
+}
+
+.status-text {
+  font-size: 11px;
+  font-weight: 600;
+  color: #15803d;
+  letter-spacing: 0.03em;
+}
+
+/* Floor Map
+   ========================================================================== */
+
+.floor-map {
+  position: relative;
+  padding: 24px;
+  background: #fafbfc;
+  border: 2px solid #e8edf3;
+  border-radius: 10px;
+  margin: 20px;
+}
+
+.floor-label {
+  position: absolute;
+  font-size: 10px;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.floor-label-top {
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.floor-label-right {
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%) rotate(90deg);
+  transform-origin: center;
+}
+
+.seats-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  max-width: 100%;
+}
+
+/* Seat Cards
+   ========================================================================== */
+
+.seat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  padding: 12px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1.5px solid;
+}
+
+.seat-id {
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Manrope', sans-serif;
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
+}
+
+.seat-status {
+  font-size: 10px;
+  font-weight: 500;
+}
+
+/* Seat States */
+.seat-available {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #15803d;
+}
+
+.seat-available:hover {
+  background: #dcfce7;
+  border-color: #86efac;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(34, 197, 94, 0.15);
+}
+
+.seat-occupied {
+  background: #fef3c7;
+  border-color: #fde047;
+  color: #a16207;
+}
+
+.seat-occupied:hover {
+  background: #fef08a;
+  border-color: #fde047;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.15);
+}
+
+.seat-reserved {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1e40af;
+}
+
+.seat-reserved:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.15);
+}
+
+.seat-selected {
+  border-width: 2px;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  transform: scale(1.05);
+}
+
+/* Seat Details Panel
+   ========================================================================== */
+
+.seat-details-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Legend Section */
+.legend-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e8edf3;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  color: #334155;
+  font-weight: 500;
+}
+
+.legend-box {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  border: 1.5px solid;
+}
+
+.legend-available {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.legend-occupied {
+  background: #fef3c7;
+  border-color: #fde047;
+}
+
+.legend-reserved {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+/* Selected Seat Card */
+.selected-seat-card {
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e8edf3;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+}
+
+.card-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.seat-number {
+  font-size: 28px;
+  font-weight: 800;
+  font-family: 'Manrope', sans-serif;
+  color: #1a2332;
+  letter-spacing: -0.03em;
+  margin-bottom: 10px;
+}
+
+.seat-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.seat-badge-reserved {
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 12.5px;
+}
+
+.detail-row:last-of-type {
+  border-bottom: none;
+  margin-bottom: 20px;
+}
+
+.detail-label {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.detail-value {
+  color: #334155;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  text-align: right;
+}
+
+.detail-value-strong {
+  color: #1a2332;
+  font-weight: 600;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.action-button {
+  width: 100%;
+  padding: 10px 16px;
+  border: 1px solid;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+
+.action-button-secondary {
+  background: #fff;
+  color: #334155;
+  border-color: #e2e8f0;
+}
+
+.action-button-secondary:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.action-button-danger {
+  background: #fff;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.action-button-danger:hover {
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
+
+/* Responsive Design for Seats Page
+   ========================================================================== */
+
+@media (max-width: 1200px) {
+  .seats-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .seat-details-panel {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 960px) {
+  .seats-page {
+    padding: 20px 20px 36px;
+  }
+
+  .seats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .floor-map {
+    padding: 20px;
+    margin: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .seats-page {
+    padding: 18px 16px 32px;
+  }
+
+  .seat-details-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .floor-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .seats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .seat {
+    padding: 10px 6px;
+  }
+
+  .seat-id {
+    font-size: 11.5px;
+  }
+
+  .seat-status {
+    font-size: 9px;
+  }
+
+  .floor-map {
+    padding: 16px;
+    margin: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .floor-stats {
+    flex-wrap: wrap;
+  }
+
+  .seat-number {
+    font-size: 24px;
+  }
+
+  .action-buttons {
+    flex-direction: row;
+  }
+}

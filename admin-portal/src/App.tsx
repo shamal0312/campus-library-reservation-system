@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react'
 import './App.css'
 import Header from './components/layout/Header'
 import Sidebar from './components/layout/Sidebar'
-import { supabase, checkIsAdmin } from './lib/supabase'
-import Dashboard from './pages/Dashboard'
-import Books from './pages/Books'
+import { checkIsAdmin, supabase } from './lib/supabase'
 import Login from './Login'
+import Books from './pages/Books'
+import Dashboard from './pages/Dashboard'
+import SeatsReadingRoom from './pages/SeatsReadingRoom'
 
 function App() {
   const [isLoading, setIsLoading] = useState(true)
@@ -62,7 +63,8 @@ function App() {
         />
         {currentPage === 'Dashboard' && <Dashboard />}
         {currentPage === 'Books' && <Books />}
-        {currentPage !== 'Dashboard' && currentPage !== 'Books' && (
+        {currentPage === 'Seats & Reading Room' && <SeatsReadingRoom />}
+        {currentPage !== 'Dashboard' && currentPage !== 'Books' && currentPage !== 'Seats & Reading Room' && (
           <main className="dashboard-page">
             <div className="page-heading">
               <h1>{currentPage}</h1>
