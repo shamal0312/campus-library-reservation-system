@@ -4,12 +4,14 @@ import Header from './components/layout/Header'
 import Sidebar from './components/layout/Sidebar'
 import { supabase, checkIsAdmin } from './lib/supabase'
 import Dashboard from './pages/Dashboard'
+import Books from './pages/Books'
 import Login from './Login'
 
 function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [currentPage, setCurrentPage] = useState('Dashboard')
 
   useEffect(() => {
     const syncAdminSession = async (currentSession: any = null) => {
@@ -44,13 +46,30 @@ function App() {
           aria-hidden="true"
         />
       )}
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar 
+        isOpen={sidebarOpen} 
+        onClose={() => setSidebarOpen(false)} 
+        activePage={currentPage}
+        onNavigate={(page) => {
+          setCurrentPage(page)
+          setSidebarOpen(false)
+        }}
+      />
       <div className="admin-main">
         <Header
           onLogout={handleLogout}
           onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
         />
-        <Dashboard />
+        {currentPage === 'Dashboard' && <Dashboard />}
+        {currentPage === 'Books' && <Books />}
+        {currentPage !== 'Dashboard' && currentPage !== 'Books' && (
+          <main className="dashboard-page">
+            <div className="page-heading">
+              <h1>{currentPage}</h1>
+              <p>This page is under construction.</p>
+            </div>
+          </main>
+        )}
       </div>
     </div>
   )

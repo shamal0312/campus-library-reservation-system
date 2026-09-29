@@ -12,9 +12,11 @@ const navigation = [
 type SidebarProps = {
   isOpen?: boolean
   onClose?: () => void
+  activePage: string
+  onNavigate: (page: string) => void
 }
 
-function Sidebar({ isOpen = false, onClose }: SidebarProps) {
+function Sidebar({ isOpen = false, onClose, activePage, onNavigate }: SidebarProps) {
   return (
     <aside className={`sidebar${isOpen ? ' is-open' : ''}`}>
       <div className="sidebar-brand">
@@ -30,8 +32,13 @@ function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       </div>
 
       <nav className="sidebar-nav" aria-label="Primary navigation">
-        {navigation.map(({ label, icon: Icon, active }) => (
-          <button className={`nav-item${active ? ' active' : ''}`} key={label} type="button">
+        {navigation.map(({ label, icon: Icon }) => (
+          <button 
+            className={`nav-item${activePage === label ? ' active' : ''}`} 
+            key={label} 
+            type="button"
+            onClick={() => onNavigate(label)}
+          >
             <Icon size={16} strokeWidth={1.9} />
             <span>{label}</span>
           </button>
