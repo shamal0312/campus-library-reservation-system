@@ -2378,3 +2378,388 @@ td.student-name {
     padding: 1px 5px;
   }
 }
+
+/* ==========================================================================
+   REPORTS & ANALYTICS PAGE
+   ========================================================================== */
+
+.reports-page {
+  flex: 1;
+  min-height: 0;
+  padding: 24px 28px 48px;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.reports-page::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.reports-page::-webkit-scrollbar-track {
+  background: transparent;
+}
+.reports-page::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+.reports-page::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.reports-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+/* Reports Filters
+   ========================================================================== */
+
+.reports-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 16px 18px;
+  background: #fff;
+  border: 1px solid #e8edf3;
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.filter-input {
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  font-size: 12.5px;
+  color: #334155;
+  background: #fff;
+  transition: all 0.2s;
+  min-width: 120px;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filter-separator {
+  font-size: 12.5px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.filter-select {
+  padding: 8px 32px 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  font-size: 12.5px;
+  background-color: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+  appearance: none;
+  transition: all 0.2s;
+  color: #334155;
+}
+
+.filter-select:hover {
+  border-color: #3b82f6;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.generate-button {
+  padding: 8px 16px;
+  background: #1e40af;
+  color: #fff;
+  border: 0;
+  border-radius: 7px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.generate-button:hover {
+  background: #1e3a8a;
+  transform: translateY(-1px);
+}
+
+/* Reports Widgets
+   ========================================================================== */
+
+.reports-widgets {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 18px;
+  margin-top: 20px;
+  align-items: start;
+}
+
+/* Chart Card
+   ========================================================================== */
+
+.chart-card {
+  background: #fff;
+  border: 1px solid #e8edf3;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+  overflow: hidden;
+}
+
+.chart-container {
+  padding: 24px 24px 20px;
+}
+
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  height: 280px;
+  padding-bottom: 8px;
+}
+
+.chart-bar-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.chart-bar-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+.chart-bar {
+  position: relative;
+  width: 100%;
+  background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%);
+  border-radius: 8px 8px 4px 4px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 10px;
+}
+
+.chart-bar:hover {
+  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.chart-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  font-family: 'Manrope', sans-serif;
+}
+
+.chart-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  text-align: center;
+}
+
+/* Top Books Card
+   ========================================================================== */
+
+.top-books-card {
+  background: #fff;
+  border: 1px solid #e8edf3;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+  overflow: hidden;
+}
+
+.top-books-list {
+  padding: 0;
+}
+
+.top-books-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.top-books-table thead th {
+  padding: 11px 18px;
+  color: #94a3b8;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+  background: #fafbfc;
+  border-bottom: 1px solid #eef1f6;
+}
+
+.top-books-table tbody td {
+  padding: 14px 18px;
+  font-size: 12.5px;
+  border-bottom: 1px solid #f6f7f9;
+}
+
+.top-books-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.top-books-table tbody tr:hover {
+  background: #fafbff;
+}
+
+.rank-cell {
+  color: #94a3b8;
+  font-weight: 600;
+  width: 60px;
+}
+
+.title-cell {
+  color: #334155;
+  font-weight: 500;
+}
+
+.checkouts-cell {
+  color: #3b82f6;
+  font-weight: 700;
+  text-align: right;
+  font-family: 'Manrope', sans-serif;
+}
+
+.top-books-table thead th.align-right {
+  text-align: right;
+}
+
+/* Stat Detail Variants
+   ========================================================================== */
+
+.stat-detail-positive {
+  color: #16a34a;
+}
+
+.stat-detail-info {
+  color: #2563eb;
+}
+
+.stat-detail-warning {
+  color: #ea580c;
+}
+
+/* Responsive Design for Reports Page
+   ========================================================================== */
+
+@media (max-width: 1200px) {
+  .reports-widgets {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 960px) {
+  .reports-page {
+    padding: 20px 20px 36px;
+  }
+
+  .chart-bars {
+    height: 240px;
+    gap: 12px;
+  }
+
+  .reports-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-group {
+    width: 100%;
+  }
+
+  .filter-input {
+    flex: 1;
+  }
+
+  .filter-select,
+  .generate-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .reports-page {
+    padding: 18px 16px 32px;
+  }
+
+  .reports-heading {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .export-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .chart-bars {
+    height: 200px;
+    gap: 8px;
+  }
+
+  .chart-value {
+    font-size: 11px;
+  }
+
+  .chart-label {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .reports-heading h1 {
+    font-size: 20px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-separator {
+    text-align: center;
+  }
+}

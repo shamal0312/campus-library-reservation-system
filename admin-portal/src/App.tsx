@@ -6,6 +6,7 @@ import { checkIsAdmin, supabase } from './lib/supabase'
 import Login from './Login'
 import Books from './pages/Books'
 import Dashboard from './pages/Dashboard'
+import Reports from './pages/Reports'
 import ReservationsFines from './pages/ReservationsFines'
 import SeatsReadingRoom from './pages/SeatsReadingRoom'
 
@@ -66,7 +67,12 @@ function App() {
         {currentPage === 'Books' && <Books />}
         {currentPage === 'Seats & Reading Room' && <SeatsReadingRoom />}
         {currentPage === 'Reservations & Fines' && <ReservationsFines />}
-        {currentPage !== 'Dashboard' && currentPage !== 'Books' && currentPage !== 'Seats & Reading Room' && currentPage !== 'Reservations & Fines' && (
+        {currentPage === 'Reports' && <Reports />}
+        {currentPage !== 'Dashboard' && 
+         currentPage !== 'Books' && 
+         currentPage !== 'Seats & Reading Room' && 
+         currentPage !== 'Reservations & Fines' && 
+         currentPage !== 'Reports' && (
           <main className="dashboard-page">
             <div className="page-heading">
               <h1>{currentPage}</h1>
