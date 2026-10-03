@@ -1,24 +1,35 @@
 import { useEffect, useState } from 'react'
-import { LogOut, ShieldCheck } from 'lucide-react'
-import { supabase } from './lib/supabase'
-import Login from './Login'
 import './App.css'
+import Header from './components/layout/Header'
+import Sidebar from './components/layout/Sidebar'
+import { checkIsAdmin, supabase } from './lib/supabase'
+import Login from './Login'
+import Books from './pages/Books'
+import Dashboard from './pages/Dashboard'
+import Reports from './pages/Reports'
+import ReservationsFines from './pages/ReservationsFines'
+import SeatsReadingRoom from './pages/SeatsReadingRoom'
+import Settings from './pages/Settings'
 
 function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [currentPage, setCurrentPage] = useState('Dashboard')
 
   useEffect(() => {
-    const syncAdminSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
+    const syncAdminSession = async (currentSession: any = null) => {
+      const session = currentSession || (await supabase.auth.getSession()).data.session
       if (session?.user) {
-        const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single()
-        setIsAdmin(profile?.role === 'admin')
-      } else setIsAdmin(false)
+        const isAdminUser = await checkIsAdmin(session.user)
+        setIsAdmin(isAdminUser)
+      } else {
+        setIsAdmin(false)
+      }
       setIsLoading(false)
     }
     void syncAdminSession()
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => void syncAdminSession())
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => void syncAdminSession(session))
     return () => subscription.unsubscribe()
   }, [])
 
@@ -31,15 +42,49 @@ function App() {
   if (!isAdmin) return <Login />
 
   return (
-    <main className="dashboard-shell">
-      <section className="dashboard-card">
-        <div className="dashboard-icon"><ShieldCheck size={24} /></div>
-        <p className="eyebrow">Library Admin</p>
-        <h1>Welcome back.</h1>
-        <p className="dashboard-copy">Your administrative workspace is ready for today.</p>
-        <button className="logout-button" type="button" onClick={handleLogout}><LogOut size={17} />Sign out</button>
-      </section>
-    </main>
+    <div className="admin-layout">
+      {sidebarOpen && (
+        <div
+          className="sidebar-backdrop"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+      <Sidebar 
+        isOpen={sidebarOpen} 
+        onClose={() => setSidebarOpen(false)} 
+        activePage={currentPage}
+        onNavigate={(page) => {
+          setCurrentPage(page)
+          setSidebarOpen(false)
+        }}
+      />
+      <div className="admin-main">
+        <Header
+          onLogout={handleLogout}
+          onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
+        />
+        {currentPage === 'Dashboard' && <Dashboard />}
+        {currentPage === 'Books' && <Books />}
+        {currentPage === 'Seats & Reading Room' && <SeatsReadingRoom />}
+        {currentPage === 'Reservations & Fines' && <ReservationsFines />}
+        {currentPage === 'Reports' && <Reports />}
+        {currentPage === 'Settings' && <Settings />}
+        {currentPage !== 'Dashboard' && 
+         currentPage !== 'Books' && 
+         currentPage !== 'Seats & Reading Room' && 
+         currentPage !== 'Reservations & Fines' && 
+         currentPage !== 'Reports' &&
+         currentPage !== 'Settings' && (
+          <main className="dashboard-page">
+            <div className="page-heading">
+              <h1>{currentPage}</h1>
+              <p>This page is under construction.</p>
+            </div>
+          </main>
+        )}
+      </div>
+    </div>
   )
 }
 
