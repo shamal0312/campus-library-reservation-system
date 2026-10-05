@@ -1,7 +1,6 @@
-import { router } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
-import Svg, { Path } from 'react-native-svg';
-import { useState } from 'react';
+import { router } from "expo-router";
+import { SymbolView } from "expo-symbols";
+import { useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -11,12 +10,13 @@ import {
   Text,
   TextInput,
   View,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Svg, { Path } from "react-native-svg";
 
-import { useAuth } from '@/contexts/auth-context';
+import { useAuth } from "@/contexts/auth-context";
 
-const ICON = '#98A2B3';
+const ICON = "#98A2B3";
 
 function GoogleIcon() {
   return (
@@ -43,8 +43,8 @@ function GoogleIcon() {
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,39 +52,49 @@ export default function LoginScreen() {
 
   async function handleLogin() {
     if (!email.trim() || !password) {
-      setErrorMessage('Enter your university email and password.');
+      setErrorMessage("Enter your university email and password.");
       return;
     }
 
     setErrorMessage(null);
     setIsSubmitting(true);
-    const result = await signIn(email, password);
+    const result = await signIn(email.trim(), password);
     setIsSubmitting(false);
 
     if (result.error || !result.session) {
-      setErrorMessage(result.error ?? 'Could not sign in.');
+      setErrorMessage(result.error ?? "Could not sign in.");
       return;
     }
 
     const role = result.session.user.user_metadata?.role;
-    if (role !== 'student' && role !== 'lecturer') {
-      router.replace('/role');
+    if (role !== "student" && role !== "lecturer") {
+      router.replace("/role");
     }
   }
 
   return (
     <KeyboardAvoidingView
       style={styles.screen}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={[
           styles.content,
           { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 24 },
-        ]}>
-        <Pressable style={styles.backButton} onPress={() => router.back()} hitSlop={8}>
+        ]}
+      >
+        <Pressable
+          style={styles.backButton}
+          onPress={() => router.back()}
+          hitSlop={8}
+        >
           <SymbolView
-            name={{ ios: 'chevron.left', android: 'arrow_back', web: 'arrow_back' }}
+            name={{
+              ios: "chevron.left",
+              android: "arrow_back",
+              web: "arrow_back",
+            }}
             size={22}
             tintColor="#1A1D26"
           />
@@ -95,7 +105,7 @@ export default function LoginScreen() {
 
         <View style={styles.field}>
           <SymbolView
-            name={{ ios: 'envelope', android: 'mail', web: 'mail' }}
+            name={{ ios: "envelope", android: "mail", web: "mail" }}
             size={20}
             tintColor={ICON}
           />
@@ -112,7 +122,11 @@ export default function LoginScreen() {
         </View>
 
         <View style={styles.field}>
-          <SymbolView name={{ ios: 'lock', android: 'lock', web: 'lock' }} size={20} tintColor={ICON} />
+          <SymbolView
+            name={{ ios: "lock", android: "lock", web: "lock" }}
+            size={20}
+            tintColor={ICON}
+          />
           <TextInput
             style={styles.input}
             placeholder="Password"
@@ -123,12 +137,15 @@ export default function LoginScreen() {
             autoCapitalize="none"
             autoCorrect={false}
           />
-          <Pressable onPress={() => setShowPassword((current) => !current)} hitSlop={8}>
+          <Pressable
+            onPress={() => setShowPassword((current) => !current)}
+            hitSlop={8}
+          >
             <SymbolView
               name={{
-                ios: showPassword ? 'eye.slash' : 'eye',
-                android: showPassword ? 'visibility_off' : 'visibility',
-                web: showPassword ? 'visibility_off' : 'visibility',
+                ios: showPassword ? "eye.slash" : "eye",
+                android: showPassword ? "visibility_off" : "visibility",
+                web: showPassword ? "visibility_off" : "visibility",
               }}
               size={20}
               tintColor={ICON}
@@ -145,8 +162,11 @@ export default function LoginScreen() {
         <Pressable
           style={[styles.button, isSubmitting && styles.buttonDisabled]}
           onPress={handleLogin}
-          disabled={isSubmitting}>
-          <Text style={styles.buttonText}>{isSubmitting ? 'Signing in...' : 'Login'}</Text>
+          disabled={isSubmitting}
+        >
+          <Text style={styles.buttonText}>
+            {isSubmitting ? "Signing in..." : "Login"}
+          </Text>
         </Pressable>
 
         <View style={styles.dividerRow}>
@@ -161,8 +181,11 @@ export default function LoginScreen() {
         </Pressable>
 
         <Text style={styles.footer}>
-          Don't have an account?{' '}
-          <Text style={styles.footerLink} onPress={() => router.push('/register')}>
+          Don't have an account?{" "}
+          <Text
+            style={styles.footerLink}
+            onPress={() => router.push("/register")}
+          >
             Sign up
           </Text>
         </Text>
@@ -174,7 +197,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
   },
   content: {
     paddingHorizontal: 24,
@@ -183,105 +206,105 @@ const styles = StyleSheet.create({
   backButton: {
     width: 40,
     height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 12,
   },
   title: {
     fontSize: 28,
-    fontWeight: '700',
-    color: '#1A1D26',
-    textAlign: 'center',
+    fontWeight: "700",
+    color: "#1A1D26",
+    textAlign: "center",
   },
   subtitle: {
     fontSize: 15,
-    color: '#8B93A7',
-    textAlign: 'center',
+    color: "#8B93A7",
+    textAlign: "center",
     marginBottom: 12,
   },
   field: {
     height: 54,
     borderRadius: 14,
-    backgroundColor: '#F4F6FA',
-    flexDirection: 'row',
-    alignItems: 'center',
+    backgroundColor: "#F4F6FA",
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 16,
     gap: 12,
   },
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#1A1D26',
+    color: "#1A1D26",
   },
   forgotButton: {
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
     marginTop: -4,
   },
   forgotText: {
-    color: '#3B5CCC',
+    color: "#3B5CCC",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   button: {
     marginTop: 6,
     height: 52,
     borderRadius: 14,
-    backgroundColor: '#3B5CCC',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#3B5CCC",
+    alignItems: "center",
+    justifyContent: "center",
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   error: {
-    color: '#D92D20',
+    color: "#D92D20",
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
   },
   buttonText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 17,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   dividerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
     marginTop: 4,
   },
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E6E8EE',
+    backgroundColor: "#E6E8EE",
   },
   dividerText: {
-    color: '#8B93A7',
+    color: "#8B93A7",
     fontSize: 14,
   },
   googleButton: {
     height: 52,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#E6E8EE',
-    backgroundColor: '#ffffff',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderColor: "#E6E8EE",
+    backgroundColor: "#ffffff",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 10,
   },
   googleText: {
-    color: '#1A1D26',
+    color: "#1A1D26",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   footer: {
-    textAlign: 'center',
-    color: '#8B93A7',
+    textAlign: "center",
+    color: "#8B93A7",
     fontSize: 15,
     marginTop: 8,
   },
   footerLink: {
-    color: '#3B5CCC',
-    fontWeight: '700',
+    color: "#3B5CCC",
+    fontWeight: "700",
   },
 });
