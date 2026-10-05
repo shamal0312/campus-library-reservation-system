@@ -1,116 +1,336 @@
-import { Image } from 'expo-image';
-import { Redirect, router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-import { useAuth } from '@/contexts/auth-context';
+import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
+import { SymbolView } from "expo-symbols";
+import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
 
 export default function GetStartedScreen() {
-  const { session, account } = useAuth();
-  const insets = useSafeAreaInsets();
-
-  if (session && !account?.role) {
-    return <Redirect href="/role" />;
-  }
-
   return (
-    <View style={styles.screen}>
-      <Image
-        source={require('@/assets/images/library-aisle.jpg')}
-        style={styles.photo}
-        contentFit="cover"
-      />
-      <View style={[styles.sheet, { paddingBottom: insets.bottom + 20 }]}>
-        <View style={styles.iconBadge}>
-          <View style={styles.book}>
-            <View style={styles.bookPage} />
-            <View style={styles.bookSpine} />
+    <SafeAreaView style={styles.screen}>
+      <LinearGradient
+        colors={["#EFF6FF", "#FFFFFF", "#F8FAFC"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.background}
+      >
+        <View style={styles.topSection}>
+          <View style={styles.brandRow}>
+            <View style={styles.brandIcon}>
+              <SymbolView
+                name={{
+                  ios: "books.vertical.fill",
+                  android: "menu_book",
+                  web: "menu_book",
+                }}
+                size={28}
+                tintColor="#2563EB"
+              />
+            </View>
+
+            <View>
+              <Text style={styles.brandTitle}>SLIIT Library</Text>
+              <Text style={styles.brandSubtitle}>Learning Commons</Text>
+            </View>
+          </View>
+
+          <View style={styles.heroCard}>
+            <LinearGradient
+              colors={["#3B82F6", "#2563EB", "#1D4ED8"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.heroGradient}
+            >
+              <View style={styles.heroIconCircle}>
+                <SymbolView
+                  name={{
+                    ios: "books.vertical.fill",
+                    android: "local_library",
+                    web: "local_library",
+                  }}
+                  size={46}
+                  tintColor="#FFFFFF"
+                />
+              </View>
+
+              <Text style={styles.heroTitle}>Your Library, Simplified</Text>
+
+              <Text style={styles.heroDescription}>
+                Reserve books, find available reading seats, and request study
+                rooms from one place.
+              </Text>
+
+              <View style={styles.featureRow}>
+                <View style={styles.featureChip}>
+                  <SymbolView
+                    name={{
+                      ios: "book.fill",
+                      android: "book",
+                      web: "book",
+                    }}
+                    size={17}
+                    tintColor="#FFFFFF"
+                  />
+                  <Text style={styles.featureText}>Books</Text>
+                </View>
+
+                <View style={styles.featureChip}>
+                  <SymbolView
+                    name={{
+                      ios: "chair.fill",
+                      android: "event_seat",
+                      web: "event_seat",
+                    }}
+                    size={17}
+                    tintColor="#FFFFFF"
+                  />
+                  <Text style={styles.featureText}>Seats</Text>
+                </View>
+
+                <View style={styles.featureChip}>
+                  <SymbolView
+                    name={{
+                      ios: "person.3.fill",
+                      android: "groups",
+                      web: "groups",
+                    }}
+                    size={17}
+                    tintColor="#FFFFFF"
+                  />
+                  <Text style={styles.featureText}>Study Rooms</Text>
+                </View>
+              </View>
+            </LinearGradient>
           </View>
         </View>
-        <Text style={styles.brand}>Smart Library</Text>
-        <Text style={styles.tagline}>Your Learning Space</Text>
-        <Text style={styles.tagline}>Anytime, Anywhere</Text>
-        <Pressable style={styles.button} onPress={() => router.push('/login')}>
-          <Text style={styles.buttonText}>Get Started</Text>
-        </Pressable>
-        <Text style={styles.footer}>Knowledge for a brighter tomorrow</Text>
-      </View>
-    </View>
+
+        <View style={styles.bottomSection}>
+          <Text style={styles.welcomeTitle}>Welcome to SLIIT Library</Text>
+
+          <Text style={styles.welcomeDescription}>
+            Access library services quickly and manage your reservations with
+            your SLIIT account.
+          </Text>
+
+          <Pressable
+            style={styles.primaryButton}
+            onPress={() => router.push("/login")}
+          >
+            <LinearGradient
+              colors={["#3B82F6", "#2563EB", "#1D4ED8"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.primaryGradient}
+            >
+              <Text style={styles.primaryButtonText}>Get Started</Text>
+
+              <SymbolView
+                name={{
+                  ios: "arrow.right",
+                  android: "arrow_forward",
+                  web: "arrow_forward",
+                }}
+                size={20}
+                tintColor="#FFFFFF"
+              />
+            </LinearGradient>
+          </Pressable>
+
+          <Pressable
+            style={styles.createAccountButton}
+            onPress={() => router.push("/register")}
+          >
+            <Text style={styles.createAccountText}>Create a New Account</Text>
+          </Pressable>
+
+          <Text style={styles.accountHint}>
+            Use your SLIIT university email to continue
+          </Text>
+        </View>
+      </LinearGradient>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#FFFFFF",
   },
-  photo: {
-    width: '100%',
-    height: '56%',
-  },
-  sheet: {
+
+  background: {
     flex: 1,
-    marginTop: -40,
-    backgroundColor: '#ffffff',
-    borderTopLeftRadius: 48,
-    borderTopRightRadius: 48,
-    alignItems: 'center',
-    paddingHorizontal: 28,
-    paddingTop: 28,
+    paddingHorizontal: 22,
   },
-  iconBadge: {
-    width: 64,
-    height: 64,
-    borderRadius: 18,
-    backgroundColor: '#EEF2FF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  book: {
-    width: 28,
-    height: 22,
-    borderWidth: 2,
-    borderColor: '#3B5CCC',
-    borderRadius: 3,
-    flexDirection: 'row',
-    overflow: 'hidden',
-  },
-  bookPage: {
+
+  topSection: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    paddingTop: 24,
   },
-  bookSpine: {
-    width: 2,
-    backgroundColor: '#3B5CCC',
+
+  brandRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 28,
   },
-  brand: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#1A1D26',
+
+  brandIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 15,
+    backgroundColor: "#DBEAFE",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  tagline: {
-    marginTop: 4,
-    fontSize: 16,
-    color: '#8B93A7',
+
+  brandTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#0F172A",
   },
-  button: {
-    marginTop: 28,
-    width: '100%',
-    height: 52,
-    borderRadius: 14,
-    backgroundColor: '#3B5CCC',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 17,
-    fontWeight: '600',
-  },
-  footer: {
-    marginTop: 16,
+
+  brandSubtitle: {
+    marginTop: 2,
     fontSize: 13,
-    color: '#B0B6C3',
+    color: "#64748B",
+  },
+
+  heroCard: {
+    borderRadius: 28,
+    overflow: "hidden",
+    shadowColor: "#1D4ED8",
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.18,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+
+  heroGradient: {
+    minHeight: 330,
+    paddingHorizontal: 24,
+    paddingVertical: 30,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  heroIconCircle: {
+    width: 86,
+    height: 86,
+    borderRadius: 26,
+    backgroundColor: "rgba(255,255,255,0.16)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.3)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 22,
+  },
+
+  heroTitle: {
+    fontSize: 28,
+    lineHeight: 34,
+    fontWeight: "800",
+    color: "#FFFFFF",
+    textAlign: "center",
+  },
+
+  heroDescription: {
+    marginTop: 12,
+    maxWidth: 320,
+    fontSize: 15,
+    lineHeight: 23,
+    color: "#EAF2FF",
+    textAlign: "center",
+  },
+
+  featureRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 8,
+    marginTop: 26,
+  },
+
+  featureChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 11,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: "rgba(255,255,255,0.15)",
+  },
+
+  featureText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#FFFFFF",
+  },
+
+  bottomSection: {
+    paddingTop: 28,
+    paddingBottom: 24,
+  },
+
+  welcomeTitle: {
+    fontSize: 23,
+    fontWeight: "800",
+    color: "#0F172A",
+    textAlign: "center",
+  },
+
+  welcomeDescription: {
+    marginTop: 8,
+    paddingHorizontal: 8,
+    fontSize: 14,
+    lineHeight: 21,
+    color: "#64748B",
+    textAlign: "center",
+  },
+
+  primaryButton: {
+    height: 54,
+    marginTop: 24,
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+
+  primaryGradient: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 9,
+  },
+
+  primaryButtonText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#FFFFFF",
+  },
+
+  createAccountButton: {
+    height: 52,
+    marginTop: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#DCE4F2",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  createAccountText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#2563EB",
+  },
+
+  accountHint: {
+    marginTop: 16,
+    fontSize: 12,
+    color: "#94A3B8",
+    textAlign: "center",
   },
 });
