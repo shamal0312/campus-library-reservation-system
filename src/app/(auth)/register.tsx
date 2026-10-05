@@ -116,7 +116,7 @@ export default function RegisterScreen() {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailPattern.test(email.trim())) {
-      setErrorMessage("Please enter a valid university email.");
+      setErrorMessage("Please enter a valid email address.");
       return;
     }
 
@@ -152,15 +152,11 @@ export default function RegisterScreen() {
       return;
     }
 
-    // If Supabase immediately creates a session,
-    // continue to the role selection screen.
     if (result.session) {
       router.replace("/role");
       return;
     }
 
-    // If email confirmation is enabled in Supabase,
-    // a user may be created without an active session.
     setSuccessMessage(
       "Account created successfully. Please verify your email, then login to continue.",
     );
@@ -200,15 +196,11 @@ export default function RegisterScreen() {
         <Text style={styles.title}>Create Your Account</Text>
 
         <Text style={styles.subtitle}>
-          Join smart library and get access to all the facilities
+          Join Smart Library and get access to all the facilities
         </Text>
 
         <Field
-          icon={{
-            ios: "person",
-            android: "person",
-            web: "person",
-          }}
+          icon={{ ios: "person", android: "person", web: "person" }}
           placeholder="Full Name"
           value={fullName}
           onChangeText={setFullName}
@@ -227,11 +219,7 @@ export default function RegisterScreen() {
         />
 
         <Field
-          icon={{
-            ios: "phone",
-            android: "call",
-            web: "call",
-          }}
+          icon={{ ios: "phone", android: "call", web: "call" }}
           placeholder="Phone Number"
           value={phone}
           onChangeText={setPhone}
@@ -239,11 +227,7 @@ export default function RegisterScreen() {
         />
 
         <Field
-          icon={{
-            ios: "envelope",
-            android: "mail",
-            web: "mail",
-          }}
+          icon={{ ios: "envelope", android: "mail", web: "mail" }}
           placeholder="University Email"
           value={email}
           onChangeText={setEmail}
@@ -251,11 +235,7 @@ export default function RegisterScreen() {
         />
 
         <Field
-          icon={{
-            ios: "lock",
-            android: "lock",
-            web: "lock",
-          }}
+          icon={{ ios: "lock", android: "lock", web: "lock" }}
           placeholder="Password"
           value={password}
           onChangeText={setPassword}
@@ -265,11 +245,7 @@ export default function RegisterScreen() {
         />
 
         <Field
-          icon={{
-            ios: "lock",
-            android: "lock",
-            web: "lock",
-          }}
+          icon={{ ios: "lock", android: "lock", web: "lock" }}
           placeholder="Confirm Password"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
