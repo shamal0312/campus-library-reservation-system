@@ -1,15 +1,9 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View, StyleSheet } from "react-native";
 
-export default function HomeScreen() {
+export default function Index() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>
-        Campus Library Reservation System
-      </Text>
-
-      <Text style={styles.subtitle}>
-        Base project setup successfully.
-      </Text>
+      <Text>Edit src/app/index.tsx to edit this screen.</Text>
     </View>
   );
 }
@@ -17,21 +11,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-    backgroundColor: '#ffffff',
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#111111',
-  },
-  subtitle: {
-    marginTop: 12,
-    fontSize: 16,
-    textAlign: 'center',
-    color: '#666666',
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
