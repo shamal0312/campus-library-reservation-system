@@ -9,13 +9,18 @@ import {
 } from "react";
 
 import {
+  //  verifies current password before changing it
+  changePassword as changeAccountPassword,
   getSession,
   saveRole as saveAccountRole,
+  //  Google Sign-In
   signInWithGoogle as signInWithGoogleAccount,
   signIn as signInWithPassword,
   signOut as signOutAccount,
   signUp as signUpAccount,
   subscribeToAuthChanges,
+
+  //direct password update
   updatePassword as updateAccountPassword,
   type SignUpInput,
 } from "@/services/auth";
@@ -34,33 +39,52 @@ export type AccountSession = {
 
 type AuthContextValue = {
   isLoading: boolean;
+
   session: Session | null;
+
   account: AccountSession | null;
 
+  //  Sign Up
   signUp: (input: SignUpInput) => ReturnType<typeof signUpAccount>;
 
+  //  Email / Password Sign In
   signIn: (
     email: string,
     password: string,
   ) => ReturnType<typeof signInWithPassword>;
 
+  //  Google Sign In
   signInWithGoogle: () => ReturnType<typeof signInWithGoogleAccount>;
 
+  // Sign Out
   signOut: () => ReturnType<typeof signOutAccount>;
 
+  // Save Student / Lecturer Role
   saveRole: (role: UserRole) => ReturnType<typeof saveAccountRole>;
 
+  //  Direct password update
   updatePassword: (
     newPassword: string,
   ) => ReturnType<typeof updateAccountPassword>;
+
+  //  Change password
+  // Current password is verified before updating
+  changePassword: (
+    currentPassword: string,
+    newPassword: string,
+  ) => Promise<{
+    error: string | null;
+  }>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+// safely convert metadata values to strings
 function text(value: unknown) {
   return typeof value === "string" ? value : "";
 }
 
+//  convert Supabase user into app account format
 function accountFromUser(user: User): AccountSession {
   const metadata = user.user_metadata ?? {};
 
@@ -71,19 +95,28 @@ function accountFromUser(user: User): AccountSession {
 
   return {
     id: user.id,
+
     fullName: text(metadata.full_name),
+
     universityId: text(metadata.university_id),
+
     email: user.email ?? "",
+
     phone: text(metadata.phone),
+
     role,
+
     avatarUrl: text(metadata.avatar_url) || null,
   };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
+
   const [isLoading, setIsLoading] = useState(true);
 
+  // Load current Supabase session
+  // and listen for auth changes
   useEffect(() => {
     let active = true;
 
@@ -115,6 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       account: session?.user ? accountFromUser(session.user) : null,
 
+      //  Sign Up
       signUp: async (input) => {
         const result = await signUpAccount(input);
 
@@ -125,6 +159,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return result;
       },
 
+      // Email / Password Sign In
       signIn: async (email, password) => {
         const result = await signInWithPassword(email, password);
 
@@ -135,10 +170,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return result;
       },
 
+      // Google Sign In
       signInWithGoogle: async () => {
         return await signInWithGoogleAccount();
       },
 
+      //  Sign Out
       signOut: async () => {
         const result = await signOutAccount();
 
@@ -149,6 +186,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return result;
       },
 
+      // Save role
       saveRole: async (role) => {
         const result = await saveAccountRole(role);
 
@@ -168,8 +206,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return result;
       },
 
+      //  Direct password update
       updatePassword: async (newPassword) => {
         return await updateAccountPassword(newPassword);
+      },
+
+      // =====================================
+      //  Change Password
+      // =====================================
+      changePassword: async (currentPassword, newPassword) => {
+        const email = session?.user.email;
+
+        if (!email) {
+          return {
+            error: "Unable to find your account email.",
+          };
+        }
+
+        return await changeAccountPassword(email, currentPassword, newPassword);
       },
     }),
     [isLoading, session],

@@ -1,350 +1,266 @@
-import { LinearGradient } from "expo-linear-gradient";
+import { Image } from "expo-image";
+import { router } from "expo-router";
 import { SymbolView } from "expo-symbols";
-import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAuth } from "@/contexts/auth-context";
 
+const BACKGROUND = "#E7EDF6";
+const BLUE = "#3B5CCC";
+const TEXT = "#111827";
+const MUTED = "#6B7280";
+const BORDER = "#AEB8C5";
+
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
-  const { account, signOut } = useAuth();
 
-  const [isSigningOut, setIsSigningOut] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  //  Logged-in account data
+  const { account } = useAuth();
 
-  async function handleLogout() {
-    setErrorMessage(null);
-    setIsSigningOut(true);
-
-    const result = await signOut();
-
-    setIsSigningOut(false);
-
-    if (result.error) {
-      setErrorMessage(result.error);
-    }
-  }
-
-  const displayName = account?.fullName || "Library User";
-
-  const roleLabel =
-    account?.role === "student"
-      ? "Student"
-      : account?.role === "lecturer"
-        ? "Lecturer"
-        : "User";
-
-  const initials = displayName
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((name) => name[0]?.toUpperCase())
-    .join("");
+  const displayName = account?.fullName?.trim() || "Nimal Perera";
 
   return (
-    <View style={styles.screen}>
-      <LinearGradient
-        colors={["#3B82F6", "#2563EB", "#1D4ED8"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[
-          styles.header,
-          {
-            paddingTop: insets.top + 20,
-          },
-        ]}
-      >
-        <Text style={styles.headerTitle}>My Profile</Text>
-
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{initials || "SL"}</Text>
-        </View>
-
-        <Text style={styles.name}>{displayName}</Text>
-
-        <View style={styles.roleBadge}>
-          <Text style={styles.roleText}>{roleLabel}</Text>
-        </View>
-      </LinearGradient>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={[
-          styles.content,
-          {
-            paddingBottom: insets.bottom + 30,
-          },
-        ]}
-      >
-        <Text style={styles.sectionTitle}>Account Information</Text>
-
-        <View style={styles.card}>
-          <ProfileInfoRow
-            icon={{
-              ios: "person.fill",
-              android: "person",
-              web: "person",
-            }}
-            label="Full Name"
-            value={displayName}
-          />
-
-          <View style={styles.divider} />
-
-          <ProfileInfoRow
-            icon={{
-              ios: "envelope.fill",
-              android: "mail",
-              web: "mail",
-            }}
-            label="Email"
-            value={account?.email || "Not available"}
-          />
-
-          <View style={styles.divider} />
-
-          <ProfileInfoRow
-            icon={{
-              ios: "person.text.rectangle",
-              android: "badge",
-              web: "badge",
-            }}
-            label="University ID"
-            value={account?.universityId || "Not available"}
-          />
-
-          <View style={styles.divider} />
-
-          <ProfileInfoRow
-            icon={{
-              ios: "phone.fill",
-              android: "call",
-              web: "call",
-            }}
-            label="Phone Number"
-            value={account?.phone || "Not available"}
-          />
-        </View>
-
-        {errorMessage ? (
-          <View style={styles.errorBox}>
-            <SymbolView
-              name={{
-                ios: "exclamationmark.circle.fill",
-                android: "error",
-                web: "error",
-              }}
-              size={18}
-              tintColor="#DC2626"
-            />
-
-            <Text style={styles.errorText}>{errorMessage}</Text>
-          </View>
-        ) : null}
-
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={[
+        styles.content,
+        {
+          paddingTop: insets.top + 10,
+          paddingBottom: insets.bottom + 28,
+        },
+      ]}
+      showsVerticalScrollIndicator={false}
+    >
+      {/*  Header */}
+      <View style={styles.header}>
         <Pressable
-          style={[styles.logoutButton, isSigningOut && styles.disabledButton]}
-          onPress={handleLogout}
-          disabled={isSigningOut}
+          style={styles.headerButton}
+          onPress={() => router.back()}
+          hitSlop={8}
         >
           <SymbolView
             name={{
-              ios: "rectangle.portrait.and.arrow.right",
-              android: "logout",
-              web: "logout",
+              ios: "chevron.left",
+              android: "arrow_back",
+              web: "arrow_back",
             }}
-            size={20}
-            tintColor="#DC2626"
+            size={24}
+            tintColor={TEXT}
           />
-
-          <Text style={styles.logoutText}>
-            {isSigningOut ? "Signing out..." : "Log Out"}
-          </Text>
         </Pressable>
-      </ScrollView>
-    </View>
+
+        <Text style={styles.title}>My Profile</Text>
+
+        <Pressable
+          style={styles.headerButton}
+          onPress={() => {
+            // Settings screen will be connected later
+            console.log("Open settings");
+          }}
+          hitSlop={8}
+        >
+          <SymbolView
+            name={{
+              ios: "gearshape",
+              android: "settings",
+              web: "settings",
+            }}
+            size={24}
+            tintColor={TEXT}
+          />
+        </Pressable>
+      </View>
+
+      {/* Profile information */}
+      <View style={styles.profileSection}>
+        <Image
+          source={
+            account?.avatarUrl
+              ? { uri: account.avatarUrl }
+              : require("@/assets/images/app-logo.png")
+          }
+          style={styles.avatar}
+          contentFit="cover"
+        />
+
+        <Text style={styles.name}>{displayName}</Text>
+
+        <Text style={styles.role}>
+          {account?.role
+            ? account.role.charAt(0).toUpperCase() + account.role.slice(1)
+            : "Student"}
+        </Text>
+      </View>
+
+      {/*  Personal Information
+          Opens the profile details screen */}
+      <ProfileMenuItem
+        label="Personal Information"
+        onPress={() => router.push("/profile-details")}
+      />
+
+      {/* Book reservation
+          Route can be connected when their screen path is confirmed */}
+      <ProfileMenuItem
+        label="Book Reservation"
+        onPress={() => {
+          console.log("Open book reservation");
+        }}
+      />
+
+      {/* Seat reservation
+          Route can be connected when their screen path is confirmed */}
+      <ProfileMenuItem
+        label="Seat Reservation"
+        onPress={() => {
+          console.log("Open seat reservation");
+        }}
+      />
+
+      {/* Room reservation
+          Route can be connected when their screen path is confirmed */}
+      <ProfileMenuItem
+        label="Room reservation"
+        onPress={() => {
+          console.log("Open room reservation");
+        }}
+      />
+
+      {/*  Change Password */}
+      <ProfileMenuItem
+        label="Change Password"
+        onPress={() => router.push("/change-password")}
+      />
+
+      {/*  Settings / appearance */}
+      <ProfileMenuItem
+        label="App appearance"
+        onPress={() => {
+          console.log("Open app appearance");
+        }}
+      />
+
+      {/* Notification settings */}
+      <ProfileMenuItem
+        label="Notification Preferences"
+        onPress={() => {
+          console.log("Open notification preferences");
+        }}
+      />
+    </ScrollView>
   );
 }
 
-type ProfileInfoRowProps = {
-  icon: {
-    ios: any;
-    android: any;
-    web: any;
-  };
+type ProfileMenuItemProps = {
   label: string;
-  value: string;
+  onPress: () => void;
 };
 
-function ProfileInfoRow({ icon, label, value }: ProfileInfoRowProps) {
+function ProfileMenuItem({ label, onPress }: ProfileMenuItemProps) {
   return (
-    <View style={styles.infoRow}>
-      <View style={styles.infoIcon}>
-        <SymbolView name={icon} size={20} tintColor="#2563EB" />
-      </View>
+    <Pressable
+      style={({ pressed }) => [
+        styles.menuItem,
+        pressed && styles.menuItemPressed,
+      ]}
+      onPress={onPress}
+    >
+      <Text style={styles.menuText}>{label}</Text>
 
-      <View style={styles.infoContent}>
-        <Text style={styles.infoLabel}>{label}</Text>
-        <Text style={styles.infoValue}>{value}</Text>
-      </View>
-    </View>
+      <SymbolView
+        name={{
+          ios: "chevron.right",
+          android: "chevron_right",
+          web: "chevron_right",
+        }}
+        size={20}
+        tintColor={TEXT}
+      />
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F8FAFC",
-  },
-
-  header: {
-    paddingHorizontal: 24,
-    paddingBottom: 34,
-    alignItems: "center",
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-  },
-
-  headerTitle: {
-    alignSelf: "flex-start",
-    fontSize: 24,
-    fontWeight: "800",
-    color: "#FFFFFF",
-    marginBottom: 24,
-  },
-
-  avatar: {
-    width: 92,
-    height: 92,
-    borderRadius: 46,
-    backgroundColor: "rgba(255,255,255,0.20)",
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.45)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  avatarText: {
-    fontSize: 30,
-    fontWeight: "800",
-    color: "#FFFFFF",
-  },
-
-  name: {
-    marginTop: 14,
-    fontSize: 22,
-    fontWeight: "800",
-    color: "#FFFFFF",
-  },
-
-  roleBadge: {
-    marginTop: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 999,
-    backgroundColor: "rgba(255,255,255,0.18)",
-  },
-
-  roleText: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#FFFFFF",
+    backgroundColor: BACKGROUND,
   },
 
   content: {
-    paddingHorizontal: 20,
-    paddingTop: 26,
+    paddingHorizontal: 18,
   },
 
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#0F172A",
-    marginBottom: 12,
-  },
-
-  card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-  },
-
-  infoRow: {
+  header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 16,
+    justifyContent: "space-between",
   },
 
-  infoIcon: {
+  headerButton: {
     width: 42,
     height: 42,
-    borderRadius: 13,
-    backgroundColor: "#EFF6FF",
+    borderRadius: 21,
+
     alignItems: "center",
     justifyContent: "center",
   },
 
-  infoContent: {
-    flex: 1,
-    marginLeft: 12,
+  title: {
+    fontSize: 23,
+    fontWeight: "800",
+    color: TEXT,
   },
 
-  infoLabel: {
-    fontSize: 12,
-    color: "#64748B",
-    marginBottom: 3,
-  },
-
-  infoValue: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#0F172A",
-  },
-
-  divider: {
-    height: 1,
-    backgroundColor: "#F1F5F9",
-  },
-
-  errorBox: {
-    marginTop: 18,
-    flexDirection: "row",
+  profileSection: {
     alignItems: "center",
-    gap: 8,
-    padding: 12,
-    borderRadius: 12,
-    backgroundColor: "#FEF2F2",
+    marginTop: 8,
+    marginBottom: 10,
   },
 
-  errorText: {
-    flex: 1,
-    fontSize: 13,
-    color: "#DC2626",
-  },
-
-  logoutButton: {
-    marginTop: 24,
-    height: 54,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#FECACA",
+  avatar: {
+    width: 86,
+    height: 86,
+    borderRadius: 43,
     backgroundColor: "#FFFFFF",
+  },
+
+  name: {
+    marginTop: 8,
+    fontSize: 22,
+    fontWeight: "500",
+    color: TEXT,
+  },
+
+  role: {
+    marginTop: -1,
+    fontSize: 17,
+    color: MUTED,
+  },
+
+  menuItem: {
+    minHeight: 52,
+
+    borderWidth: 1,
+    borderColor: BORDER,
+    borderRadius: 7,
+
+    paddingHorizontal: 12,
+
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
+    justifyContent: "space-between",
+
+    marginBottom: 9,
   },
 
-  disabledButton: {
-    opacity: 0.6,
+  menuItemPressed: {
+    opacity: 0.7,
   },
 
-  logoutText: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#DC2626",
+  menuText: {
+    flex: 1,
+    fontSize: 17,
+    color: TEXT,
   },
 });

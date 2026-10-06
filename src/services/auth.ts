@@ -172,3 +172,32 @@ export async function updatePassword(newPassword: string) {
     error: error?.message ?? null,
   };
 }
+
+// YOUR PART - Change password
+// First verifies the current password, then updates to the new password.
+export async function changePassword(
+  email: string,
+  currentPassword: string,
+  newPassword: string,
+) {
+  // Verify the user's current password
+  const { error: verifyError } = await supabase.auth.signInWithPassword({
+    email: email.trim(),
+    password: currentPassword,
+  });
+
+  if (verifyError) {
+    return {
+      error: "Current password is incorrect.",
+    };
+  }
+
+  // Update to the new password
+  const { error: updateError } = await supabase.auth.updateUser({
+    password: newPassword,
+  });
+
+  return {
+    error: updateError?.message ?? null,
+  };
+}
