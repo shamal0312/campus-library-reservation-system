@@ -1,151 +1,52 @@
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { SymbolView } from "expo-symbols";
-import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import {
+  Image,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 export default function GetStartedScreen() {
   return (
     <SafeAreaView style={styles.screen}>
-      <LinearGradient
-        colors={["#EFF6FF", "#FFFFFF", "#F8FAFC"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.background}
-      >
-        <View style={styles.topSection}>
-          <View style={styles.brandRow}>
-            <View style={styles.brandIcon}>
-              <SymbolView
-                name={{
-                  ios: "books.vertical.fill",
-                  android: "menu_book",
-                  web: "menu_book",
-                }}
-                size={28}
-                tintColor="#2563EB"
-              />
-            </View>
+      <View style={styles.container}>
+        <Image
+          source={require("@/assets/images/library-aisle.jpg")}
+          style={styles.libraryImage}
+          resizeMode="cover"
+        />
 
-            <View>
-              <Text style={styles.brandTitle}>SLIIT Library</Text>
-              <Text style={styles.brandSubtitle}>Learning Commons</Text>
-            </View>
+        <View style={styles.contentSection}>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require("@/assets/images/app-logo.png")}
+              style={styles.logo}
+              resizeMode="contain"
+            />
           </View>
 
-          <View style={styles.heroCard}>
-            <LinearGradient
-              colors={["#3B82F6", "#2563EB", "#1D4ED8"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.heroGradient}
-            >
-              <View style={styles.heroIconCircle}>
-                <SymbolView
-                  name={{
-                    ios: "books.vertical.fill",
-                    android: "local_library",
-                    web: "local_library",
-                  }}
-                  size={46}
-                  tintColor="#FFFFFF"
-                />
-              </View>
+          <Text style={styles.title}>Smart Library</Text>
 
-              <Text style={styles.heroTitle}>Your Library, Simplified</Text>
+          <Text style={styles.subtitle}>Your Learning Space</Text>
 
-              <Text style={styles.heroDescription}>
-                Reserve books, find available reading seats, and request study
-                rooms from one place.
-              </Text>
+          <Text style={styles.tagline}>Anytime , Anywhere</Text>
 
-              <View style={styles.featureRow}>
-                <View style={styles.featureChip}>
-                  <SymbolView
-                    name={{
-                      ios: "book.fill",
-                      android: "book",
-                      web: "book",
-                    }}
-                    size={17}
-                    tintColor="#FFFFFF"
-                  />
-                  <Text style={styles.featureText}>Books</Text>
-                </View>
-
-                <View style={styles.featureChip}>
-                  <SymbolView
-                    name={{
-                      ios: "chair.fill",
-                      android: "event_seat",
-                      web: "event_seat",
-                    }}
-                    size={17}
-                    tintColor="#FFFFFF"
-                  />
-                  <Text style={styles.featureText}>Seats</Text>
-                </View>
-
-                <View style={styles.featureChip}>
-                  <SymbolView
-                    name={{
-                      ios: "person.3.fill",
-                      android: "groups",
-                      web: "groups",
-                    }}
-                    size={17}
-                    tintColor="#FFFFFF"
-                  />
-                  <Text style={styles.featureText}>Study Rooms</Text>
-                </View>
-              </View>
-            </LinearGradient>
-          </View>
-        </View>
-
-        <View style={styles.bottomSection}>
-          <Text style={styles.welcomeTitle}>Welcome to SLIIT Library</Text>
-
-          <Text style={styles.welcomeDescription}>
-            Access library services quickly and manage your reservations with
-            your SLIIT account.
-          </Text>
+          <View style={styles.spacer} />
 
           <Pressable
-            style={styles.primaryButton}
+            style={styles.button}
             onPress={() => router.push("/login")}
           >
-            <LinearGradient
-              colors={["#3B82F6", "#2563EB", "#1D4ED8"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.primaryGradient}
-            >
-              <Text style={styles.primaryButtonText}>Get Started</Text>
-
-              <SymbolView
-                name={{
-                  ios: "arrow.right",
-                  android: "arrow_forward",
-                  web: "arrow_forward",
-                }}
-                size={20}
-                tintColor="#FFFFFF"
-              />
-            </LinearGradient>
+            <Text style={styles.buttonText}>Get Started</Text>
           </Pressable>
 
-          <Pressable
-            style={styles.createAccountButton}
-            onPress={() => router.push("/register")}
-          >
-            <Text style={styles.createAccountText}>Create a New Account</Text>
-          </Pressable>
-
-          <Text style={styles.accountHint}>
-            Use your SLIIT university email to continue
+          <Text style={styles.footerText}>
+            Knowledge for a Brighter Tomorrow
           </Text>
         </View>
-      </LinearGradient>
+      </View>
     </SafeAreaView>
   );
 }
@@ -153,184 +54,136 @@ export default function GetStartedScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#E5EBF4",
   },
 
-  background: {
+  container: {
     flex: 1,
-    paddingHorizontal: 22,
+    backgroundColor: "#E5EBF4",
   },
 
-  topSection: {
+  libraryImage: {
+    width: "100%",
+    height: "46%",
+  },
+
+  contentSection: {
     flex: 1,
-    paddingTop: 24,
-  },
-
-  brandRow: {
-    flexDirection: "row",
+    marginTop: -48,
+    paddingTop: 62,
+    paddingHorizontal: 26,
+    paddingBottom: 24,
     alignItems: "center",
-    gap: 12,
-    marginBottom: 28,
+
+    backgroundColor: "#E5EBF4",
+
+    borderTopLeftRadius: 80,
+    borderTopRightRadius: 80,
   },
 
-  brandIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 15,
-    backgroundColor: "#DBEAFE",
+  logoContainer: {
+    position: "absolute",
+    top: -40,
+
+    width: 82,
+    height: 82,
+
+    borderRadius: 24,
+
+    backgroundColor: "#FFFFFF",
+
     alignItems: "center",
     justifyContent: "center",
-  },
 
-  brandTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#0F172A",
-  },
+    borderWidth: 1,
+    borderColor: "#D8E0EC",
 
-  brandSubtitle: {
-    marginTop: 2,
-    fontSize: 13,
-    color: "#64748B",
-  },
-
-  heroCard: {
-    borderRadius: 28,
-    overflow: "hidden",
-    shadowColor: "#1D4ED8",
+    shadowColor: "#000000",
     shadowOffset: {
       width: 0,
-      height: 10,
+      height: 4,
+    },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+
+    elevation: 6,
+  },
+
+  logo: {
+    width: 60,
+    height: 60,
+  },
+
+  title: {
+    marginTop: 4,
+
+    fontSize: 24,
+    fontWeight: "800",
+
+    color: "#111827",
+    textAlign: "center",
+  },
+
+  subtitle: {
+    marginTop: 10,
+
+    fontSize: 15,
+    fontWeight: "500",
+
+    color: "#374151",
+    textAlign: "center",
+  },
+
+  tagline: {
+    marginTop: 9,
+
+    fontSize: 14,
+    fontWeight: "400",
+
+    color: "#374151",
+    textAlign: "center",
+  },
+
+  spacer: {
+    flex: 1,
+  },
+
+  button: {
+    width: "100%",
+    height: 54,
+
+    borderRadius: 11,
+
+    backgroundColor: "#3F5FBF",
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    shadowColor: "#3F5FBF",
+    shadowOffset: {
+      width: 0,
+      height: 4,
     },
     shadowOpacity: 0.18,
-    shadowRadius: 20,
-    elevation: 8,
+    shadowRadius: 7,
+
+    elevation: 4,
   },
 
-  heroGradient: {
-    minHeight: 330,
-    paddingHorizontal: 24,
-    paddingVertical: 30,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  heroIconCircle: {
-    width: 86,
-    height: 86,
-    borderRadius: 26,
-    backgroundColor: "rgba(255,255,255,0.16)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.3)",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 22,
-  },
-
-  heroTitle: {
-    fontSize: 28,
-    lineHeight: 34,
-    fontWeight: "800",
-    color: "#FFFFFF",
-    textAlign: "center",
-  },
-
-  heroDescription: {
-    marginTop: 12,
-    maxWidth: 320,
-    fontSize: 15,
-    lineHeight: 23,
-    color: "#EAF2FF",
-    textAlign: "center",
-  },
-
-  featureRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    gap: 8,
-    marginTop: 26,
-  },
-
-  featureChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 11,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: "rgba(255,255,255,0.15)",
-  },
-
-  featureText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#FFFFFF",
-  },
-
-  bottomSection: {
-    paddingTop: 28,
-    paddingBottom: 24,
-  },
-
-  welcomeTitle: {
-    fontSize: 23,
-    fontWeight: "800",
-    color: "#0F172A",
-    textAlign: "center",
-  },
-
-  welcomeDescription: {
-    marginTop: 8,
-    paddingHorizontal: 8,
-    fontSize: 14,
-    lineHeight: 21,
-    color: "#64748B",
-    textAlign: "center",
-  },
-
-  primaryButton: {
-    height: 54,
-    marginTop: 24,
-    borderRadius: 16,
-    overflow: "hidden",
-  },
-
-  primaryGradient: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 9,
-  },
-
-  primaryButtonText: {
-    fontSize: 16,
+  buttonText: {
+    fontSize: 17,
     fontWeight: "700",
+
     color: "#FFFFFF",
   },
 
-  createAccountButton: {
-    height: 52,
-    marginTop: 12,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#DCE4F2",
-    backgroundColor: "#FFFFFF",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  footerText: {
+    marginTop: 15,
 
-  createAccountText: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#2563EB",
-  },
+    fontSize: 10,
+    fontWeight: "400",
 
-  accountHint: {
-    marginTop: 16,
-    fontSize: 12,
-    color: "#94A3B8",
+    color: "#374151",
     textAlign: "center",
   },
 });

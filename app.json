@@ -32,7 +32,8 @@
           "image": "./assets/images/app-logo.png",
           "imageWidth": 120
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -13,20 +13,48 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Svg, { Path } from "react-native-svg";
 
 import { useAuth } from "@/contexts/auth-context";
 
 const ICON = "#94A3B8";
 
+function GoogleIcon() {
+  return (
+    <Svg width={22} height={22} viewBox="0 0 48 48">
+      <Path
+        fill="#FFC107"
+        d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"
+      />
+      <Path
+        fill="#FF3D00"
+        d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"
+      />
+      <Path
+        fill="#4CAF50"
+        d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"
+      />
+      <Path
+        fill="#1976D2"
+        d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"
+      />
+    </Svg>
+  );
+}
+
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
-  const { signIn } = useAuth();
+
+  const { signIn, signInWithGoogle } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
 
   async function handleLogin() {
     if (!email.trim() || !password) {
@@ -50,6 +78,19 @@ export default function LoginScreen() {
 
     if (role !== "student" && role !== "lecturer") {
       router.replace("/role");
+    }
+  }
+
+  async function handleGoogleSignIn() {
+    setErrorMessage(null);
+    setIsGoogleSubmitting(true);
+
+    const result = await signInWithGoogle();
+
+    setIsGoogleSubmitting(false);
+
+    if (result?.error) {
+      setErrorMessage(result.error);
     }
   }
 
@@ -87,7 +128,7 @@ export default function LoginScreen() {
         <View style={styles.headerSection}>
           <View style={styles.logoBox}>
             <LinearGradient
-              colors={["#3B82F6", "#2563EB", "#1D4ED8"]}
+              colors={["#4F70D6", "#3F5FBF", "#304A9B"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.logoGradient}
@@ -104,13 +145,12 @@ export default function LoginScreen() {
             </LinearGradient>
           </View>
 
-          <Text style={styles.brand}>SLIIT Library</Text>
-          <Text style={styles.brandSub}>Learning Commons</Text>
+          <Text style={styles.brand}>Smart Library</Text>
+          <Text style={styles.brandSub}>Your Learning Space</Text>
 
-          <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>
-            Sign in to manage your library activities
-          </Text>
+          <Text style={styles.title}>Welcome Back!</Text>
+
+          <Text style={styles.subtitle}>Sign in to continue</Text>
         </View>
 
         <View style={styles.formCard}>
@@ -129,7 +169,7 @@ export default function LoginScreen() {
 
             <TextInput
               style={styles.input}
-              placeholder="University Email"
+              placeholder="Email"
               placeholderTextColor={ICON}
               value={email}
               onChangeText={setEmail}
@@ -190,6 +230,7 @@ export default function LoginScreen() {
                 size={18}
                 tintColor="#DC2626"
               />
+
               <Text style={styles.error}>{errorMessage}</Text>
             </View>
           ) : null}
@@ -200,10 +241,10 @@ export default function LoginScreen() {
               isSubmitting && styles.buttonDisabled,
             ]}
             onPress={handleLogin}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isGoogleSubmitting}
           >
             <LinearGradient
-              colors={["#3B82F6", "#2563EB", "#1D4ED8"]}
+              colors={["#4F70D6", "#3F5FBF", "#304A9B"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.button}
@@ -225,6 +266,29 @@ export default function LoginScreen() {
               ) : null}
             </LinearGradient>
           </Pressable>
+
+          <View style={styles.dividerRow}>
+            <View style={styles.dividerLine} />
+
+            <Text style={styles.dividerText}>OR</Text>
+
+            <View style={styles.dividerLine} />
+          </View>
+
+          <Pressable
+            style={[
+              styles.googleButton,
+              isGoogleSubmitting && styles.buttonDisabled,
+            ]}
+            onPress={handleGoogleSignIn}
+            disabled={isGoogleSubmitting || isSubmitting}
+          >
+            <GoogleIcon />
+
+            <Text style={styles.googleButtonText}>
+              {isGoogleSubmitting ? "Connecting..." : "Continue with Google"}
+            </Text>
+          </Pressable>
         </View>
 
         <View style={styles.infoCard}>
@@ -235,12 +299,12 @@ export default function LoginScreen() {
               web: "info",
             }}
             size={19}
-            tintColor="#2563EB"
+            tintColor="#3F5FBF"
           />
 
           <Text style={styles.infoText}>
-            Sign in using the email address registered with your library
-            account.
+            Sign in using your registered library account or continue with
+            Google.
           </Text>
         </View>
 
@@ -261,7 +325,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F8FAFC",
+    backgroundColor: "#E9EEF5",
   },
 
   content: {
@@ -276,7 +340,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: "#D9E0EA",
   },
 
   headerSection: {
@@ -302,80 +366,88 @@ const styles = StyleSheet.create({
   brand: {
     fontSize: 19,
     fontWeight: "800",
-    color: "#0F172A",
+    color: "#1F2937",
   },
 
   brandSub: {
     marginTop: 2,
     fontSize: 12,
-    color: "#64748B",
+    color: "#7C879A",
   },
 
   title: {
     marginTop: 26,
     fontSize: 28,
     fontWeight: "800",
-    color: "#0F172A",
+    color: "#1F2937",
   },
 
   subtitle: {
     marginTop: 7,
     fontSize: 14,
-    color: "#64748B",
+    color: "#7C879A",
     textAlign: "center",
   },
 
   formCard: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 24,
+    borderRadius: 20,
     padding: 20,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    shadowColor: "#1D4ED8",
+    borderColor: "#D9E0EA",
+
+    shadowColor: "#1F2937",
     shadowOffset: {
       width: 0,
-      height: 8,
+      height: 5,
     },
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    elevation: 4,
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+
+    elevation: 3,
   },
 
   label: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#334155",
+    color: "#374151",
     marginBottom: 8,
     marginTop: 4,
   },
 
   field: {
-    height: 56,
-    borderRadius: 16,
-    backgroundColor: "#F8FAFC",
+    height: 54,
+    borderRadius: 14,
+    backgroundColor: "#F5F7FA",
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: "#DDE3EC",
+
     flexDirection: "row",
     alignItems: "center",
+
     paddingHorizontal: 15,
     gap: 11,
+
     marginBottom: 16,
   },
 
   input: {
     flex: 1,
     fontSize: 15,
-    color: "#0F172A",
+    color: "#1F2937",
   },
 
   errorBox: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+
     borderRadius: 12,
     backgroundColor: "#FEF2F2",
+
     paddingHorizontal: 12,
     paddingVertical: 10,
+
     marginBottom: 14,
   },
 
@@ -388,16 +460,18 @@ const styles = StyleSheet.create({
 
   buttonWrapper: {
     height: 54,
-    borderRadius: 16,
+    borderRadius: 14,
     overflow: "hidden",
     marginTop: 4,
   },
 
   button: {
     flex: 1,
+
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+
     gap: 8,
   },
 
@@ -411,34 +485,87 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
+  dividerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 18,
+  },
+
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#D9E0EA",
+  },
+
+  dividerText: {
+    marginHorizontal: 12,
+
+    fontSize: 12,
+    fontWeight: "600",
+
+    color: "#94A3B8",
+  },
+
+  googleButton: {
+    height: 54,
+
+    borderRadius: 14,
+
+    borderWidth: 1,
+    borderColor: "#D9E0EA",
+
+    backgroundColor: "#FFFFFF",
+
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+
+    gap: 10,
+  },
+
+  googleButtonText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#1F2937",
+  },
+
   infoCard: {
     marginTop: 18,
-    borderRadius: 16,
-    backgroundColor: "#EFF6FF",
+
+    borderRadius: 14,
+
+    backgroundColor: "#E7ECFA",
     borderWidth: 1,
-    borderColor: "#DBEAFE",
+    borderColor: "#CCD7F4",
+
     padding: 14,
+
     flexDirection: "row",
     alignItems: "flex-start",
+
     gap: 9,
   },
 
   infoText: {
     flex: 1,
+
     fontSize: 12,
     lineHeight: 18,
-    color: "#475569",
+
+    color: "#4B5563",
   },
 
   footer: {
     marginTop: 24,
+
     textAlign: "center",
-    color: "#64748B",
+
+    color: "#7C879A",
     fontSize: 14,
   },
 
   footerLink: {
-    color: "#2563EB",
+    color: "#3F5FBF",
     fontWeight: "700",
   },
 });
