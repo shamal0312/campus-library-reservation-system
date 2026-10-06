@@ -7,6 +7,40 @@ import { scheduleOnRN } from 'react-native-worklets';
 
 const INITIAL_SCALE_FACTOR = Dimensions.get('screen').height / 90;
 const DURATION = 600;
+const SPLASH_DURATION = 1700;
+
+const splashLogoIn = new Keyframe({
+  0: {
+    opacity: 0,
+    transform: [{ scale: 0.7 }],
+  },
+  45: {
+    opacity: 1,
+    transform: [{ scale: 1.06 }],
+    easing: Easing.out(Easing.cubic),
+  },
+  62: {
+    opacity: 1,
+    transform: [{ scale: 1 }],
+  },
+  100: {
+    opacity: 1,
+    transform: [{ scale: 1 }],
+  },
+});
+
+const splashFadeOut = new Keyframe({
+  0: {
+    opacity: 1,
+  },
+  62: {
+    opacity: 1,
+  },
+  100: {
+    opacity: 0,
+    easing: Easing.in(Easing.cubic),
+  },
+});
 
 export function AnimatedSplashOverlay() {
   const [animate, setAnimate] = useState(false);
@@ -14,37 +48,24 @@ export function AnimatedSplashOverlay() {
 
   if (!visible) return null;
 
-  const splashKeyframe = new Keyframe({
-    0: {
-      transform: [{ scale: 1 }],
-      opacity: 1,
-    },
-    20: {
-      opacity: 1,
-    },
-    70: {
-      opacity: 0,
-      easing: Easing.elastic(0.7),
-    },
-    100: {
-      opacity: 0,
-      transform: [{ scale: 1 }],
-      easing: Easing.elastic(0.7),
-    },
-  });
-
-  const image = <Image style={styles.image} source={require('@/assets/images/expo-logo.png')} />;
+  const logo = (
+    <Image
+      style={styles.splashLogo}
+      source={require('@/assets/images/app-logo.png')}
+      contentFit="contain"
+    />
+  );
 
   return animate ? (
     <Animated.View
-      entering={splashKeyframe.duration(DURATION).withCallback((finished) => {
+      entering={splashFadeOut.duration(SPLASH_DURATION).withCallback((finished) => {
         'worklet';
         if (finished) {
           scheduleOnRN(setVisible, false);
         }
       })}
       style={styles.splashOverlay}>
-      {image}
+      <Animated.View entering={splashLogoIn.duration(SPLASH_DURATION)}>{logo}</Animated.View>
     </Animated.View>
   ) : (
     <View
@@ -54,7 +75,7 @@ export function AnimatedSplashOverlay() {
         });
       }}
       style={styles.splashOverlay}>
-      {image}
+      {logo}
     </View>
   );
 }
@@ -138,9 +159,13 @@ const styles = StyleSheet.create({
     height: 128,
     position: 'absolute',
   },
+  splashLogo: {
+    width: 168,
+    height: 168,
+  },
   splashOverlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: '#208AEF',
+    backgroundColor: '#F7F8FC',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1000,
