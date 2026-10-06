@@ -1,11 +1,12 @@
-import { Armchair, BarChart3, BookMarked, BookOpen, LayoutDashboard, Settings, Ticket, X } from 'lucide-react'
+import { Armchair, BarChart3, BookMarked, BookOpen, LayoutDashboard, Settings, Ticket, Users, X } from 'lucide-react'
 
 const navigation = [
-  { label: 'Dashboard', icon: LayoutDashboard, active: true },
+  { label: 'Dashboard', icon: LayoutDashboard },
   { label: 'Books', icon: BookMarked },
   { label: 'Seats & Reading Room', icon: Armchair },
   { label: 'Reservations & Fines', icon: Ticket },
   { label: 'Reports', icon: BarChart3 },
+  { label: 'User Management', icon: Users },
   { label: 'Settings', icon: Settings },
 ]
 
