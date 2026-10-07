@@ -4043,3 +4043,298 @@ select.modal-input {
   vertical-align: middle;
   margin-right: 5px;
 }
+
+/* ==========================================================================
+   USER MANAGEMENT PAGE
+   ========================================================================== */
+
+.users-page {
+  flex: 1;
+  min-height: 0;
+  padding: 24px 28px 48px;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.users-page::-webkit-scrollbar { width: 6px; }
+.users-page::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+
+/* Header */
+.users-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.users-header h1 {
+  margin: 0 0 4px;
+  color: #1a2332;
+  font-family: 'Manrope', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+.users-header p {
+  margin: 0;
+  color: #7c8fa6;
+  font-size: 12.5px;
+}
+.users-header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Stat Cards */
+.users-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.user-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  background: #fff;
+  border: 1px solid #e8edf3;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, .04);
+}
+.user-stat-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.user-stat-blue   { background: #eff6ff; color: #3b82f6; }
+.user-stat-purple { background: #f5f3ff; color: #7c3aed; }
+.user-stat-green  { background: #f0fdf4; color: #16a34a; }
+.user-stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: 'Manrope', sans-serif;
+  color: #1a2332;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.user-stat-label {
+  font-size: 11.5px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* Toolbar */
+.users-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+/* Role filter tabs */
+.role-filter-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.role-filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.role-filter-btn:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+.role-filter-btn.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #fff;
+}
+.role-filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: rgba(0, 0, 0, .08);
+}
+.role-filter-btn.active .role-filter-count {
+  background: rgba(255, 255, 255, .25);
+}
+
+/* User cell */
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Avatar */
+.user-avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 700;
+  font-family: 'Manrope', sans-serif;
+  flex-shrink: 0;
+  letter-spacing: 0.03em;
+}
+.user-avatar-lg {
+  width: 48px;
+  height: 48px;
+  font-size: 16px;
+}
+
+/* Role badge */
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+.role-admin {
+  background: #f5f3ff;
+  color: #6d28d9;
+  border: 1px solid #ddd6fe;
+}
+.role-student {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+/* Dropdown menu */
+.user-menu-wrap {
+  position: relative;
+  display: inline-block;
+}
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 50;
+  min-width: 180px;
+  padding: 5px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, .12);
+  animation: slideUp 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.user-dropdown button {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  text-align: left;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.user-dropdown button:hover {
+  background: #f8fafc;
+}
+.user-dropdown-danger {
+  color: #dc2626 !important;
+}
+.user-dropdown-danger:hover {
+  background: #fef2f2 !important;
+}
+
+/* Modal avatar preview */
+.modal-avatar-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border: 1px solid #e8edf3;
+  border-radius: 8px;
+  margin-bottom: 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #1a2332;
+}
+
+/* Role radio picker */
+.role-radio-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.role-radio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 9px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  transition: all 0.15s;
+}
+.role-radio input { display: none; }
+.role-radio:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background: #eff6ff;
+}
+.role-radio-active {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+/* Responsive */
+@media (max-width: 960px) {
+  .users-page { padding: 20px 20px 36px; }
+  .users-stats { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 768px) {
+  .users-page { padding: 18px 16px 32px; }
+  .users-stats { grid-template-columns: 1fr; }
+  .users-toolbar { flex-direction: column; align-items: stretch; }
+  .role-filter-tabs { width: 100%; }
+  .data-table-container { overflow-x: auto; }
+  .data-table { min-width: 700px; }
+  .users-header { flex-direction: column; align-items: stretch; }
+  .users-header-actions { flex-direction: row; }
+}
+@media (max-width: 600px) {
+  .users-stats { grid-template-columns: 1fr; }
+  .role-radio-group { grid-template-columns: 1fr; }
+}

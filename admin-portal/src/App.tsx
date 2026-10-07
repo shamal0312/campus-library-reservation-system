@@ -10,6 +10,7 @@ import Reports from './pages/Reports'
 import ReservationsFines from './pages/ReservationsFines'
 import SeatsReadingRoom from './pages/SeatsReadingRoom'
 import Settings from './pages/Settings'
+import Users from './pages/Users'
 
 function App() {
   const [isLoading, setIsLoading] = useState(true)
@@ -69,12 +70,14 @@ function App() {
         {currentPage === 'Seats & Reading Room' && <SeatsReadingRoom />}
         {currentPage === 'Reservations & Fines' && <ReservationsFines />}
         {currentPage === 'Reports' && <Reports />}
+        {currentPage === 'User Management' && <Users />}
         {currentPage === 'Settings' && <Settings />}
-        {currentPage !== 'Dashboard' && 
-         currentPage !== 'Books' && 
-         currentPage !== 'Seats & Reading Room' && 
-         currentPage !== 'Reservations & Fines' && 
+        {currentPage !== 'Dashboard' &&
+         currentPage !== 'Books' &&
+         currentPage !== 'Seats & Reading Room' &&
+         currentPage !== 'Reservations & Fines' &&
          currentPage !== 'Reports' &&
+         currentPage !== 'User Management' &&
          currentPage !== 'Settings' && (
           <main className="dashboard-page">
             <div className="page-heading">

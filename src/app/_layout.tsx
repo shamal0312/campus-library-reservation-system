@@ -1,22 +1,37 @@
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
 import { useColorScheme } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AnimatedSplashOverlay } from "@/components/animated-icon";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
 
-SplashScreen.preventAutoHideAsync();
+import { BookingProvider } from "../features/booking/context";
+import { AuthRefresh } from "../features/booking/screens";
+
+void SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <AuthProvider>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <AnimatedSplashOverlay />
-        <RootNavigator />
-      </ThemeProvider>
-    </AuthProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <BookingProvider>
+          <ThemeProvider
+            value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+          >
+            <AuthRefresh />
+
+            <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+
+            <AnimatedSplashOverlay />
+            <RootNavigator />
+          </ThemeProvider>
+        </BookingProvider>
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }
 
@@ -53,12 +68,7 @@ function RootNavigator() {
   }
 
   return (
-    <Stack
-      initialRouteName="(auth)"
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
+    <Stack initialRouteName="(auth)" screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(auth)" />
     </Stack>
   );
