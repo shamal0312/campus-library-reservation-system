@@ -22,18 +22,13 @@ const MUTED = "#6B7280";
 
 export default function EditProfileScreen() {
   const insets = useSafeAreaInsets();
-
-  // get current logged-in user details
   const { account } = useAuth();
 
-  // editable profile fields
   const [fullName, setFullName] = useState(account?.fullName ?? "");
   const [userId] = useState(account?.universityId ?? "");
   const [email, setEmail] = useState(account?.email ?? "");
   const [phone, setPhone] = useState(account?.phone ?? "");
 
-  //  save profile
-  // Backend update will be connected later using src/services/accounts.ts
   function handleSaveChanges() {
     console.log({
       fullName,
@@ -55,7 +50,6 @@ export default function EditProfileScreen() {
       ]}
       showsVerticalScrollIndicator={false}
     >
-      {/*  Back button + title */}
       <View style={styles.header}>
         <Pressable
           style={styles.backButton}
@@ -75,11 +69,9 @@ export default function EditProfileScreen() {
 
         <Text style={styles.title}>Edit Profile</Text>
 
-        {/* keeps title centered */}
         <View style={styles.headerSpacer} />
       </View>
 
-      {/*  Profile image */}
       <View style={styles.profileSection}>
         <View style={styles.avatarWrapper}>
           <Image
@@ -91,8 +83,6 @@ export default function EditProfileScreen() {
             style={styles.avatar}
           />
 
-          {/*  Edit avatar button
-              Actual image picker can be connected later */}
           <Pressable style={styles.editAvatarButton}>
             <SymbolView
               name={{
@@ -115,7 +105,6 @@ export default function EditProfileScreen() {
         </Text>
       </View>
 
-      {/*  Full Name */}
       <View style={styles.fieldGroup}>
         <Text style={styles.label}>Full Name</Text>
 
@@ -128,8 +117,6 @@ export default function EditProfileScreen() {
         />
       </View>
 
-      {/*  User ID
-          Read-only because user ID should not normally change */}
       <View style={styles.fieldGroup}>
         <Text style={styles.label}>User ID</Text>
 
@@ -152,8 +139,6 @@ export default function EditProfileScreen() {
         </View>
       </View>
 
-      {/*  Email
-          User requested only "Email", not "University Email" */}
       <View style={styles.fieldGroup}>
         <Text style={styles.label}>Email</Text>
 
@@ -169,7 +154,6 @@ export default function EditProfileScreen() {
         />
       </View>
 
-      {/*  Phone Number */}
       <View style={styles.fieldGroup}>
         <Text style={styles.label}>Phone Number</Text>
 
@@ -183,7 +167,6 @@ export default function EditProfileScreen() {
         />
       </View>
 
-      {/*  Save button */}
       <Pressable style={styles.saveButton} onPress={handleSaveChanges}>
         <Text style={styles.saveButtonText}>Save Changes</Text>
       </Pressable>
@@ -246,16 +229,12 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: -2,
     bottom: 3,
-
     width: 28,
     height: 28,
     borderRadius: 14,
-
     backgroundColor: "#FFFFFF",
-
     alignItems: "center",
     justifyContent: "center",
-
     borderWidth: 1,
     borderColor: "#D5DCE5",
   },
@@ -286,32 +265,22 @@ const styles = StyleSheet.create({
 
   input: {
     height: 50,
-
     borderRadius: 6,
-
     backgroundColor: FIELD_BACKGROUND,
-
     borderWidth: 1,
     borderColor: "#B9C2CE",
-
     paddingHorizontal: 12,
-
     fontSize: 15,
     color: TEXT,
   },
 
   readOnlyField: {
     height: 50,
-
     borderRadius: 6,
-
     backgroundColor: FIELD_BACKGROUND,
-
     borderWidth: 1,
     borderColor: "#B9C2CE",
-
     paddingHorizontal: 12,
-
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -328,14 +297,10 @@ const styles = StyleSheet.create({
 
   saveButton: {
     height: 54,
-
     borderRadius: 11,
-
     backgroundColor: BLUE,
-
     alignItems: "center",
     justifyContent: "center",
-
     marginTop: 4,
   },
 

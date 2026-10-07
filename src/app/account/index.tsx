@@ -5,8 +5,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAuth } from "@/contexts/auth-context";
-
-import GetStartedScreen from "./(auth)/get-started";
+import GetStartedScreen from "../(auth)/get-started";
 
 const BLUE = "#3B5CCC";
 const LIGHT_BLUE = "#DCE6FF";
@@ -40,7 +39,6 @@ const ACTIONS: {
     label: "Notification",
     ios: "bell",
     android: "notifications",
-    route: "/notifications",
     badge: 3,
   },
 ];
@@ -69,11 +67,9 @@ export default function HomeScreen() {
       ]}
       showsVerticalScrollIndicator={false}
     >
-      {/* Header */}
       <View style={styles.header}>
         <View style={styles.greeting}>
           <Text style={styles.hello}>Hello, {firstName} !</Text>
-
           <Text style={styles.subtitle}>Let’s make today productive</Text>
         </View>
 
@@ -94,7 +90,7 @@ export default function HomeScreen() {
 
           <Pressable
             style={styles.avatar}
-            onPress={() => router.push("/profile")}
+            onPress={() => router.push("/account/profile")}
             hitSlop={8}
           >
             <SymbolView
@@ -110,7 +106,6 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* Upcoming Reservation */}
       <View style={styles.reservationSection}>
         <View style={styles.reservationHeader}>
           <Text style={styles.reservationTitle}>Upcoming Reservation</Text>
@@ -140,15 +135,12 @@ export default function HomeScreen() {
           <View style={styles.reservationBody}>
             <Text style={styles.roomName}>Seat - A8</Text>
             <Text style={styles.floor}>Floor - 2</Text>
-
             <Text style={styles.metaText}>Date - 15 Sep 2026</Text>
-
             <Text style={styles.metaText}>Time - 10.00 AM - 12.00 PM</Text>
           </View>
         </View>
       </View>
 
-      {/* Quick Actions */}
       <View style={styles.grid}>
         {[ACTIONS.slice(0, 2), ACTIONS.slice(2)].map((row, rowIndex) => (
           <View key={rowIndex} style={styles.actionRow}>
@@ -345,7 +337,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 14,
-
     borderWidth: 1,
     borderColor: "#DDE3EC",
   },

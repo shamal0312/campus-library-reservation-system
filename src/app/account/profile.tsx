@@ -7,15 +7,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/contexts/auth-context";
 
 const BACKGROUND = "#E7EDF6";
-const BLUE = "#3B5CCC";
 const TEXT = "#111827";
 const MUTED = "#6B7280";
 const BORDER = "#AEB8C5";
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
-
-  //  Logged-in account data
   const { account } = useAuth();
 
   const displayName = account?.fullName?.trim() || "Nimal Perera";
@@ -32,7 +29,6 @@ export default function ProfileScreen() {
       ]}
       showsVerticalScrollIndicator={false}
     >
-      {/*  Header */}
       <View style={styles.header}>
         <Pressable
           style={styles.headerButton}
@@ -55,7 +51,6 @@ export default function ProfileScreen() {
         <Pressable
           style={styles.headerButton}
           onPress={() => {
-            // Settings screen will be connected later
             console.log("Open settings");
           }}
           hitSlop={8}
@@ -72,7 +67,6 @@ export default function ProfileScreen() {
         </Pressable>
       </View>
 
-      {/* Profile information */}
       <View style={styles.profileSection}>
         <Image
           source={
@@ -93,15 +87,11 @@ export default function ProfileScreen() {
         </Text>
       </View>
 
-      {/*  Personal Information
-          Opens the profile details screen */}
       <ProfileMenuItem
         label="Personal Information"
-        onPress={() => router.push("/profile-details")}
+        onPress={() => router.push("/account/profile-details")}
       />
 
-      {/* Book reservation
-          Route can be connected when their screen path is confirmed */}
       <ProfileMenuItem
         label="Book Reservation"
         onPress={() => {
@@ -109,8 +99,6 @@ export default function ProfileScreen() {
         }}
       />
 
-      {/* Seat reservation
-          Route can be connected when their screen path is confirmed */}
       <ProfileMenuItem
         label="Seat Reservation"
         onPress={() => {
@@ -118,8 +106,6 @@ export default function ProfileScreen() {
         }}
       />
 
-      {/* Room reservation
-          Route can be connected when their screen path is confirmed */}
       <ProfileMenuItem
         label="Room reservation"
         onPress={() => {
@@ -127,13 +113,11 @@ export default function ProfileScreen() {
         }}
       />
 
-      {/*  Change Password */}
       <ProfileMenuItem
         label="Change Password"
-        onPress={() => router.push("/change-password")}
+        onPress={() => router.push("/account/change-password")}
       />
 
-      {/*  Settings / appearance */}
       <ProfileMenuItem
         label="App appearance"
         onPress={() => {
@@ -141,7 +125,6 @@ export default function ProfileScreen() {
         }}
       />
 
-      {/* Notification settings */}
       <ProfileMenuItem
         label="Notification Preferences"
         onPress={() => {
@@ -201,7 +184,6 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-
     alignItems: "center",
     justifyContent: "center",
   },
@@ -240,17 +222,13 @@ const styles = StyleSheet.create({
 
   menuItem: {
     minHeight: 52,
-
     borderWidth: 1,
     borderColor: BORDER,
     borderRadius: 7,
-
     paddingHorizontal: 12,
-
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-
     marginBottom: 9,
   },
 

@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAuth } from "@/contexts/auth-context";
 
-export default function ProfileScreen() {
+export default function ProfileDetailsScreen() {
   const insets = useSafeAreaInsets();
   const { account, signOut } = useAuth();
 
@@ -56,7 +56,6 @@ export default function ProfileScreen() {
           },
         ]}
       >
-        {/* Back to main profile menu */}
         <View style={styles.headerTop}>
           <Pressable
             style={styles.backButton}
@@ -165,10 +164,9 @@ export default function ProfileScreen() {
           </View>
         ) : null}
 
-        {/* Navigate to edit profile screen */}
         <Pressable
           style={styles.editButton}
-          onPress={() => router.push("/edit-profile")}
+          onPress={() => router.push("/account/edit-profile")}
         >
           <SymbolView
             name={{
