@@ -25,6 +25,7 @@ const ACTIONS: {
     label: "Book Reservation",
     ios: "book",
     android: "menu_book",
+    route: "/(student)/book",
   },
   {
     label: "Seat Reservation",

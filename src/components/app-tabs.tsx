@@ -20,9 +20,15 @@ export default function AppTabs() {
           renderingMode="template"
         />
       </NativeTabs.Trigger>
+
       <NativeTabs.Trigger name="profile">
         <NativeTabs.Trigger.Label>Profile</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="person.fill" md="person" />
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="(student)/book">
+        <NativeTabs.Trigger.Label>Books</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="book.fill" md="menu_book" />
       </NativeTabs.Trigger>
     </NativeTabs>
   );
