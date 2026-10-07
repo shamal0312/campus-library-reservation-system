@@ -4,7 +4,7 @@ import { makeRedirectUri } from "expo-auth-session";
 import * as QueryParams from "expo-auth-session/build/QueryParams";
 import * as WebBrowser from "expo-web-browser";
 
-import { supabase } from "@/lib/supabase";
+import { requireSupabase } from "@/services/supabase";
 import type { UserRole } from "@/types/account";
 
 WebBrowser.maybeCompleteAuthSession();
@@ -20,6 +20,7 @@ export type SignUpInput = {
 };
 
 export async function signUp(input: SignUpInput) {
+  const supabase = requireSupabase();
   const { data, error } = await supabase.auth.signUp({
     email: input.email.trim(),
     password: input.password,
@@ -40,6 +41,7 @@ export async function signUp(input: SignUpInput) {
 }
 
 export async function saveRole(role: UserRole) {
+  const supabase = requireSupabase();
   const { data, error } = await supabase.auth.updateUser({
     data: { role },
   });
@@ -51,6 +53,7 @@ export async function saveRole(role: UserRole) {
 }
 
 export async function signIn(email: string, password: string) {
+  const supabase = requireSupabase();
   const { data, error } = await supabase.auth.signInWithPassword({
     email: email.trim(),
     password,
@@ -63,6 +66,7 @@ export async function signIn(email: string, password: string) {
 }
 
 export async function signInWithGoogle() {
+  const supabase = requireSupabase();
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -134,6 +138,7 @@ export async function signInWithGoogle() {
 }
 
 export async function signOut() {
+  const supabase = requireSupabase();
   const { error } = await supabase.auth.signOut();
 
   return {
@@ -142,6 +147,7 @@ export async function signOut() {
 }
 
 export async function getSession() {
+  const supabase = requireSupabase();
   const { data, error } = await supabase.auth.getSession();
 
   return {
@@ -153,9 +159,10 @@ export async function getSession() {
 export function subscribeToAuthChanges(
   onChange: (session: Session | null) => void,
 ) {
+  const supabase = requireSupabase();
   const {
     data: { subscription },
-  } = supabase.auth.onAuthStateChange((_event, session) => {
+  } = supabase.auth.onAuthStateChange((_event: unknown, session: Session | null) => {
     onChange(session);
   });
 
@@ -163,6 +170,7 @@ export function subscribeToAuthChanges(
 }
 
 export async function updatePassword(newPassword: string) {
+  const supabase = requireSupabase();
   const { data, error } = await supabase.auth.updateUser({
     password: newPassword,
   });
