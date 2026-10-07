@@ -27,6 +27,7 @@ export default function RootLayout() {
             <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
 
             <AnimatedSplashOverlay />
+
             <RootNavigator />
           </ThemeProvider>
         </BookingProvider>
@@ -47,28 +48,29 @@ function RootNavigator() {
   if (canUseApp) {
     return (
       <Stack
-        initialRouteName="index"
+        initialRouteName="account/index"
         screenOptions={{
           headerShown: false,
         }}
       >
-        <Stack.Screen name="index" />
-
-        <Stack.Screen name="profile" />
-
-        <Stack.Screen name="profile-details" />
-
-        <Stack.Screen name="edit-profile" />
-
-        <Stack.Screen name="change-password" />
-
-        <Stack.Screen name="notifications" />
+        <Stack.Screen name="account/index" />
+        <Stack.Screen name="account/profile" />
+        <Stack.Screen name="account/profile-details" />
+        <Stack.Screen name="account/edit-profile" />
+        <Stack.Screen name="account/change-password" />
+        <Stack.Screen name="account/notifications" />
+        <Stack.Screen name="account/notification-details" />
       </Stack>
     );
   }
 
   return (
-    <Stack initialRouteName="(auth)" screenOptions={{ headerShown: false }}>
+    <Stack
+      initialRouteName="(auth)"
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
       <Stack.Screen name="(auth)" />
     </Stack>
   );

@@ -19,8 +19,15 @@ export type SignUpInput = {
   password: string;
 };
 
+export type UpdateProfileInput = {
+  fullName: string;
+  email: string;
+  phone: string;
+};
+
 export async function signUp(input: SignUpInput) {
   const supabase = requireSupabase();
+
   const { data, error } = await supabase.auth.signUp({
     email: input.email.trim(),
     password: input.password,
@@ -42,8 +49,28 @@ export async function signUp(input: SignUpInput) {
 
 export async function saveRole(role: UserRole) {
   const supabase = requireSupabase();
+
   const { data, error } = await supabase.auth.updateUser({
-    data: { role },
+    data: {
+      role,
+    },
+  });
+
+  return {
+    user: data.user,
+    error: error?.message ?? null,
+  };
+}
+
+export async function updateProfile(input: UpdateProfileInput) {
+  const supabase = requireSupabase();
+
+  const { data, error } = await supabase.auth.updateUser({
+    email: input.email.trim(),
+    data: {
+      full_name: input.fullName.trim(),
+      phone: input.phone.trim(),
+    },
   });
 
   return {
@@ -54,6 +81,7 @@ export async function saveRole(role: UserRole) {
 
 export async function signIn(email: string, password: string) {
   const supabase = requireSupabase();
+
   const { data, error } = await supabase.auth.signInWithPassword({
     email: email.trim(),
     password,
@@ -67,6 +95,7 @@ export async function signIn(email: string, password: string) {
 
 export async function signInWithGoogle() {
   const supabase = requireSupabase();
+
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -139,6 +168,7 @@ export async function signInWithGoogle() {
 
 export async function signOut() {
   const supabase = requireSupabase();
+
   const { error } = await supabase.auth.signOut();
 
   return {
@@ -148,6 +178,7 @@ export async function signOut() {
 
 export async function getSession() {
   const supabase = requireSupabase();
+
   const { data, error } = await supabase.auth.getSession();
 
   return {
@@ -160,17 +191,21 @@ export function subscribeToAuthChanges(
   onChange: (session: Session | null) => void,
 ) {
   const supabase = requireSupabase();
+
   const {
     data: { subscription },
-  } = supabase.auth.onAuthStateChange((_event: unknown, session: Session | null) => {
-    onChange(session);
-  });
+  } = supabase.auth.onAuthStateChange(
+    (_event: unknown, session: Session | null) => {
+      onChange(session);
+    },
+  );
 
   return () => subscription.unsubscribe();
 }
 
 export async function updatePassword(newPassword: string) {
   const supabase = requireSupabase();
+
   const { data, error } = await supabase.auth.updateUser({
     password: newPassword,
   });
@@ -181,14 +216,13 @@ export async function updatePassword(newPassword: string) {
   };
 }
 
-// YOUR PART - Change password
-// First verifies the current password, then updates to the new password.
 export async function changePassword(
   email: string,
   currentPassword: string,
   newPassword: string,
 ) {
-  // Verify the user's current password
+  const supabase = requireSupabase();
+
   const { error: verifyError } = await supabase.auth.signInWithPassword({
     email: email.trim(),
     password: currentPassword,
@@ -200,7 +234,6 @@ export async function changePassword(
     };
   }
 
-  // Update to the new password
   const { error: updateError } = await supabase.auth.updateUser({
     password: newPassword,
   });

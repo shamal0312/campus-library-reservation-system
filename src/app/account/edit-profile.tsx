@@ -2,13 +2,14 @@ import { router } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useState } from "react";
 import {
-    Image,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -22,20 +23,69 @@ const MUTED = "#6B7280";
 
 export default function EditProfileScreen() {
   const insets = useSafeAreaInsets();
-  const { account } = useAuth();
+
+  const { account, updateProfile } = useAuth();
 
   const [fullName, setFullName] = useState(account?.fullName ?? "");
   const [userId] = useState(account?.universityId ?? "");
   const [email, setEmail] = useState(account?.email ?? "");
   const [phone, setPhone] = useState(account?.phone ?? "");
 
-  function handleSaveChanges() {
-    console.log({
-      fullName,
-      userId,
-      email,
-      phone,
+  const [isSaving, setIsSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  async function handleSaveChanges() {
+    setErrorMessage(null);
+
+    const trimmedFullName = fullName.trim();
+    const trimmedEmail = email.trim();
+    const trimmedPhone = phone.trim();
+
+    if (!trimmedFullName) {
+      setErrorMessage("Please enter your full name.");
+      return;
+    }
+
+    if (!trimmedEmail) {
+      setErrorMessage("Please enter your email.");
+      return;
+    }
+
+    if (!trimmedEmail.includes("@")) {
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+
+    if (!trimmedPhone) {
+      setErrorMessage("Please enter your phone number.");
+      return;
+    }
+
+    setIsSaving(true);
+
+    const result = await updateProfile({
+      fullName: trimmedFullName,
+      email: trimmedEmail,
+      phone: trimmedPhone,
     });
+
+    setIsSaving(false);
+
+    if (result.error) {
+      setErrorMessage(result.error);
+      return;
+    }
+
+    Alert.alert(
+      "Profile Updated",
+      "Your profile has been updated successfully.",
+      [
+        {
+          text: "OK",
+          onPress: () => router.back(),
+        },
+      ],
+    );
   }
 
   return (
@@ -49,6 +99,7 @@ export default function EditProfileScreen() {
         },
       ]}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
     >
       <View style={styles.header}>
         <Pressable
@@ -167,8 +218,20 @@ export default function EditProfileScreen() {
         />
       </View>
 
-      <Pressable style={styles.saveButton} onPress={handleSaveChanges}>
-        <Text style={styles.saveButtonText}>Save Changes</Text>
+      {errorMessage ? (
+        <View style={styles.errorBox}>
+          <Text style={styles.errorText}>{errorMessage}</Text>
+        </View>
+      ) : null}
+
+      <Pressable
+        style={[styles.saveButton, isSaving && styles.disabledButton]}
+        onPress={handleSaveChanges}
+        disabled={isSaving}
+      >
+        <Text style={styles.saveButtonText}>
+          {isSaving ? "Saving..." : "Save Changes"}
+        </Text>
       </Pressable>
     </ScrollView>
   );
@@ -295,6 +358,19 @@ const styles = StyleSheet.create({
     color: "#8B93A1",
   },
 
+  errorBox: {
+    backgroundColor: "#FEE2E2",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 10,
+  },
+
+  errorText: {
+    fontSize: 13,
+    color: "#DC2626",
+  },
+
   saveButton: {
     height: 54,
     borderRadius: 11,
@@ -302,6 +378,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginTop: 4,
+  },
+
+  disabledButton: {
+    opacity: 0.6,
   },
 
   saveButtonText: {

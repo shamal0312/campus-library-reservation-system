@@ -39,6 +39,7 @@ const ACTIONS: {
     label: "Notification",
     ios: "bell",
     android: "notifications",
+    route: "/account/notifications",
     badge: 3,
   },
 ];
@@ -74,7 +75,11 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.headerRight}>
-          <Pressable style={styles.notificationButton} hitSlop={8}>
+          <Pressable
+            style={styles.notificationButton}
+            onPress={() => router.push("/account/notifications")}
+            hitSlop={8}
+          >
             <SymbolView
               name={{
                 ios: "bell.fill",
