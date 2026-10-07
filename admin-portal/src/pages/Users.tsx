@@ -1,14 +1,15 @@
 import {
-    AlertTriangle,
-    Edit2,
-    GraduationCap,
-    Loader,
-    MoreVertical,
-    Plus,
-    RefreshCw,
-    Search,
-    ShieldCheck,
-    Trash2, X
+  AlertTriangle,
+  Edit2,
+  GraduationCap,
+  Loader,
+  MoreVertical,
+  Plus,
+  Search,
+  ShieldCheck,
+  Trash2,
+  Users as UsersIcon,
+  X
 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
@@ -192,9 +193,6 @@ export default function Users() {
           <p>Manage library members, roles, and access control</p>
         </div>
         <div className="users-header-actions">
-          <button className="icon-text-btn" onClick={() => void fetchProfiles()}>
-            <RefreshCw size={15} /> Refresh
-          </button>
           <button className="primary-button" onClick={openAdd}>
             <Plus size={15} /> Add User
           </button>
