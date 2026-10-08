@@ -6,6 +6,7 @@ import { emptyRoom, useBookingDraft } from './context';
 import { active, Booking, bookingDate, bookingTime, errorText, FLOORS, past, SEATS, SLOTS, statusText, today, validateRoom, validateSlot } from './model';
 import { changeBooking, listBookings, occupiedSeats, requestRoom, reserveSeat } from './repository';
 import { Button, C, DateField, ErrorBox, Field, LibraryArt, Page, Select, Steps, styles, SuccessMark, TimeField } from './ui';
+import { UpdateReservationButton } from './update-reservation';
 
 function useParams() { const params = useLocalSearchParams<{ date?: string; slot?: string; floor?: string; seat?: string; id?: string; action?: string }>(); return params; }
 function useAction() {
@@ -74,12 +75,149 @@ export function SeatConfirmationScreen() {
   return <Page title="Confirmation" tabs={false}><SuccessMark /><Text style={[styles.heading, local.center]}>Seat Reserved!</Text>{data.loading ? <ActivityIndicator color={C.blue} /> : booking ? <Summary booking={booking} /> : <ErrorBox message={data.error || 'Booking not found. Open My Reservations to check your bookings.'} />}<Text style={[styles.muted, { color: C.danger, textAlign: 'center', backgroundColor: C.card, padding: 14, borderRadius: 8 }]}>Please check in within 30 minutes after your booking starts.</Text><Button title="View My Reservations" onPress={() => router.replace('/booking/reservations')} /></Page>;
 }
 export function ReservationsScreen() {
-  const data = useBookings(); const [tab, setTab] = useState('Current'); const [cancel, setCancel] = useState<Booking | null>(null); const action = useAction();
-  const filtered = data.rows.filter(b => b.kind === 'seat' && (tab === 'Past' ? past(b) : !past(b)));
-  return <Page title="My Reservations"><Segments values={['Current','Past']} selected={tab} onSelect={setTab} /><Button title="Refresh" outline onPress={data.refresh} disabled={data.loading} /><ErrorBox message={data.error || action.error} />{data.loading ? <ActivityIndicator color={C.blue} /> : filtered.length === 0 ? <Text style={styles.text}>No {tab.toLowerCase()} seat reservations.</Text> : filtered.map(b => <View key={b.id} style={styles.card}><LibraryArt small /><SummaryLines booking={b} />{!past(b) && <><Button title={b.status === 'checked_in' ? 'Already checked in' : 'Check in'} disabled={b.status === 'checked_in' || action.busy} onPress={() => { void action.run(async () => { await changeBooking(b.id, 'checkin'); router.push({ pathname: '/booking/check-in', params: { id: b.id } }); }); }} /><Button title="Cancel Reservation" outline disabled={action.busy} onPress={() => { action.setError(''); setCancel(b); }} /></>}</View>)}
-    <Button title="Book another seat" onPress={() => router.push('/booking/seat-availability')} />
-    <Modal transparent visible={!!cancel} animationType="fade" onRequestClose={() => { if (!action.busy) setCancel(null); }}><View style={styles.overlay}><View style={styles.modal}><Text style={[styles.title, { flex: 0 }]}>Cancel Reservation</Text><Text style={local.center}>🔴</Text><Text style={styles.text}>Are you sure you want to cancel {cancel?.resource_label}? This seat will become available for other students.</Text><ErrorBox message={action.error} /><Button title="Keep booking" outline disabled={action.busy} onPress={() => { setCancel(null); action.setError(''); }} /><Button title="Cancel reservation" busy={action.busy} onPress={() => { if (cancel) { const id = cancel.id; void action.run(async () => { await changeBooking(id, 'cancel'); setCancel(null); router.push({ pathname: '/booking/cancelled', params: { id } }); }); } }} /></View></View></Modal>
-  </Page>;
+  const data = useBookings();
+  const [tab, setTab] = useState('Current');
+  const [cancel, setCancel] = useState<Booking | null>(null);
+  const action = useAction();
+
+  const filtered = data.rows.filter(
+    b =>
+      b.kind === 'seat' &&
+      (tab === 'Past' ? past(b) : !past(b)),
+  );
+
+  return (
+    <Page title="My Reservations">
+      <Segments
+        values={['Current', 'Past']}
+        selected={tab}
+        onSelect={setTab}
+      />
+
+      <Button
+        title="Refresh"
+        outline
+        onPress={data.refresh}
+        disabled={data.loading}
+      />
+
+      <ErrorBox message={data.error || action.error} />
+
+      {data.loading ? (
+        <ActivityIndicator color={C.blue} />
+      ) : filtered.length === 0 ? (
+        <Text style={styles.text}>
+          No {tab.toLowerCase()} seat reservations.
+        </Text>
+      ) : (
+        filtered.map(b => (
+          <View key={b.id} style={styles.card}>
+            <LibraryArt small />
+            <SummaryLines booking={b} />
+
+            {!past(b) && (
+              <>
+                <UpdateReservationButton booking={b} />
+
+                <Button
+                  title={
+                    b.status === 'checked_in'
+                      ? 'Already checked in'
+                      : 'Check in'
+                  }
+                  disabled={
+                    b.status === 'checked_in' || action.busy
+                  }
+                  onPress={() => {
+                    void action.run(async () => {
+                      await changeBooking(b.id, 'checkin');
+
+                      router.push({
+                        pathname: '/booking/check-in',
+                        params: { id: b.id },
+                      });
+                    });
+                  }}
+                />
+
+                <Button
+                  title="Cancel Reservation"
+                  outline
+                  disabled={action.busy}
+                  onPress={() => {
+                    action.setError('');
+                    setCancel(b);
+                  }}
+                />
+              </>
+            )}
+          </View>
+        ))
+      )}
+
+      <Button
+        title="Book another seat"
+        onPress={() => router.push('/booking/seat-availability')}
+      />
+
+      <Modal
+        transparent
+        visible={!!cancel}
+        animationType="fade"
+        onRequestClose={() => {
+          if (!action.busy) setCancel(null);
+        }}
+      >
+        <View style={styles.overlay}>
+          <View style={styles.modal}>
+            <Text style={[styles.title, { flex: 0 }]}>
+              Cancel Reservation
+            </Text>
+
+            <Text style={local.center}>🔴</Text>
+
+            <Text style={styles.text}>
+              Are you sure you want to cancel{' '}
+              {cancel?.resource_label}? This seat will become
+              available for other students.
+            </Text>
+
+            <ErrorBox message={action.error} />
+
+            <Button
+              title="Keep booking"
+              outline
+              disabled={action.busy}
+              onPress={() => {
+                setCancel(null);
+                action.setError('');
+              }}
+            />
+
+            <Button
+              title="Cancel reservation"
+              busy={action.busy}
+              onPress={() => {
+                if (cancel) {
+                  const id = cancel.id;
+
+                  void action.run(async () => {
+                    await changeBooking(id, 'cancel');
+                    setCancel(null);
+
+                    router.push({
+                      pathname: '/booking/cancelled',
+                      params: { id },
+                    });
+                  });
+                }
+              }}
+            />
+          </View>
+        </View>
+      </Modal>
+    </Page>
+  );
 }
 export function BookingResultScreen({ cancelled = false }: { cancelled?: boolean }) {
   const { id } = useParams(); const data = useBookings(); const booking = data.rows.find(b => b.id === id); const expected = cancelled ? 'cancelled' : 'checked_in';
