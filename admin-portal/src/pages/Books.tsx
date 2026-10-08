@@ -312,10 +312,10 @@ function Books() {
                       }
                     </td>
                     <td className="align-right row-actions">
-                      <button className="icon-btn edit-btn" aria-label="Edit book" onClick={() => openEdit(book)}>
+                      <button className="icon-btn edit-btn" aria-label="Edit book" title="Edit" onClick={() => openEdit(book)}>
                         <Edit2 size={14} />
                       </button>
-                      <button className="icon-btn delete-btn" aria-label="Delete book" onClick={() => setDeleteTarget(book)}>
+                      <button className="icon-btn delete-btn" aria-label="Delete book" title="Delete" onClick={() => setDeleteTarget(book)}>
                         <Trash2 size={14} />
                       </button>
                     </td>

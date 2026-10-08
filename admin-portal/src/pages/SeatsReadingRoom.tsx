@@ -18,7 +18,7 @@ interface Seat {
   seat_number: string
   floor: number
   room_type: string
-  status: 'available' | 'occupied' | 'reserved' | string
+  status: 'available' | 'occupied' | 'reserved' | 'pending' | string
   created_at: string
   student_id: string | null
   student_name: string | null
@@ -29,7 +29,7 @@ interface Seat {
 type ModalMode = 'add' | 'edit' | null
 
 const ROOM_TYPES   = ['Reading Room', 'Quiet Study', 'Discussion Room', 'Computer Lab']
-const STATUS_OPTS  = ['available', 'occupied', 'reserved']
+const STATUS_OPTS  = ['available', 'occupied', 'reserved', 'pending']
 const FLOORS       = [1, 2, 3]
 
 const blankForm = {
@@ -49,6 +49,7 @@ function seatStatusClass(status: string) {
   if (s === 'available') return 'seat-available'
   if (s === 'occupied')  return 'seat-occupied'
   if (s === 'reserved')  return 'seat-reserved'
+  if (s === 'pending')   return 'seat-pending'
   return 'seat-available'
 }
 
@@ -57,6 +58,7 @@ function badgeClass(status: string) {
   if (s === 'available') return 'status-success'
   if (s === 'occupied')  return 'status-warning'
   if (s === 'reserved')  return 'status-info'
+  if (s === 'pending')   return 'status-pending'
   return 'status-default'
 }
 
@@ -136,6 +138,7 @@ export default function SeatsReadingRoom() {
     available: seats.filter(s => s.status?.toLowerCase() === 'available').length,
     occupied:  seats.filter(s => s.status?.toLowerCase() === 'occupied').length,
     reserved:  seats.filter(s => s.status?.toLowerCase() === 'reserved').length,
+    pending:   seats.filter(s => s.status?.toLowerCase() === 'pending').length,
   }
 
   // Group by floor → room for map view
@@ -252,6 +255,40 @@ export default function SeatsReadingRoom() {
     }
   }
 
+  // ── Approve / Reject (Mobile Bookings) ────────────────────────────────────
+
+  const handleApprove = async (seat: Seat) => {
+    try {
+      const { error: e } = await supabase.from('seats').update({
+        status: 'reserved',
+      }).eq('id', seat.id)
+      if (e) throw e
+      if (selectedSeat?.id === seat.id) {
+        setSelectedSeat({ ...seat, status: 'reserved' })
+      }
+      void fetchSeats()
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : 'Approve failed.')
+    }
+  }
+
+  const handleReject = async (seat: Seat) => {
+    try {
+      const { error: e } = await supabase.from('seats').update({
+        status: 'available',
+        student_id: null,
+        student_name: null,
+        time_slot: null,
+        reserved_at: null,
+      }).eq('id', seat.id)
+      if (e) throw e
+      if (selectedSeat?.id === seat.id) setSelectedSeat(null)
+      void fetchSeats()
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : 'Reject failed.')
+    }
+  }
+
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
@@ -280,6 +317,7 @@ export default function SeatsReadingRoom() {
           { label: 'Available',     value: stats.available, icon: <BookOpen size={16} />, color: 'green' },
           { label: 'Occupied',      value: stats.occupied,  icon: <Users    size={16} />, color: 'amber' },
           { label: 'Reserved',      value: stats.reserved,  icon: <Clock    size={16} />, color: 'blue'  },
+          { label: 'Pending',       value: stats.pending,   icon: <Clock    size={16} />, color: 'orange'},
         ].map(c => (
           <div key={c.label} className={`seats-stat-card seats-stat-${c.color}`}>
             <div className="seats-stat-icon">{c.icon}</div>
@@ -309,6 +347,7 @@ export default function SeatsReadingRoom() {
           <div className="filter-select-wrap">
             <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="seats-select">
               <option value="All">All Status</option>
+              <option value="pending">Pending Approval</option>
               {STATUS_OPTS.map(s => <option key={s} value={s}>{capitalize(s)}</option>)}
             </select>
             <ChevronDown size={13} className="select-chevron" />
@@ -389,6 +428,7 @@ export default function SeatsReadingRoom() {
                     { cls: 'seat-available', label: 'Available' },
                     { cls: 'seat-occupied',  label: 'Occupied'  },
                     { cls: 'seat-reserved',  label: 'Reserved'  },
+                    { cls: 'seat-pending',   label: 'Pending'   },
                   ].map(l => (
                     <div key={l.label} className="legend-row">
                       <span className={`legend-dot ${l.cls}`}></span>
@@ -424,18 +464,31 @@ export default function SeatsReadingRoom() {
                     </div>
 
                     <div className="sdc-actions">
-                      <button className="sdc-btn sdc-btn-edit" onClick={() => openEdit(selectedSeat)}>
-                        <Edit2 size={13} /> Edit Seat
-                      </button>
-                      {selectedSeat.status !== 'available' && (
-                        <button className="sdc-btn sdc-btn-release" onClick={() => handleRelease(selectedSeat)}>
-                          Release Seat
-                        </button>
-                      )}
-                      {selectedSeat.status === 'available' && (
-                        <button className="sdc-btn sdc-btn-block" onClick={() => handleBlock(selectedSeat)}>
-                          Block Seat
-                        </button>
+                      {selectedSeat.status === 'pending' ? (
+                        <>
+                          <button className="sdc-btn sdc-btn-approve" onClick={() => handleApprove(selectedSeat)}>
+                            <Check size={13} /> Approve Booking
+                          </button>
+                          <button className="sdc-btn sdc-btn-reject" onClick={() => handleReject(selectedSeat)}>
+                            <XCircle size={13} /> Reject Booking
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button className="sdc-btn sdc-btn-edit" onClick={() => openEdit(selectedSeat)}>
+                            <Edit2 size={13} /> Edit Seat
+                          </button>
+                          {selectedSeat.status !== 'available' && (
+                            <button className="sdc-btn sdc-btn-release" onClick={() => handleRelease(selectedSeat)}>
+                              Release Seat
+                            </button>
+                          )}
+                          {selectedSeat.status === 'available' && (
+                            <button className="sdc-btn sdc-btn-block" onClick={() => handleBlock(selectedSeat)}>
+                              Block Seat
+                            </button>
+                          )}
+                        </>
                       )}
                       <button className="sdc-btn sdc-btn-delete" onClick={() => setDeleteTarget(selectedSeat)}>
                         <Trash2 size={13} /> Delete
@@ -481,8 +534,17 @@ export default function SeatsReadingRoom() {
                         </span>
                       </td>
                       <td className="align-right row-actions">
-                        <button className="icon-btn edit-btn" aria-label="Edit" onClick={() => openEdit(seat)}><Edit2 size={14} /></button>
-                        <button className="icon-btn delete-btn" aria-label="Delete" onClick={() => setDeleteTarget(seat)}><Trash2 size={14} /></button>
+                        {seat.status === 'pending' ? (
+                          <>
+                            <button className="icon-btn approve-btn" aria-label="Approve" onClick={() => handleApprove(seat)} title="Approve booking"><Check size={14} /></button>
+                            <button className="icon-btn reject-btn" aria-label="Reject" onClick={() => handleReject(seat)} title="Reject booking"><XCircle size={14} /></button>
+                          </>
+                        ) : (
+                          <>
+                            <button className="icon-btn edit-btn" aria-label="Edit" onClick={() => openEdit(seat)}><Edit2 size={14} /></button>
+                            <button className="icon-btn delete-btn" aria-label="Delete" onClick={() => setDeleteTarget(seat)}><Trash2 size={14} /></button>
+                          </>
+                        )}
                       </td>
                     </tr>
                   ))}

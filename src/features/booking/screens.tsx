@@ -1,11 +1,13 @@
-import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, AppState, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { DEMO_MODE, requireSupabase, supabase } from '../../services/supabase';
-import { emptyRoom, useBookingDraft } from './context';
-import { active, Booking, bookingDate, bookingTime, errorText, FLOORS, past, SEATS, SLOTS, statusText, today, validateRoom, validateSlot } from './model';
-import { changeBooking, listBookings, occupiedSeats, requestRoom, reserveSeat } from './repository';
+import { useBookingDraft, emptyRoom } from './context';
+import { active, Booking, bookingDate, bookingTime, errorText, past, SLOTS, statusText, validateRoom } from './model';
+import { UpdateReservationButton } from './update-reservation';
+import { changeBooking, listBookings, requestRoom } from './repository';
 import { Button, C, DateField, ErrorBox, Field, LibraryArt, Page, Select, Steps, styles, SuccessMark, TimeField } from './ui';
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 function useParams() { const params = useLocalSearchParams<{ date?: string; slot?: string; floor?: string; seat?: string; id?: string; action?: string }>(); return params; }
 function useAction() {
@@ -43,32 +45,8 @@ export function SeatBookingScreen() {
     <View style={{ height: 95, backgroundColor: C.blue, borderTopLeftRadius: 140, borderTopRightRadius: 22, marginHorizontal: -22, marginBottom: -32, overflow: 'hidden' }}><View style={{ height: 75, backgroundColor: C.navy, transform: [{ rotate: '17deg' }], marginTop: 48, marginHorizontal: -20 }} /></View>
   </Page>;
 }
-export function SeatAvailabilityScreen() {
-  const [date, setDate] = useState(() => today()); const [slot, setSlot] = useState('09'); const [floor, setFloor] = useState('2'); const [error, setError] = useState('');
-  return <Page title="Seat Availability"><DateField value={date} onChange={setDate} /><TimeField value={slot} onChange={setSlot} /><Select label="Reading Room" value={floor} onSelect={setFloor} choices={FLOORS.map(f => ({ value: String(f), label: `Floor ${f} – Reading Room` }))} /><ErrorBox message={error} /><View style={{ marginTop: 20 }}><Button title="View Seat Map" onPress={() => { try { validateSlot(date, slot); router.push({ pathname: '/booking/seat-map', params: { date, slot, floor } }); } catch (e) { setError(errorText(e)); } }} /></View></Page>;
-}
-export function SeatMapScreen() {
-  const params = useParams(); const date = params.date ?? today(); const slot = params.slot ?? '09'; const floor = Number(params.floor ?? 2);
-  const [selected, setSelected] = useState(''); const [occupied, setOccupied] = useState<string[]>([]); const [loading, setLoading] = useState(true); const [error, setError] = useState(''); const [revision, setRevision] = useState(0);
-  useFocusEffect(useCallback(() => {
-    let mounted = true; setLoading(true); setError('');
-    void occupiedSeats(date, slot, floor).then(ids => { if (mounted) { setOccupied(ids); setSelected(s => ids.includes(s) ? '' : s); } }).catch(e => { if (mounted) setError(errorText(e)); }).finally(() => { if (mounted) setLoading(false); });
-    return () => { mounted = false; };
-  // revision deliberately reruns the focus loader for refreshed availability.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [date, slot, floor, revision]));
-  return <Page title={`Seat map – Floor ${floor}`}><Text style={styles.muted}>{date} · {SLOTS.find(s => s.id === slot)?.label}</Text>
-    {loading ? <ActivityIndicator color={C.blue} /> : <>{[1,2].map(table => <View key={table} style={{ gap: 9 }}><Text style={[styles.text, { fontWeight: '700' }]}>Table {String(table).padStart(2,'0')}</Text><View style={local.seatTable}>{SEATS.filter(s => s.floor === floor && s.table === table).map(seat => {
-      const taken = occupied.includes(seat.id); const chosen = seat.id === selected;
-      return <Pressable key={seat.id} disabled={taken || !!error} accessibilityRole="button" accessibilityLabel={`Seat ${seat.label}, ${taken ? 'occupied' : chosen ? 'selected' : 'available'}`} accessibilityState={{ selected: chosen, disabled: taken }} onPress={() => setSelected(seat.id)} style={[local.seat, { backgroundColor: taken ? C.yellow : chosen ? '#23CD65' : 'white' }]}><Text style={{ color: C.navy, fontWeight: '700', fontSize: 12 }}>{seat.label}</Text></Pressable>;
-    })}</View></View>)}<View style={{ gap: 12, marginVertical: 12 }}>{[{ color: 'white', text: 'Available' },{ color: C.yellow, text: 'Occupied / Reserved' },{ color: '#23CD65', text: 'Selected' }].map(item => <View key={item.text} style={styles.row}><View style={{ width: 20, height: 20, backgroundColor: item.color, borderWidth: 1, borderColor: C.muted }} /><Text style={styles.text}>{item.text}</Text></View>)}</View></>}
-    <ErrorBox message={error} /><Button title="Refresh availability" outline onPress={() => setRevision(r => r + 1)} disabled={loading} /><Button title="Next" disabled={!selected || loading || !!error} onPress={() => router.push({ pathname: '/booking/seat-details', params: { date, slot, floor: String(floor), seat: selected } })} />
-  </Page>;
-}
-export function SeatDetailsScreen() {
-  const params = useParams(); const seat = SEATS.find(s => s.id === params.seat); const action = useAction();
-  return <Page title="Selected seat details"><LibraryArt />{seat ? <><View style={styles.card}><Text style={styles.heading}>Seat {seat.label}</Text><Text style={styles.text}>Floor: {seat.floor}</Text><Text style={styles.text}>Charging points: {seat.charging ? 'Available' : 'Not available'}</Text><Text style={styles.text}>Date: {params.date}</Text><Text style={styles.text}>Time: {SLOTS.find(s => s.id === params.slot)?.label}</Text></View><ErrorBox message={action.error} /><View style={{ marginTop: 24 }}><Button title="Reserve Seat" busy={action.busy} onPress={() => { void action.run(async () => { const result = await reserveSeat(seat.id, params.date ?? '', params.slot ?? ''); router.replace({ pathname: '/booking/seat-confirmation', params: { id: result.id } }); }); }} /></View></> : <ErrorBox message="Seat details are missing. Return to the seat map and select a seat." />}</Page>;
-}
+export { SeatAvailabilityScreen, SeatMapScreen, SeatDetailsScreen } from './seat-screens';
+
 export function SeatConfirmationScreen() {
   const { id } = useParams(); const data = useBookings(); const booking = data.rows.find(b => b.id === id);
   return <Page title="Confirmation" tabs={false}><SuccessMark /><Text style={[styles.heading, local.center]}>Seat Reserved!</Text>{data.loading ? <ActivityIndicator color={C.blue} /> : booking ? <Summary booking={booking} /> : <ErrorBox message={data.error || 'Booking not found. Open My Reservations to check your bookings.'} />}<Text style={[styles.muted, { color: C.danger, textAlign: 'center', backgroundColor: C.card, padding: 14, borderRadius: 8 }]}>Please check in within 30 minutes after your booking starts.</Text><Button title="View My Reservations" onPress={() => router.replace('/booking/reservations')} /></Page>;
@@ -76,7 +54,7 @@ export function SeatConfirmationScreen() {
 export function ReservationsScreen() {
   const data = useBookings(); const [tab, setTab] = useState('Current'); const [cancel, setCancel] = useState<Booking | null>(null); const action = useAction();
   const filtered = data.rows.filter(b => b.kind === 'seat' && (tab === 'Past' ? past(b) : !past(b)));
-  return <Page title="My Reservations"><Segments values={['Current','Past']} selected={tab} onSelect={setTab} /><Button title="Refresh" outline onPress={data.refresh} disabled={data.loading} /><ErrorBox message={data.error || action.error} />{data.loading ? <ActivityIndicator color={C.blue} /> : filtered.length === 0 ? <Text style={styles.text}>No {tab.toLowerCase()} seat reservations.</Text> : filtered.map(b => <View key={b.id} style={styles.card}><LibraryArt small /><SummaryLines booking={b} />{!past(b) && <><Button title={b.status === 'checked_in' ? 'Already checked in' : 'Check in'} disabled={b.status === 'checked_in' || action.busy} onPress={() => { void action.run(async () => { await changeBooking(b.id, 'checkin'); router.push({ pathname: '/booking/check-in', params: { id: b.id } }); }); }} /><Button title="Cancel Reservation" outline disabled={action.busy} onPress={() => { action.setError(''); setCancel(b); }} /></>}</View>)}
+  return <Page title="My Reservations"><Segments values={['Current','Past']} selected={tab} onSelect={setTab} /><Button title="Refresh" outline onPress={data.refresh} disabled={data.loading} /><ErrorBox message={data.error || action.error} />{data.loading ? <ActivityIndicator color={C.blue} /> : filtered.length === 0 ? <Text style={styles.text}>No {tab.toLowerCase()} seat reservations.</Text> : filtered.map(b => <View key={b.id} style={styles.card}><LibraryArt small /><SummaryLines booking={b} />{!past(b) && <><UpdateReservationButton booking={b} /><Button title={b.status === 'checked_in' ? 'Already checked in' : 'Check in'} disabled={b.status === 'checked_in' || action.busy} onPress={() => { void action.run(async () => { await changeBooking(b.id, 'checkin'); router.push({ pathname: '/booking/check-in', params: { id: b.id } }); }); }} /><Button title="Cancel Reservation" outline disabled={action.busy} onPress={() => { action.setError(''); setCancel(b); }} /></>}</View>)}
     <Button title="Book another seat" onPress={() => router.push('/booking/seat-availability')} />
     <Modal transparent visible={!!cancel} animationType="fade" onRequestClose={() => { if (!action.busy) setCancel(null); }}><View style={styles.overlay}><View style={styles.modal}><Text style={[styles.title, { flex: 0 }]}>Cancel Reservation</Text><Text style={local.center}>🔴</Text><Text style={styles.text}>Are you sure you want to cancel {cancel?.resource_label}? This seat will become available for other students.</Text><ErrorBox message={action.error} /><Button title="Keep booking" outline disabled={action.busy} onPress={() => { setCancel(null); action.setError(''); }} /><Button title="Cancel reservation" busy={action.busy} onPress={() => { if (cancel) { const id = cancel.id; void action.run(async () => { await changeBooking(id, 'cancel'); setCancel(null); router.push({ pathname: '/booking/cancelled', params: { id } }); }); } }} /></View></View></Modal>
   </Page>;
@@ -112,13 +90,41 @@ export function RoomBookingsScreen() {
 }
 export function AccountScreen() {
   const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [signedIn, setSignedIn] = useState(false); const action = useAction(); const setAccountError = action.setError;
-  useEffect(() => {
+    useEffect(() => {
     if (!supabase) return;
+
     let mounted = true;
-    void supabase.auth.getSession().then(({ data }: any) => { if (mounted) { setSignedIn(!!data.session); setEmail(data.session?.user.email ?? ''); } }).catch((e: unknown) => { if (mounted) setAccountError(errorText(e)); });
-    const { data } = supabase.auth.onAuthStateChange((_event: unknown, session: any) => { setSignedIn(!!session); if (session?.user.email) setEmail(session.user.email); });
-    return () => { mounted = false; data.subscription.unsubscribe(); };
-    // This subscription is registered once; action.setError is React's stable setter.
+
+    void supabase.auth
+      .getSession()
+      .then(({ data }: { data: { session: Session | null } }) => {
+        if (!mounted) return;
+
+        setSignedIn(!!data.session);
+        setEmail(data.session?.user.email ?? '');
+      })
+      .catch((e: unknown) => {
+        if (mounted) {
+          setAccountError(errorText(e));
+        }
+      });
+
+    const { data } = supabase.auth.onAuthStateChange(
+      (_event: AuthChangeEvent, session: Session | null) => {
+        if (!mounted) return;
+
+        setSignedIn(!!session);
+
+        if (session?.user.email) {
+          setEmail(session.user.email);
+        }
+      },
+    );
+
+    return () => {
+      mounted = false;
+      data.subscription.unsubscribe();
+    };
   }, [setAccountError]);
   return <Page title="Profile">{DEMO_MODE ? <View style={styles.card}><Text style={styles.heading}>Demo Student</Text><Text style={styles.text}>Seat and study room bookings are stored locally on this device. Set EXPO_PUBLIC_BOOKING_DEMO=false to use Supabase.</Text></View> : signedIn ? <><Text style={styles.heading}>Signed in</Text><Text style={styles.text}>{email}</Text><Button title="Sign out" busy={action.busy} onPress={() => { void action.run(async () => { const { error } = await requireSupabase().auth.signOut(); if (error) throw error; setPassword(''); router.replace('/'); }); }} /></> : <><Text style={styles.heading}>Student sign in</Text><Text style={styles.muted}>Use your existing Supabase student account.</Text><Field label="Email" value={email} onChange={setEmail} maxLength={254} /><View><Text style={styles.label}>Password</Text><TextInput style={styles.input} accessibilityLabel="Password" secureTextEntry value={password} onChangeText={setPassword} autoCapitalize="none" /></View><Button title="Sign in" busy={action.busy} onPress={() => { void action.run(async () => { if (!email.trim() || !password) throw new Error('Enter your email and password.'); const { error } = await requireSupabase().auth.signInWithPassword({ email: email.trim(), password }); if (error) throw error; setPassword(''); router.replace('/'); }); }} /></>}<ErrorBox message={action.error} /></Page>;
 }
