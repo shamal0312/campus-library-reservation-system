@@ -26,16 +26,19 @@ const ACTIONS: {
     label: "Book Reservation",
     ios: "book",
     android: "menu_book",
+    route: "/(student)/book",
   },
   {
     label: "Seat Reservation",
     ios: "chair",
     android: "chair",
+    route: "/booking",
   },
   {
     label: "Room Reservation",
     ios: "door.left.hand.open",
     android: "meeting_room",
+    route: "/booking/room-request",
   },
   {
     label: "Notification",

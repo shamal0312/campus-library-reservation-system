@@ -2,6 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DEMO_MODE, requireSupabase } from '../../services/supabase';
 import { active, Booking, overlaps, RoomDraft, SEATS, validateRoom, validateSlot } from './model';
 
+import { type SeatRole, floorsForRole } from './seat-layout';
+
 const STORE = 'campus-booking-demo-v1';
 let mutationQueue: Promise<unknown> = Promise.resolve();
 function serialize<T>(operation: () => Promise<T>): Promise<T> {
@@ -16,21 +18,38 @@ async function currentUser() {
   if (!data.user) throw new Error('Sign in before making or viewing bookings.');
   return data.user.id;
 }
+
+async function currentSeatRole(expectedRole?: SeatRole): Promise<SeatRole> {
+  if (DEMO_MODE) return expectedRole ?? 'student';
+  const { data, error } = await requireSupabase().auth.getUser();
+  if (error) throw error;
+  const role = data.user?.user_metadata?.role;
+  if (role !== 'student' && role !== 'lecturer') {
+    throw new Error('Sign in and select Student or Lecturer before booking a seat.');
+  }
+  if (expectedRole && expectedRole !== role) {
+    throw new Error('Your account role has changed. Reopen Seat Availability.');
+  }
+  return role;
+}
+
 export async function listBookings(): Promise<Booking[]> {
   const user = await currentUser();
   if (DEMO_MODE) return (await demoRows()).filter(b => b.user_id === user).sort((a,b) => b.created_at.localeCompare(a.created_at));
   const { data, error } = await requireSupabase().from('booking_reservations').select('*').eq('user_id', user).order('created_at', { ascending: false });
   if (error) throw error; return (data ?? []) as Booking[];
 }
-export async function occupiedSeats(date: string, slot: string, floor: number): Promise<string[]> {
+export async function occupiedSeats(date: string, slot: string, floor: number, expectedRole?: SeatRole): Promise<string[]> {
   const times = validateSlot(date, slot);
-  if (DEMO_MODE) return (await demoRows()).filter(b => b.kind === 'seat' && b.floor === floor && overlaps(b, times.start_at, times.end_at)).map(b => b.resource_id);
+  const role = await currentSeatRole(expectedRole);
+  if (!floorsForRole(role).includes(floor)) throw new Error('This floor has no seats for your account role.');
+  if (DEMO_MODE) return (await demoRows()).filter(b => b.kind === 'seat' && b.floor === floor && SEATS.some(s => s.id === b.resource_id && s.role === role) && overlaps(b, times.start_at, times.end_at)).map(b => b.resource_id);
   await currentUser();
   const { data, error } = await requireSupabase().rpc('booking_occupied_seats', { p_start: times.start_at, p_end: times.end_at, p_floor: floor });
   if (error) throw error; return (data ?? []).map((r: { resource_id: string }) => r.resource_id);
 }
-export async function reserveSeat(seatId: string, date: string, slot: string): Promise<Booking> {
-  const times = validateSlot(date, slot); const user = await currentUser(); const seat = SEATS.find(s => s.id === seatId);
+export async function reserveSeat(seatId: string, date: string, slot: string, expectedRole?: SeatRole): Promise<Booking> {
+  const times = validateSlot(date, slot); const user = await currentUser(); const role = await currentSeatRole(expectedRole); const seat = SEATS.find(s => s.id === seatId && s.role === role);
   if (!seat) throw new Error('Select an available seat.');
   if (!DEMO_MODE) {
     const { data, error } = await requireSupabase().rpc('booking_reserve_seat', { p_resource: seatId, p_start: times.start_at, p_end: times.end_at });
@@ -74,5 +93,41 @@ export async function changeBooking(id: string, action: 'cancel' | 'checkin'): P
     }
     booking.status = action === 'cancel' ? 'cancelled' : 'checked_in';
     await AsyncStorage.setItem(STORE, JSON.stringify(rows)); return booking;
+  });
+}
+
+// Append this function to src/features/booking/repository.ts.
+// It reuses that file's existing imports and helper functions.
+export async function updateSeatReservation(id: string, date: string, slot: string, expectedRole?: SeatRole): Promise<Booking> {
+  const times = validateSlot(date, slot);
+  const user = await currentUser();
+  const role = await currentSeatRole(expectedRole);
+  if (!DEMO_MODE) {
+    const { data, error } = await requireSupabase().rpc('booking_update_seat', {
+      p_id: id,
+      p_start: times.start_at,
+      p_end: times.end_at,
+    });
+    if (error) throw error;
+    return data as Booking;
+  }
+  return serialize(async () => {
+    const rows = await demoRows();
+    const booking = rows.find(b => b.id === id && b.user_id === user);
+    if (!booking || booking.kind !== 'seat') throw new Error('Seat reservation not found.');
+    if (!SEATS.some(s => s.id === booking.resource_id && s.role === role)) {
+      throw new Error('This seat is not available for your current account role.');
+    }
+    if (booking.status !== 'reserved' || new Date(booking.start_at).getTime() <= Date.now()) {
+      throw new Error('Only future reservations that have not been checked in can be updated.');
+    }
+    if (rows.some(b => b.id !== id && overlaps(b, times.start_at, times.end_at) &&
+        (b.resource_id === booking.resource_id || b.user_id === user))) {
+      throw new Error('Seat unavailable, or you already have a booking during this time. Your reservation was not changed.');
+    }
+    booking.start_at = times.start_at;
+    booking.end_at = times.end_at;
+    await AsyncStorage.setItem(STORE, JSON.stringify(rows));
+    return booking;
   });
 }

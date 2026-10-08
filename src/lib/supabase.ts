@@ -27,5 +27,5 @@ export function requireSupabase(): any {
 
   return supabaseClient;
 }
-
-export const supabase: any = null;
+export const supabase = requireSupabase();
+//export const supabase: any = null;
