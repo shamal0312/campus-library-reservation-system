@@ -1,6 +1,7 @@
 export type BookingKind = 'seat' | 'room';
 export type BookingStatus = 'reserved' | 'checked_in' | 'pending' | 'approved' | 'rejected' | 'cancelled';
-export interface Seat { id: string; label: string; floor: number; table: number; charging: boolean; }
+export type { Seat } from './seat-layout';
+export { SEATS, FLOORS } from './seat-layout';
 export interface Booking {
   id: string; user_id: string; kind: BookingKind; resource_id: string;
   resource_label: string; floor: number; start_at: string; end_at: string;
@@ -14,9 +15,6 @@ export const SLOTS = [
   { id: '13', label: '1:00 PM – 3:00 PM', start: '13:00', end: '15:00' },
   { id: '15', label: '3:00 PM – 5:00 PM', start: '15:00', end: '17:00' },
 ];
-export const FLOORS = [1, 2, 3];
-export const SEATS: Seat[] = FLOORS.flatMap(floor => ['A', 'B'].flatMap((prefix, table) =>
-  Array.from({ length: 10 }, (_, i) => ({ id: `F${floor}-${prefix}${i + 1}`, label: `${prefix}${i + 1}`, floor, table: table + 1, charging: i % 2 === 1 }))));
 export function today(daysAhead = 0) { const d = new Date(Date.now() + (330 * 60000) + daysAhead * 86400000); return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`; }
 export function slotTimes(date: string, slotId: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error('Select a valid date.');
