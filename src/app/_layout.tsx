@@ -1,9 +1,7 @@
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { AnimatedSplashOverlay } from "@/components/animated-icon";
 import {
   AppearanceProvider,
   useAppearance,
@@ -12,8 +10,6 @@ import { AuthProvider, useAuth } from "@/contexts/auth-context";
 
 import { BookingProvider } from "../features/booking/context";
 import { AuthRefresh } from "../features/booking/screens";
-
-void SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   return (
@@ -41,8 +37,6 @@ function AppContent() {
           <AuthRefresh />
 
           <StatusBar style={isDark ? "light" : "dark"} />
-
-          <AnimatedSplashOverlay />
 
           <RootNavigator />
         </ThemeProvider>

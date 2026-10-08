@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useState } from "react";
 import {
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -10,6 +11,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -17,6 +19,12 @@ import Svg, { Path } from "react-native-svg";
 
 import { useAuth } from "@/contexts/auth-context";
 
+const PRIMARY = "#4F6FD8";
+const PRIMARY_DARK = "#3F5FBF";
+const BACKGROUND = "#F4F7FB";
+const TEXT = "#1F2937";
+const MUTED = "#6B7280";
+const BORDER = "#DCE3EC";
 const ICON = "#94A3B8";
 
 function GoogleIcon() {
@@ -47,6 +55,7 @@ function GoogleIcon() {
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
 
   const { signIn, signInWithGoogle } = useAuth();
 
@@ -58,6 +67,8 @@ export default function LoginScreen() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
+
+  const isSmallScreen = height < 750;
 
   async function handleLogin() {
     if (!email.trim() || !password) {
@@ -121,11 +132,13 @@ export default function LoginScreen() {
     >
       <ScrollView
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.content,
           {
-            paddingTop: insets.top + 10,
-            paddingBottom: insets.bottom + 28,
+            paddingTop: insets.top + 8,
+            paddingBottom: insets.bottom + 32,
           },
         ]}
       >
@@ -140,35 +153,32 @@ export default function LoginScreen() {
               android: "arrow_back",
               web: "arrow_back",
             }}
-            size={22}
-            tintColor="#0F172A"
+            size={21}
+            tintColor={TEXT}
           />
         </Pressable>
 
-        <View style={styles.headerSection}>
+        <View
+          style={[
+            styles.headerSection,
+            isSmallScreen && styles.headerSectionSmall,
+          ]}
+        >
           <View style={styles.logoBox}>
-            <LinearGradient
-              colors={["#4F70D6", "#3F5FBF", "#304A9B"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.logoGradient}
-            >
-              <SymbolView
-                name={{
-                  ios: "books.vertical.fill",
-                  android: "local_library",
-                  web: "local_library",
-                }}
-                size={34}
-                tintColor="#FFFFFF"
-              />
-            </LinearGradient>
+            <Image
+              source={require("@/assets/images/app-logo.png")}
+              style={styles.logo}
+              resizeMode="contain"
+            />
           </View>
 
           <Text style={styles.brand}>Smart Library</Text>
+
           <Text style={styles.brandSub}>Your Learning Space</Text>
 
-          <Text style={styles.title}>Welcome Back!</Text>
+          <Text style={[styles.title, isSmallScreen && styles.titleSmall]}>
+            Welcome Back!
+          </Text>
 
           <Text style={styles.subtitle}>Sign in to continue</Text>
         </View>
@@ -196,6 +206,7 @@ export default function LoginScreen() {
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
+              returnKeyType="next"
             />
           </View>
 
@@ -221,6 +232,8 @@ export default function LoginScreen() {
               secureTextEntry={!showPassword}
               autoCapitalize="none"
               autoCorrect={false}
+              returnKeyType="done"
+              onSubmitEditing={handleLogin}
             />
 
             <Pressable
@@ -264,7 +277,7 @@ export default function LoginScreen() {
             disabled={isSubmitting || isGoogleSubmitting}
           >
             <LinearGradient
-              colors={["#4F70D6", "#3F5FBF", "#304A9B"]}
+              colors={["#6280DF", PRIMARY, PRIMARY_DARK]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.button}
@@ -319,7 +332,7 @@ export default function LoginScreen() {
               web: "info",
             }}
             size={19}
-            tintColor="#3F5FBF"
+            tintColor={PRIMARY}
           />
 
           <Text style={styles.infoText}>
@@ -345,144 +358,207 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#E9EEF5",
+    backgroundColor: BACKGROUND,
   },
 
   content: {
+    flexGrow: 1,
     paddingHorizontal: 22,
+    backgroundColor: BACKGROUND,
   },
 
   backButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
+    width: 40,
+    height: 40,
+    borderRadius: 13,
+
     backgroundColor: "#FFFFFF",
+
     alignItems: "center",
     justifyContent: "center",
+
     borderWidth: 1,
-    borderColor: "#D9E0EA",
+    borderColor: BORDER,
   },
 
   headerSection: {
     alignItems: "center",
-    marginTop: 20,
-    marginBottom: 28,
+    marginTop: 14,
+    marginBottom: 20,
   },
 
-  logoBox: {
-    width: 74,
-    height: 74,
-    borderRadius: 22,
-    overflow: "hidden",
+  headerSectionSmall: {
+    marginTop: 8,
     marginBottom: 14,
   },
 
-  logoGradient: {
-    flex: 1,
+  logoBox: {
+    width: 84,
+    height: 84,
+
+    borderRadius: 24,
+
+    backgroundColor: "#FFFFFF",
+
     alignItems: "center",
     justifyContent: "center",
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
+    marginBottom: 10,
+
+    shadowColor: "#64748B",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+
+    elevation: 4,
+  },
+
+  logo: {
+    width: 62,
+    height: 62,
   },
 
   brand: {
     fontSize: 19,
     fontWeight: "800",
-    color: "#1F2937",
+    color: TEXT,
   },
 
   brandSub: {
     marginTop: 2,
+
     fontSize: 12,
-    color: "#7C879A",
+    fontWeight: "500",
+
+    color: MUTED,
   },
 
   title: {
-    marginTop: 26,
-    fontSize: 28,
+    marginTop: 18,
+
+    fontSize: 27,
     fontWeight: "800",
-    color: "#1F2937",
+
+    color: TEXT,
+  },
+
+  titleSmall: {
+    marginTop: 12,
+    fontSize: 25,
   },
 
   subtitle: {
-    marginTop: 7,
+    marginTop: 5,
+
     fontSize: 14,
-    color: "#7C879A",
+
+    color: MUTED,
     textAlign: "center",
   },
 
   formCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: "#D9E0EA",
+    width: "100%",
 
-    shadowColor: "#1F2937",
+    backgroundColor: "#FFFFFF",
+
+    borderRadius: 20,
+
+    paddingHorizontal: 18,
+    paddingVertical: 18,
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
+    shadowColor: "#64748B",
     shadowOffset: {
       width: 0,
-      height: 5,
+      height: 4,
     },
     shadowOpacity: 0.06,
-    shadowRadius: 12,
+    shadowRadius: 10,
 
-    elevation: 3,
+    elevation: 2,
   },
 
   label: {
     fontSize: 13,
     fontWeight: "700",
+
     color: "#374151",
-    marginBottom: 8,
-    marginTop: 4,
+
+    marginBottom: 7,
+    marginTop: 2,
   },
 
   field: {
-    height: 54,
+    minHeight: 52,
+
     borderRadius: 14,
-    backgroundColor: "#F5F7FA",
+
+    backgroundColor: "#F8FAFC",
+
     borderWidth: 1,
-    borderColor: "#DDE3EC",
+    borderColor: BORDER,
 
     flexDirection: "row",
     alignItems: "center",
 
-    paddingHorizontal: 15,
-    gap: 11,
+    paddingHorizontal: 14,
 
-    marginBottom: 16,
+    gap: 10,
+
+    marginBottom: 14,
   },
 
   input: {
     flex: 1,
+
+    minHeight: 50,
+
     fontSize: 15,
-    color: "#1F2937",
+
+    color: TEXT,
   },
 
   errorBox: {
     flexDirection: "row",
     alignItems: "center",
+
     gap: 8,
 
     borderRadius: 12,
+
     backgroundColor: "#FEF2F2",
 
     paddingHorizontal: 12,
     paddingVertical: 10,
 
-    marginBottom: 14,
+    marginBottom: 13,
   },
 
   error: {
     flex: 1,
+
     color: "#DC2626",
+
     fontSize: 13,
     lineHeight: 18,
   },
 
   buttonWrapper: {
-    height: 54,
+    height: 52,
+
     borderRadius: 14,
+
     overflow: "hidden",
-    marginTop: 4,
+
+    marginTop: 2,
   },
 
   button: {
@@ -501,6 +577,7 @@ const styles = StyleSheet.create({
 
   buttonText: {
     color: "#FFFFFF",
+
     fontSize: 16,
     fontWeight: "700",
   },
@@ -508,27 +585,35 @@ const styles = StyleSheet.create({
   dividerRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 18,
+
+    marginVertical: 15,
   },
 
   dividerLine: {
     flex: 1,
+
     height: 1,
-    backgroundColor: "#D9E0EA",
+
+    backgroundColor: BORDER,
   },
 
   dividerText: {
     marginHorizontal: 12,
+
     fontSize: 12,
     fontWeight: "600",
-    color: "#94A3B8",
+
+    color: ICON,
   },
 
   googleButton: {
-    height: 54,
+    minHeight: 52,
+
     borderRadius: 14,
+
     borderWidth: 1,
-    borderColor: "#D9E0EA",
+    borderColor: BORDER,
+
     backgroundColor: "#FFFFFF",
 
     flexDirection: "row",
@@ -536,21 +621,29 @@ const styles = StyleSheet.create({
     justifyContent: "center",
 
     gap: 10,
+
+    paddingHorizontal: 12,
   },
 
   googleButtonText: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#1F2937",
+
+    color: TEXT,
   },
 
   infoCard: {
-    marginTop: 18,
+    marginTop: 14,
+
     borderRadius: 14,
-    backgroundColor: "#E7ECFA",
+
+    backgroundColor: "#EEF3FF",
+
     borderWidth: 1,
-    borderColor: "#CCD7F4",
-    padding: 14,
+    borderColor: "#D7E1FA",
+
+    paddingHorizontal: 13,
+    paddingVertical: 12,
 
     flexDirection: "row",
     alignItems: "flex-start",
@@ -560,20 +653,26 @@ const styles = StyleSheet.create({
 
   infoText: {
     flex: 1,
+
     fontSize: 12,
     lineHeight: 18,
+
     color: "#4B5563",
   },
 
   footer: {
-    marginTop: 24,
+    marginTop: 18,
+    marginBottom: 8,
+
     textAlign: "center",
-    color: "#7C879A",
+
+    color: MUTED,
+
     fontSize: 14,
   },
 
   footerLink: {
-    color: "#3F5FBF",
+    color: PRIMARY,
     fontWeight: "700",
   },
 });

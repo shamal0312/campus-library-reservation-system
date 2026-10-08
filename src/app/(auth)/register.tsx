@@ -1,7 +1,9 @@
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useState } from "react";
 import {
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -15,7 +17,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAuth } from "@/contexts/auth-context";
 
-const ICON = "#98A2B3";
+const PRIMARY = "#4F6FD8";
+const PRIMARY_DARK = "#3F5FBF";
+const BACKGROUND = "#F4F7FB";
+const TEXT = "#1F2937";
+const MUTED = "#6B7280";
+const BORDER = "#DCE3EC";
+const ICON = "#94A3B8";
 
 type FieldIcon = {
   ios: "person" | "person.text.rectangle" | "phone" | "envelope" | "lock";
@@ -48,7 +56,7 @@ function Field({
 }: FieldProps) {
   return (
     <View style={styles.field}>
-      <SymbolView name={icon} size={20} tintColor={ICON} />
+      <SymbolView name={icon} size={19} tintColor={ICON} />
 
       <TextInput
         style={styles.input}
@@ -70,7 +78,7 @@ function Field({
               android: secureVisible ? "visibility_off" : "visibility",
               web: secureVisible ? "visibility_off" : "visibility",
             }}
-            size={20}
+            size={19}
             tintColor={ICON}
           />
         </Pressable>
@@ -91,10 +99,13 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
+
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleRegister() {
@@ -169,6 +180,8 @@ export default function RegisterScreen() {
     >
       <ScrollView
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.content,
           {
@@ -188,87 +201,133 @@ export default function RegisterScreen() {
               android: "arrow_back",
               web: "arrow_back",
             }}
-            size={22}
-            tintColor="#1A1D26"
+            size={21}
+            tintColor={TEXT}
           />
         </Pressable>
 
-        <Text style={styles.title}>Create Your Account</Text>
+        <View style={styles.headerSection}>
+          <View style={styles.logoBox}>
+            <Image
+              source={require("@/assets/images/app-logo.png")}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          </View>
 
-        <Text style={styles.subtitle}>
-          Join Smart Library and get access to all the facilities
-        </Text>
+          <Text style={styles.title}>Create Account</Text>
 
-        <Field
-          icon={{ ios: "person", android: "person", web: "person" }}
-          placeholder="Full Name"
-          value={fullName}
-          onChangeText={setFullName}
-          autoCapitalize="words"
-        />
+          <Text style={styles.subtitle}>Join Smart Library</Text>
+        </View>
 
-        <Field
-          icon={{
-            ios: "person.text.rectangle",
-            android: "badge",
-            web: "badge",
-          }}
-          placeholder="Student ID / Staff ID"
-          value={universityId}
-          onChangeText={setUniversityId}
-        />
+        <View style={styles.formCard}>
+          <Field
+            icon={{
+              ios: "person",
+              android: "person",
+              web: "person",
+            }}
+            placeholder="Full Name"
+            value={fullName}
+            onChangeText={setFullName}
+            autoCapitalize="words"
+          />
 
-        <Field
-          icon={{ ios: "phone", android: "call", web: "call" }}
-          placeholder="Phone Number"
-          value={phone}
-          onChangeText={setPhone}
-          keyboardType="phone-pad"
-        />
+          <Field
+            icon={{
+              ios: "person.text.rectangle",
+              android: "badge",
+              web: "badge",
+            }}
+            placeholder="Student ID / Staff ID"
+            value={universityId}
+            onChangeText={setUniversityId}
+          />
 
-        <Field
-          icon={{ ios: "envelope", android: "mail", web: "mail" }}
-          placeholder="University Email"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-        />
+          <Field
+            icon={{
+              ios: "phone",
+              android: "call",
+              web: "call",
+            }}
+            placeholder="Phone Number"
+            value={phone}
+            onChangeText={setPhone}
+            keyboardType="phone-pad"
+          />
 
-        <Field
-          icon={{ ios: "lock", android: "lock", web: "lock" }}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry={!showPassword}
-          onToggleSecure={() => setShowPassword((current) => !current)}
-          secureVisible={showPassword}
-        />
+          <Field
+            icon={{
+              ios: "envelope",
+              android: "mail",
+              web: "mail",
+            }}
+            placeholder="University Email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+          />
 
-        <Field
-          icon={{ ios: "lock", android: "lock", web: "lock" }}
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          secureTextEntry={!showConfirmPassword}
-          onToggleSecure={() => setShowConfirmPassword((current) => !current)}
-          secureVisible={showConfirmPassword}
-        />
+          <Field
+            icon={{
+              ios: "lock",
+              android: "lock",
+              web: "lock",
+            }}
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+            onToggleSecure={() => setShowPassword((current) => !current)}
+            secureVisible={showPassword}
+          />
 
-        {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
+          <Field
+            icon={{
+              ios: "lock",
+              android: "lock",
+              web: "lock",
+            }}
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry={!showConfirmPassword}
+            onToggleSecure={() => setShowConfirmPassword((current) => !current)}
+            secureVisible={showConfirmPassword}
+          />
 
-        {successMessage ? (
-          <Text style={styles.success}>{successMessage}</Text>
-        ) : null}
+          {errorMessage ? (
+            <View style={styles.errorBox}>
+              <Text style={styles.error}>{errorMessage}</Text>
+            </View>
+          ) : null}
 
-        <Pressable
-          style={[styles.button, isSubmitting && styles.buttonDisabled]}
-          onPress={handleRegister}
-          disabled={isSubmitting}
-        >
-          <Text style={styles.buttonText}>
-            {isSubmitting ? "Creating Account..." : "Create Account"}
-          </Text>
-        </Pressable>
+          {successMessage ? (
+            <View style={styles.successBox}>
+              <Text style={styles.success}>{successMessage}</Text>
+            </View>
+          ) : null}
+
+          <Pressable
+            style={[
+              styles.buttonWrapper,
+              isSubmitting && styles.buttonDisabled,
+            ]}
+            onPress={handleRegister}
+            disabled={isSubmitting}
+          >
+            <LinearGradient
+              colors={["#6280DF", PRIMARY, PRIMARY_DARK]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.button}
+            >
+              <Text style={styles.buttonText}>
+                {isSubmitting ? "Creating Account..." : "Create Account"}
+              </Text>
+            </LinearGradient>
+          </Pressable>
+        </View>
 
         <Text style={styles.footer}>
           Already have an account?{" "}
@@ -284,93 +343,218 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: BACKGROUND,
   },
 
   content: {
-    paddingHorizontal: 24,
-    gap: 14,
+    flexGrow: 1,
+    paddingHorizontal: 22,
+    backgroundColor: BACKGROUND,
   },
 
   backButton: {
-    width: 40,
-    height: 40,
+    width: 38,
+    height: 38,
+
+    borderRadius: 12,
+
+    backgroundColor: "#FFFFFF",
+
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 8,
+
+    borderWidth: 1,
+    borderColor: BORDER,
+  },
+
+  headerSection: {
+    alignItems: "center",
+
+    marginTop: 4,
+    marginBottom: 12,
+  },
+
+  logoBox: {
+    width: 58,
+    height: 58,
+
+    borderRadius: 16,
+
+    backgroundColor: "#FFFFFF",
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
+    marginBottom: 7,
+
+    shadowColor: "#64748B",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 5,
+
+    elevation: 2,
+  },
+
+  logo: {
+    width: 42,
+    height: 42,
   },
 
   title: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#1A1D26",
+    fontSize: 25,
+    fontWeight: "800",
+
+    color: TEXT,
+
     textAlign: "center",
   },
 
   subtitle: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: "#8B93A7",
+    marginTop: 3,
+
+    fontSize: 13,
+
+    color: MUTED,
+
     textAlign: "center",
-    marginBottom: 8,
+  },
+
+  formCard: {
+    width: "100%",
+
+    backgroundColor: "#FFFFFF",
+
+    borderRadius: 18,
+
+    padding: 16,
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
+    shadowColor: "#64748B",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+
+    elevation: 2,
   },
 
   field: {
-    height: 54,
-    borderRadius: 14,
-    backgroundColor: "#F4F6FA",
+    height: 48,
+
+    borderRadius: 12,
+
+    backgroundColor: "#F8FAFC",
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
-    gap: 12,
+
+    paddingHorizontal: 13,
+
+    gap: 9,
+
+    marginBottom: 10,
   },
 
   input: {
     flex: 1,
-    fontSize: 16,
-    color: "#1A1D26",
+
+    fontSize: 14,
+
+    color: TEXT,
+  },
+
+  errorBox: {
+    borderRadius: 10,
+
+    backgroundColor: "#FEF2F2",
+
+    padding: 9,
+
+    marginBottom: 10,
   },
 
   error: {
-    color: "#D92D20",
-    fontSize: 14,
+    color: "#DC2626",
+
+    fontSize: 12,
+
     textAlign: "center",
+  },
+
+  successBox: {
+    borderRadius: 10,
+
+    backgroundColor: "#F0FDF4",
+
+    padding: 9,
+
+    marginBottom: 10,
   },
 
   success: {
     color: "#15803D",
-    fontSize: 14,
-    lineHeight: 20,
+
+    fontSize: 12,
+    lineHeight: 17,
+
     textAlign: "center",
   },
 
+  buttonWrapper: {
+    height: 48,
+
+    borderRadius: 12,
+
+    overflow: "hidden",
+
+    marginTop: 2,
+  },
+
   button: {
-    marginTop: 10,
-    height: 52,
-    borderRadius: 14,
-    backgroundColor: "#3B5CCC",
+    flex: 1,
+
     alignItems: "center",
     justifyContent: "center",
   },
 
   buttonDisabled: {
-    opacity: 0.6,
+    opacity: 0.65,
   },
 
   buttonText: {
-    color: "#ffffff",
-    fontSize: 17,
-    fontWeight: "600",
+    color: "#FFFFFF",
+
+    fontSize: 15,
+    fontWeight: "700",
   },
 
   footer: {
+    marginTop: 13,
+    marginBottom: 6,
+
     textAlign: "center",
-    color: "#8B93A7",
-    fontSize: 15,
+
+    color: MUTED,
+
+    fontSize: 13,
   },
 
   footerLink: {
-    color: "#3B5CCC",
+    color: PRIMARY,
+
     fontWeight: "700",
   },
 });
