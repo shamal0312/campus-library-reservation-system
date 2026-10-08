@@ -1,5 +1,6 @@
 import type { Session } from "@supabase/supabase-js";
 
+import { decode } from "base64-arraybuffer";
 import { makeRedirectUri } from "expo-auth-session";
 import * as QueryParams from "expo-auth-session/build/QueryParams";
 import * as WebBrowser from "expo-web-browser";
@@ -23,6 +24,7 @@ export type UpdateProfileInput = {
   fullName: string;
   email: string;
   phone: string;
+  avatarUrl?: string;
 };
 
 export async function signUp(input: SignUpInput) {
@@ -65,18 +67,94 @@ export async function saveRole(role: UserRole) {
 export async function updateProfile(input: UpdateProfileInput) {
   const supabase = requireSupabase();
 
+  const metadata: {
+    full_name: string;
+    phone: string;
+    avatar_url?: string;
+  } = {
+    full_name: input.fullName.trim(),
+    phone: input.phone.trim(),
+  };
+
+  if (input.avatarUrl) {
+    metadata.avatar_url = input.avatarUrl;
+  }
+
   const { data, error } = await supabase.auth.updateUser({
     email: input.email.trim(),
-    data: {
-      full_name: input.fullName.trim(),
-      phone: input.phone.trim(),
-    },
+    data: metadata,
   });
 
   return {
     user: data.user,
     error: error?.message ?? null,
   };
+}
+
+export async function uploadAvatar(base64: string, mimeType = "image/jpeg") {
+  const supabase = requireSupabase();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return {
+      avatarUrl: null,
+      error: userError?.message ?? "User not found.",
+    };
+  }
+
+  try {
+    if (!base64) {
+      return {
+        avatarUrl: null,
+        error: "Selected image data is empty.",
+      };
+    }
+
+    let extension = "jpg";
+
+    if (mimeType === "image/png") {
+      extension = "png";
+    } else if (mimeType === "image/webp") {
+      extension = "webp";
+    }
+
+    const filePath = `${user.id}/avatar-${Date.now()}.${extension}`;
+
+    const arrayBuffer = decode(base64);
+
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(filePath, arrayBuffer, {
+        contentType: mimeType,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      return {
+        avatarUrl: null,
+        error: uploadError.message,
+      };
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from("avatars")
+      .getPublicUrl(filePath);
+
+    return {
+      avatarUrl: publicUrlData.publicUrl,
+      error: null,
+    };
+  } catch (error) {
+    return {
+      avatarUrl: null,
+      error:
+        error instanceof Error ? error.message : "Profile image upload failed.",
+    };
+  }
 }
 
 export async function signIn(email: string, password: string) {

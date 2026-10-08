@@ -1,10 +1,13 @@
 import { Image } from "expo-image";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { SymbolView } from "expo-symbols";
+import { useCallback, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAuth } from "@/contexts/auth-context";
+import { getUnreadNotificationCount } from "@/services/notifications";
+
 import GetStartedScreen from "../(auth)/get-started";
 
 const BLUE = "#3B5CCC";
@@ -18,7 +21,6 @@ const ACTIONS: {
   ios: "book" | "chair" | "door.left.hand.open" | "bell";
   android: "menu_book" | "chair" | "meeting_room" | "notifications";
   route?: string;
-  badge?: number;
 }[] = [
   {
     label: "Book Reservation",
@@ -40,15 +42,36 @@ const ACTIONS: {
     ios: "bell",
     android: "notifications",
     route: "/account/notifications",
-    badge: 3,
   },
 ];
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
+
   const { session, account, isLoading } = useAuth();
 
+  const [unreadCount, setUnreadCount] = useState(0);
+
   const isSignedIn = !isLoading && !!session && !!account?.role;
+
+  const loadUnreadCount = useCallback(async () => {
+    if (!session) {
+      setUnreadCount(0);
+      return;
+    }
+
+    const result = await getUnreadNotificationCount();
+
+    if (!result.error) {
+      setUnreadCount(result.count);
+    }
+  }, [session]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadUnreadCount();
+    }, [loadUnreadCount]),
+  );
 
   if (!isSignedIn) {
     return <GetStartedScreen />;
@@ -71,6 +94,7 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <View style={styles.greeting}>
           <Text style={styles.hello}>Hello, {firstName} !</Text>
+
           <Text style={styles.subtitle}>Let’s make today productive</Text>
         </View>
 
@@ -90,7 +114,7 @@ export default function HomeScreen() {
               tintColor={BLUE}
             />
 
-            <View style={styles.headerBadge} />
+            {unreadCount > 0 ? <View style={styles.headerBadge} /> : null}
           </Pressable>
 
           <Pressable
@@ -98,15 +122,23 @@ export default function HomeScreen() {
             onPress={() => router.push("/account/profile")}
             hitSlop={8}
           >
-            <SymbolView
-              name={{
-                ios: "person.fill",
-                android: "person",
-                web: "person",
-              }}
-              size={25}
-              tintColor={BLUE}
-            />
+            {account.avatarUrl ? (
+              <Image
+                source={{ uri: account.avatarUrl }}
+                style={styles.headerAvatarImage}
+                contentFit="cover"
+              />
+            ) : (
+              <SymbolView
+                name={{
+                  ios: "person.fill",
+                  android: "person",
+                  web: "person",
+                }}
+                size={25}
+                tintColor={BLUE}
+              />
+            )}
           </Pressable>
         </View>
       </View>
@@ -139,8 +171,11 @@ export default function HomeScreen() {
 
           <View style={styles.reservationBody}>
             <Text style={styles.roomName}>Seat - A8</Text>
+
             <Text style={styles.floor}>Floor - 2</Text>
+
             <Text style={styles.metaText}>Date - 15 Sep 2026</Text>
+
             <Text style={styles.metaText}>Time - 10.00 AM - 12.00 PM</Text>
           </View>
         </View>
@@ -149,37 +184,43 @@ export default function HomeScreen() {
       <View style={styles.grid}>
         {[ACTIONS.slice(0, 2), ACTIONS.slice(2)].map((row, rowIndex) => (
           <View key={rowIndex} style={styles.actionRow}>
-            {row.map((action) => (
-              <Pressable
-                key={action.label}
-                style={styles.actionCard}
-                onPress={() => {
-                  if (action.route) {
-                    router.push(action.route as never);
-                  }
-                }}
-              >
-                <View style={styles.actionIcon}>
-                  <SymbolView
-                    name={{
-                      ios: action.ios,
-                      android: action.android,
-                      web: action.android,
-                    }}
-                    size={30}
-                    tintColor={BLUE}
-                  />
+            {row.map((action) => {
+              const isNotification = action.label === "Notification";
 
-                  {action.badge ? (
-                    <View style={styles.actionBadge}>
-                      <Text style={styles.actionBadgeText}>{action.badge}</Text>
-                    </View>
-                  ) : null}
-                </View>
+              return (
+                <Pressable
+                  key={action.label}
+                  style={styles.actionCard}
+                  onPress={() => {
+                    if (action.route) {
+                      router.push(action.route as never);
+                    }
+                  }}
+                >
+                  <View style={styles.actionIcon}>
+                    <SymbolView
+                      name={{
+                        ios: action.ios,
+                        android: action.android,
+                        web: action.android,
+                      }}
+                      size={30}
+                      tintColor={BLUE}
+                    />
 
-                <Text style={styles.actionLabel}>{action.label}</Text>
-              </Pressable>
-            ))}
+                    {isNotification && unreadCount > 0 ? (
+                      <View style={styles.actionBadge}>
+                        <Text style={styles.actionBadgeText}>
+                          {unreadCount > 99 ? "99+" : unreadCount}
+                        </Text>
+                      </View>
+                    ) : null}
+                  </View>
+
+                  <Text style={styles.actionLabel}>{action.label}</Text>
+                </Pressable>
+              );
+            })}
           </View>
         ))}
       </View>
@@ -382,5 +423,11 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "700",
     color: "#FFFFFF",
+  },
+
+  headerAvatarImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 24,
   },
 });

@@ -19,6 +19,7 @@ import {
   subscribeToAuthChanges,
   updatePassword as updateAccountPassword,
   updateProfile as updateAccountProfile,
+  uploadAvatar as uploadAccountAvatar,
   type SignUpInput,
   type UpdateProfileInput,
 } from "@/services/auth";
@@ -59,6 +60,11 @@ type AuthContextValue = {
     input: UpdateProfileInput,
   ) => ReturnType<typeof updateAccountProfile>;
 
+  uploadAvatar: (
+    base64: string,
+    mimeType?: string,
+  ) => ReturnType<typeof uploadAccountAvatar>;
+
   updatePassword: (
     newPassword: string,
   ) => ReturnType<typeof updateAccountPassword>;
@@ -87,23 +93,18 @@ function accountFromUser(user: User): AccountSession {
 
   return {
     id: user.id,
-
     fullName: text(metadata.full_name),
-
     universityId: text(metadata.university_id),
-
     email: user.email ?? "",
-
     phone: text(metadata.phone),
-
     role,
-
     avatarUrl: text(metadata.avatar_url) || null,
   };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
+
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -207,6 +208,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         return result;
+      },
+
+      uploadAvatar: async (base64, mimeType) => {
+        return await uploadAccountAvatar(base64, mimeType);
       },
 
       updatePassword: async (newPassword) => {

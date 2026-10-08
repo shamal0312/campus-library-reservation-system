@@ -120,16 +120,12 @@ export default function ProfileScreen() {
 
       <ProfileMenuItem
         label="App appearance"
-        onPress={() => {
-          console.log("Open app appearance");
-        }}
+        onPress={() => router.push("/account/app-appearance")}
       />
 
       <ProfileMenuItem
         label="Notification Preferences"
-        onPress={() => {
-          console.log("Open notification preferences");
-        }}
+        onPress={() => router.push("/account/notification-preferences")}
       />
     </ScrollView>
   );

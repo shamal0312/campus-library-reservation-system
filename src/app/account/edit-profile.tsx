@@ -1,3 +1,4 @@
+import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useState } from "react";
@@ -24,55 +25,154 @@ const MUTED = "#6B7280";
 export default function EditProfileScreen() {
   const insets = useSafeAreaInsets();
 
-  const { account, updateProfile } = useAuth();
+  const { account, updateProfile, uploadAvatar } = useAuth();
 
   const [fullName, setFullName] = useState(account?.fullName ?? "");
+
   const [userId] = useState(account?.universityId ?? "");
+
   const [email, setEmail] = useState(account?.email ?? "");
+
   const [phone, setPhone] = useState(account?.phone ?? "");
 
+  const [avatarUri, setAvatarUri] = useState(account?.avatarUrl ?? "");
+
+  const [avatarBase64, setAvatarBase64] = useState<string | null>(null);
+
+  const [avatarMimeType, setAvatarMimeType] = useState("image/jpeg");
+
   const [isSaving, setIsSaving] = useState(false);
+
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  async function handlePickAvatar() {
+    setErrorMessage(null);
+
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permission.granted) {
+      Alert.alert(
+        "Permission Required",
+        "Please allow access to your photos to update your profile picture.",
+      );
+
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+
+      allowsEditing: true,
+
+      aspect: [1, 1],
+
+      quality: 0.8,
+
+      base64: true,
+    });
+
+    if (result.canceled) {
+      return;
+    }
+
+    const selectedImage = result.assets[0];
+
+    if (!selectedImage) {
+      setErrorMessage("Could not select the image.");
+
+      return;
+    }
+
+    setAvatarUri(selectedImage.uri);
+
+    if (selectedImage.base64) {
+      setAvatarBase64(selectedImage.base64);
+    } else {
+      setAvatarBase64(null);
+    }
+
+    if (selectedImage.mimeType) {
+      setAvatarMimeType(selectedImage.mimeType);
+    } else {
+      setAvatarMimeType("image/jpeg");
+    }
+  }
 
   async function handleSaveChanges() {
     setErrorMessage(null);
 
     const trimmedFullName = fullName.trim();
+
     const trimmedEmail = email.trim();
+
     const trimmedPhone = phone.trim();
 
     if (!trimmedFullName) {
       setErrorMessage("Please enter your full name.");
+
       return;
     }
 
     if (!trimmedEmail) {
       setErrorMessage("Please enter your email.");
+
       return;
     }
 
     if (!trimmedEmail.includes("@")) {
       setErrorMessage("Please enter a valid email address.");
+
       return;
     }
 
     if (!trimmedPhone) {
       setErrorMessage("Please enter your phone number.");
+
       return;
     }
 
     setIsSaving(true);
 
+    let avatarUrl = account?.avatarUrl ?? undefined;
+
+    const selectedNewAvatar = avatarUri && avatarUri !== account?.avatarUrl;
+
+    if (selectedNewAvatar) {
+      if (!avatarBase64) {
+        setIsSaving(false);
+
+        setErrorMessage("Could not prepare the selected image for upload.");
+
+        return;
+      }
+
+      const avatarResult = await uploadAvatar(avatarBase64, avatarMimeType);
+
+      if (avatarResult.error || !avatarResult.avatarUrl) {
+        setIsSaving(false);
+
+        setErrorMessage(
+          avatarResult.error ?? "Could not upload profile image.",
+        );
+
+        return;
+      }
+
+      avatarUrl = avatarResult.avatarUrl;
+    }
+
     const result = await updateProfile({
       fullName: trimmedFullName,
       email: trimmedEmail,
       phone: trimmedPhone,
+      avatarUrl,
     });
 
     setIsSaving(false);
 
     if (result.error) {
       setErrorMessage(result.error);
+
       return;
     }
 
@@ -95,6 +195,7 @@ export default function EditProfileScreen() {
         styles.content,
         {
           paddingTop: insets.top + 10,
+
           paddingBottom: insets.bottom + 28,
         },
       ]}
@@ -127,14 +228,20 @@ export default function EditProfileScreen() {
         <View style={styles.avatarWrapper}>
           <Image
             source={
-              account?.avatarUrl
-                ? { uri: account.avatarUrl }
+              avatarUri
+                ? {
+                    uri: avatarUri,
+                  }
                 : require("@/assets/images/app-logo.png")
             }
             style={styles.avatar}
           />
 
-          <Pressable style={styles.editAvatarButton}>
+          <Pressable
+            style={styles.editAvatarButton}
+            onPress={handlePickAvatar}
+            disabled={isSaving}
+          >
             <SymbolView
               name={{
                 ios: "pencil",
@@ -165,6 +272,7 @@ export default function EditProfileScreen() {
           onChangeText={setFullName}
           placeholder="Enter full name"
           placeholderTextColor={MUTED}
+          editable={!isSaving}
         />
       </View>
 
@@ -202,6 +310,7 @@ export default function EditProfileScreen() {
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
+          editable={!isSaving}
         />
       </View>
 
@@ -215,6 +324,7 @@ export default function EditProfileScreen() {
           placeholder="Enter phone number"
           placeholderTextColor={MUTED}
           keyboardType="phone-pad"
+          editable={!isSaving}
         />
       </View>
 

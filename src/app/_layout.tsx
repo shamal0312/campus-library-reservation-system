@@ -1,10 +1,13 @@
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useColorScheme } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AnimatedSplashOverlay } from "@/components/animated-icon";
+import {
+  AppearanceProvider,
+  useAppearance,
+} from "@/contexts/appearance-context";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
 
 import { BookingProvider } from "../features/booking/context";
@@ -13,26 +16,38 @@ import { AuthRefresh } from "../features/booking/screens";
 void SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <BookingProvider>
-          <ThemeProvider
-            value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-          >
-            <AuthRefresh />
-
-            <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-
-            <AnimatedSplashOverlay />
-
-            <RootNavigator />
-          </ThemeProvider>
-        </BookingProvider>
-      </AuthProvider>
+      <AppearanceProvider>
+        <AppContent />
+      </AppearanceProvider>
     </SafeAreaProvider>
+  );
+}
+
+function AppContent() {
+  const { appearance, isAppearanceLoading } = useAppearance();
+
+  if (isAppearanceLoading) {
+    return null;
+  }
+
+  const isDark = appearance === "dark";
+
+  return (
+    <AuthProvider>
+      <BookingProvider>
+        <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
+          <AuthRefresh />
+
+          <StatusBar style={isDark ? "light" : "dark"} />
+
+          <AnimatedSplashOverlay />
+
+          <RootNavigator />
+        </ThemeProvider>
+      </BookingProvider>
+    </AuthProvider>
   );
 }
 
@@ -60,6 +75,8 @@ function RootNavigator() {
         <Stack.Screen name="account/change-password" />
         <Stack.Screen name="account/notifications" />
         <Stack.Screen name="account/notification-details" />
+        <Stack.Screen name="account/notification-preferences" />
+        <Stack.Screen name="account/app-appearance" />
       </Stack>
     );
   }
