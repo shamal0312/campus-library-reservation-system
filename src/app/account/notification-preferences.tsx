@@ -3,21 +3,23 @@ import { router } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Switch,
-    Text,
-    View,
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const BLUE = "#3B5CCC";
-const BACKGROUND = "#E7EDF6";
-const TEXT = "#111827";
-const MUTED = "#6B7280";
+const BLUE = "#2F80ED";
+const NAVY = "#102A43";
+const BACKGROUND = "#F2F6FC";
+const MUTED = "#718096";
+const LIGHT_BLUE = "#EAF4FF";
+const BORDER = "#E4EAF2";
 
 const STORAGE_KEY = "notification_preferences";
 
@@ -98,7 +100,11 @@ export default function NotificationPreferencesScreen() {
   if (isLoading) {
     return (
       <View style={styles.loadingScreen}>
-        <ActivityIndicator size="large" color={BLUE} />
+        <View style={styles.loadingIcon}>
+          <ActivityIndicator size="large" color={BLUE} />
+        </View>
+
+        <Text style={styles.loadingText}>Loading preferences...</Text>
       </View>
     );
   }
@@ -109,8 +115,8 @@ export default function NotificationPreferencesScreen() {
       contentContainerStyle={[
         styles.content,
         {
-          paddingTop: insets.top + 10,
-          paddingBottom: insets.bottom + 30,
+          paddingTop: insets.top + 24,
+          paddingBottom: insets.bottom + 32,
         },
       ]}
       showsVerticalScrollIndicator={false}
@@ -128,21 +134,44 @@ export default function NotificationPreferencesScreen() {
               web: "arrow_back",
             }}
             size={22}
-            tintColor={TEXT}
+            tintColor={NAVY}
           />
         </Pressable>
 
         <Text style={styles.title}>Notification Preferences</Text>
 
-        <View style={styles.headerButton} />
+        <View style={styles.headerSpacer} />
       </View>
 
-      <Text style={styles.description}>
-        Choose which library notifications you would like to receive.
-      </Text>
+      <View style={styles.introCard}>
+        <View style={styles.introIcon}>
+          <SymbolView
+            name={{
+              ios: "bell.badge.fill",
+              android: "notifications",
+              web: "notifications",
+            }}
+            size={30}
+            tintColor={BLUE}
+          />
+        </View>
+
+        <Text style={styles.introTitle}>Stay Updated</Text>
+
+        <Text style={styles.description}>
+          Choose which library notifications you would like to receive.
+        </Text>
+      </View>
+
+      <Text style={styles.sectionTitle}>Notification Settings</Text>
 
       <View style={styles.card}>
         <PreferenceRow
+          icon={{
+            ios: "checkmark.circle.fill",
+            android: "check_circle",
+            web: "check_circle",
+          }}
           title="Reservation Confirmations"
           description="Receive notifications when your reservation is confirmed."
           value={preferences.reservationConfirmations}
@@ -154,6 +183,11 @@ export default function NotificationPreferencesScreen() {
         <View style={styles.divider} />
 
         <PreferenceRow
+          icon={{
+            ios: "clock.fill",
+            android: "schedule",
+            web: "schedule",
+          }}
           title="Reservation Reminders"
           description="Receive reminders before your reservation starts."
           value={preferences.reservationReminders}
@@ -165,6 +199,11 @@ export default function NotificationPreferencesScreen() {
         <View style={styles.divider} />
 
         <PreferenceRow
+          icon={{
+            ios: "arrow.triangle.2.circlepath",
+            android: "sync",
+            web: "sync",
+          }}
           title="Reservation Updates"
           description="Receive notifications about seat or room reservation changes."
           value={preferences.reservationUpdates}
@@ -176,6 +215,11 @@ export default function NotificationPreferencesScreen() {
         <View style={styles.divider} />
 
         <PreferenceRow
+          icon={{
+            ios: "bell.fill",
+            android: "notifications",
+            web: "notifications",
+          }}
           title="General Notifications"
           description="Receive general library notices and updates."
           value={preferences.generalNotifications}
@@ -185,11 +229,43 @@ export default function NotificationPreferencesScreen() {
         />
       </View>
 
+      <View style={styles.infoCard}>
+        <View style={styles.infoIcon}>
+          <SymbolView
+            name={{
+              ios: "info.circle.fill",
+              android: "info",
+              web: "info",
+            }}
+            size={19}
+            tintColor={BLUE}
+          />
+        </View>
+
+        <Text style={styles.infoText}>
+          You can change these preferences anytime from your profile settings.
+        </Text>
+      </View>
+
       <Pressable
-        style={[styles.saveButton, isSaving && styles.disabledButton]}
+        style={({ pressed }) => [
+          styles.saveButton,
+          pressed && styles.saveButtonPressed,
+          isSaving && styles.disabledButton,
+        ]}
         onPress={handleSave}
         disabled={isSaving}
       >
+        <SymbolView
+          name={{
+            ios: "checkmark",
+            android: "check",
+            web: "check",
+          }}
+          size={19}
+          tintColor="#FFFFFF"
+        />
+
         <Text style={styles.saveButtonText}>
           {isSaving ? "Saving..." : "Save Preferences"}
         </Text>
@@ -198,12 +274,24 @@ export default function NotificationPreferencesScreen() {
   );
 }
 
+type PreferenceIcon = {
+  ios:
+    | "checkmark.circle.fill"
+    | "clock.fill"
+    | "arrow.triangle.2.circlepath"
+    | "bell.fill";
+  android: "check_circle" | "schedule" | "sync" | "notifications";
+  web: "check_circle" | "schedule" | "sync" | "notifications";
+};
+
 function PreferenceRow({
+  icon,
   title,
   description,
   value,
   onValueChange,
 }: {
+  icon: PreferenceIcon;
   title: string;
   description: string;
   value: boolean;
@@ -211,6 +299,10 @@ function PreferenceRow({
 }) {
   return (
     <View style={styles.preferenceRow}>
+      <View style={styles.preferenceIcon}>
+        <SymbolView name={icon} size={20} tintColor={BLUE} />
+      </View>
+
       <View style={styles.preferenceText}>
         <Text style={styles.preferenceTitle}>{title}</Text>
 
@@ -221,8 +313,8 @@ function PreferenceRow({
         value={value}
         onValueChange={onValueChange}
         trackColor={{
-          false: "#C9D1DC",
-          true: "#9FB1E9",
+          false: "#D7DEE8",
+          true: "#A9D0FF",
         }}
         thumbColor={value ? BLUE : "#FFFFFF"}
       />
@@ -233,9 +325,35 @@ function PreferenceRow({
 const styles = StyleSheet.create({
   loadingScreen: {
     flex: 1,
+
     alignItems: "center",
     justifyContent: "center",
+
     backgroundColor: BACKGROUND,
+  },
+
+  loadingIcon: {
+    width: 74,
+    height: 74,
+
+    borderRadius: 24,
+
+    backgroundColor: "#FFFFFF",
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
+    elevation: 2,
+  },
+
+  loadingText: {
+    marginTop: 12,
+
+    fontSize: 13,
+    color: MUTED,
   },
 
   screen: {
@@ -251,75 +369,259 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 12,
+
+    marginBottom: 20,
   },
 
   headerButton: {
     width: 42,
     height: 42,
+
+    borderRadius: 21,
+
+    backgroundColor: "#FFFFFF",
+
     alignItems: "center",
     justifyContent: "center",
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+
+    elevation: 2,
+  },
+
+  headerSpacer: {
+    width: 42,
   },
 
   title: {
     flex: 1,
+
     textAlign: "center",
+
     fontSize: 20,
     fontWeight: "800",
-    color: TEXT,
+
+    color: NAVY,
+  },
+
+  introCard: {
+    backgroundColor: "#FFFFFF",
+
+    borderRadius: 24,
+
+    paddingVertical: 22,
+    paddingHorizontal: 20,
+
+    alignItems: "center",
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
+    marginBottom: 24,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+
+    elevation: 3,
+  },
+
+  introIcon: {
+    width: 70,
+    height: 70,
+
+    borderRadius: 23,
+
+    backgroundColor: LIGHT_BLUE,
+
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  introTitle: {
+    marginTop: 13,
+
+    fontSize: 19,
+    fontWeight: "800",
+
+    color: NAVY,
   },
 
   description: {
-    fontSize: 14,
-    lineHeight: 20,
+    marginTop: 6,
+
+    maxWidth: 290,
+
+    fontSize: 13,
+    lineHeight: 19,
+
+    textAlign: "center",
+
     color: MUTED,
-    marginBottom: 18,
+  },
+
+  sectionTitle: {
+    marginLeft: 3,
+    marginBottom: 9,
+
+    fontSize: 16,
+    fontWeight: "800",
+
+    color: NAVY,
   },
 
   card: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    paddingHorizontal: 16,
+
+    borderRadius: 20,
+
+    paddingHorizontal: 15,
+
     borderWidth: 1,
-    borderColor: "#D9E0EA",
+    borderColor: BORDER,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+
+    elevation: 2,
   },
 
   preferenceRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 18,
+
+    paddingVertical: 15,
+  },
+
+  preferenceIcon: {
+    width: 42,
+    height: 42,
+
+    borderRadius: 13,
+
+    backgroundColor: LIGHT_BLUE,
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    marginRight: 12,
   },
 
   preferenceText: {
     flex: 1,
-    paddingRight: 14,
+
+    paddingRight: 10,
   },
 
   preferenceTitle: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "700",
-    color: TEXT,
+
+    color: NAVY,
   },
 
   preferenceDescription: {
-    marginTop: 5,
-    fontSize: 12,
-    lineHeight: 18,
+    marginTop: 4,
+
+    fontSize: 11,
+    lineHeight: 16,
+
     color: MUTED,
   },
 
   divider: {
     height: 1,
-    backgroundColor: "#E5E7EB",
+
+    backgroundColor: "#EEF2F6",
+
+    marginLeft: 54,
+  },
+
+  infoCard: {
+    marginTop: 18,
+
+    borderRadius: 18,
+
+    backgroundColor: "#F8FAFD",
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
+    padding: 14,
+
+    flexDirection: "row",
+    alignItems: "center",
+
+    gap: 10,
+  },
+
+  infoIcon: {
+    width: 38,
+    height: 38,
+
+    borderRadius: 13,
+
+    backgroundColor: LIGHT_BLUE,
+
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  infoText: {
+    flex: 1,
+
+    fontSize: 12,
+    lineHeight: 18,
+
+    color: MUTED,
   },
 
   saveButton: {
-    height: 54,
-    borderRadius: 11,
+    marginTop: 20,
+
+    height: 52,
+
+    borderRadius: 16,
+
     backgroundColor: BLUE,
+
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 20,
+
+    gap: 8,
+
+    shadowColor: BLUE,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+
+    elevation: 3,
+  },
+
+  saveButtonPressed: {
+    opacity: 0.85,
   },
 
   disabledButton: {
@@ -327,8 +629,9 @@ const styles = StyleSheet.create({
   },
 
   saveButtonText: {
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: "700",
+
     color: "#FFFFFF",
   },
 });

@@ -3,10 +3,12 @@ import { SymbolView } from "expo-symbols";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const BACKGROUND = "#E7EDF6";
-const TEXT = "#111827";
-const MUTED = "#6B7280";
-const BLUE = "#3B5CCC";
+const BLUE = "#2F80ED";
+const NAVY = "#102A43";
+const BACKGROUND = "#F2F6FC";
+const MUTED = "#718096";
+const LIGHT_BLUE = "#EAF4FF";
+const BORDER = "#E4EAF2";
 
 export default function NotificationDetailsScreen() {
   const insets = useSafeAreaInsets();
@@ -27,8 +29,8 @@ export default function NotificationDetailsScreen() {
       contentContainerStyle={[
         styles.content,
         {
-          paddingTop: insets.top + 10,
-          paddingBottom: insets.bottom + 30,
+          paddingTop: insets.top + 24,
+          paddingBottom: insets.bottom + 32,
         },
       ]}
       showsVerticalScrollIndicator={false}
@@ -45,36 +47,94 @@ export default function NotificationDetailsScreen() {
               android: "arrow_back",
               web: "arrow_back",
             }}
-            size={24}
-            tintColor={TEXT}
+            size={22}
+            tintColor={NAVY}
           />
         </Pressable>
 
         <Text style={styles.headerTitle}>Notification Details</Text>
 
-        <View style={styles.headerButton} />
+        <View style={styles.headerSpacer} />
       </View>
 
-      <View style={styles.iconCircle}>
-        <SymbolView
-          name={{
-            ios: "bell.fill",
-            android: "notifications",
-            web: "notifications",
-          }}
-          size={34}
-          tintColor={BLUE}
-        />
+      <View style={styles.summaryCard}>
+        <View style={styles.iconBox}>
+          <SymbolView
+            name={{
+              ios: "bell.fill",
+              android: "notifications",
+              web: "notifications",
+            }}
+            size={32}
+            tintColor={BLUE}
+          />
+        </View>
+
+        <Text style={styles.summaryTitle}>Library Notification</Text>
+
+        <Text style={styles.summaryText}>
+          View the complete notification details below.
+        </Text>
       </View>
+
+      <Text style={styles.sectionTitle}>Notification</Text>
 
       <View style={styles.card}>
-        <Text style={styles.title}>{title}</Text>
+        <View style={styles.notificationHeader}>
+          <View style={styles.smallIconBox}>
+            <SymbolView
+              name={{
+                ios: "bell.badge.fill",
+                android: "notifications_active",
+                web: "notifications_active",
+              }}
+              size={20}
+              tintColor={BLUE}
+            />
+          </View>
 
-        {time ? <Text style={styles.time}>{time}</Text> : null}
+          <View style={styles.titleBlock}>
+            <Text style={styles.title}>{title}</Text>
+
+            {time ? (
+              <View style={styles.timeRow}>
+                <SymbolView
+                  name={{
+                    ios: "clock",
+                    android: "schedule",
+                    web: "schedule",
+                  }}
+                  size={14}
+                  tintColor={MUTED}
+                />
+
+                <Text style={styles.time}>{time}</Text>
+              </View>
+            ) : null}
+          </View>
+        </View>
 
         <View style={styles.divider} />
 
         <Text style={styles.message}>{message}</Text>
+      </View>
+
+      <View style={styles.infoCard}>
+        <View style={styles.infoIcon}>
+          <SymbolView
+            name={{
+              ios: "info.circle.fill",
+              android: "info",
+              web: "info",
+            }}
+            size={18}
+            tintColor={BLUE}
+          />
+        </View>
+
+        <Text style={styles.infoText}>
+          This notification was sent by the Smart Library system.
+        </Text>
       </View>
     </ScrollView>
   );
@@ -94,62 +154,235 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+
+    marginBottom: 20,
   },
 
   headerButton: {
     width: 42,
     height: 42,
+
+    borderRadius: 21,
+
+    backgroundColor: "#FFFFFF",
+
     alignItems: "center",
     justifyContent: "center",
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+
+    elevation: 2,
+  },
+
+  headerSpacer: {
+    width: 42,
   },
 
   headerTitle: {
-    fontSize: 21,
+    fontSize: 20,
     fontWeight: "800",
-    color: TEXT,
+
+    color: NAVY,
+
+    textAlign: "center",
   },
 
-  iconCircle: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
-    backgroundColor: "#DCE6FF",
-    alignSelf: "center",
+  summaryCard: {
+    backgroundColor: "#FFFFFF",
+
+    borderRadius: 24,
+
+    paddingVertical: 22,
+    paddingHorizontal: 20,
+
+    alignItems: "center",
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
+    marginBottom: 24,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+
+    elevation: 3,
+  },
+
+  iconBox: {
+    width: 72,
+    height: 72,
+
+    borderRadius: 24,
+
+    backgroundColor: LIGHT_BLUE,
+
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 28,
-    marginBottom: 24,
+  },
+
+  summaryTitle: {
+    marginTop: 13,
+
+    fontSize: 19,
+    fontWeight: "800",
+
+    color: NAVY,
+  },
+
+  summaryText: {
+    marginTop: 6,
+
+    maxWidth: 280,
+
+    fontSize: 13,
+    lineHeight: 19,
+
+    textAlign: "center",
+
+    color: MUTED,
+  },
+
+  sectionTitle: {
+    marginLeft: 3,
+    marginBottom: 9,
+
+    fontSize: 16,
+    fontWeight: "800",
+
+    color: NAVY,
   },
 
   card: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 20,
+
+    borderRadius: 20,
+
+    padding: 18,
+
     borderWidth: 1,
-    borderColor: "#D9E0EA",
+    borderColor: BORDER,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+
+    elevation: 2,
+  },
+
+  notificationHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  smallIconBox: {
+    width: 44,
+    height: 44,
+
+    borderRadius: 14,
+
+    backgroundColor: LIGHT_BLUE,
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    marginRight: 12,
+  },
+
+  titleBlock: {
+    flex: 1,
   },
 
   title: {
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: "800",
-    color: TEXT,
+
+    color: NAVY,
+  },
+
+  timeRow: {
+    marginTop: 5,
+
+    flexDirection: "row",
+    alignItems: "center",
+
+    gap: 5,
   },
 
   time: {
-    marginTop: 6,
     fontSize: 12,
+
     color: MUTED,
   },
 
   divider: {
     height: 1,
-    backgroundColor: "#E5E7EB",
-    marginVertical: 18,
+
+    backgroundColor: "#EEF2F6",
+
+    marginVertical: 16,
   },
 
   message: {
-    fontSize: 15,
+    fontSize: 14,
     lineHeight: 22,
-    color: TEXT,
+
+    color: NAVY,
+  },
+
+  infoCard: {
+    marginTop: 18,
+
+    borderRadius: 18,
+
+    backgroundColor: "#F8FAFD",
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
+    padding: 14,
+
+    flexDirection: "row",
+    alignItems: "center",
+
+    gap: 10,
+  },
+
+  infoIcon: {
+    width: 36,
+    height: 36,
+
+    borderRadius: 12,
+
+    backgroundColor: LIGHT_BLUE,
+
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  infoText: {
+    flex: 1,
+
+    fontSize: 12,
+    lineHeight: 18,
+
+    color: MUTED,
   },
 });

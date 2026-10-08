@@ -10,11 +10,12 @@ import { getUnreadNotificationCount } from "@/services/notifications";
 
 import GetStartedScreen from "../(auth)/get-started";
 
-const BLUE = "#3B5CCC";
-const LIGHT_BLUE = "#DCE6FF";
-const BACKGROUND = "#E8EEF6";
-const TEXT = "#1A1D26";
-const MUTED = "#7E8798";
+const BLUE = "#2F80ED";
+const NAVY = "#102A43";
+const BACKGROUND = "#F2F6FC";
+const MUTED = "#718096";
+const LIGHT_BLUE = "#EAF4FF";
+const BORDER = "#E4EAF2";
 
 const ACTIONS: {
   label: string;
@@ -41,7 +42,7 @@ const ACTIONS: {
     route: "/booking/room-request",
   },
   {
-    label: "Notification",
+    label: "Notifications",
     ios: "bell",
     android: "notifications",
     route: "/account/notifications",
@@ -80,87 +81,107 @@ export default function HomeScreen() {
     return <GetStartedScreen />;
   }
 
-  const firstName = account.fullName.trim().split(" ")[0] || "Nimal";
+  const firstName = account.fullName.trim().split(" ")[0] || "User";
 
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={[
-        styles.content,
-        {
-          paddingTop: insets.top + 12,
-          paddingBottom: insets.bottom + 24,
-        },
-      ]}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={styles.header}>
-        <View style={styles.greeting}>
-          <Text style={styles.hello}>Hello, {firstName} !</Text>
+    <View style={styles.screen}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingTop: insets.top + 28,
+            paddingBottom: insets.bottom + 105,
+          },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <View style={styles.greeting}>
+            <Text style={styles.hello}>Hello, {firstName}</Text>
 
-          <Text style={styles.subtitle}>Let’s make today productive</Text>
-        </View>
+            <Text style={styles.subtitle}>Let’s make today productive</Text>
+          </View>
 
-        <View style={styles.headerRight}>
-          <Pressable
-            style={styles.notificationButton}
-            onPress={() => router.push("/account/notifications")}
-            hitSlop={8}
-          >
-            <SymbolView
-              name={{
-                ios: "bell.fill",
-                android: "notifications",
-                web: "notifications",
-              }}
-              size={21}
-              tintColor={BLUE}
-            />
-
-            {unreadCount > 0 ? <View style={styles.headerBadge} /> : null}
-          </Pressable>
-
-          <Pressable
-            style={styles.avatar}
-            onPress={() => router.push("/account/profile")}
-            hitSlop={8}
-          >
-            {account.avatarUrl ? (
-              <Image
-                source={{ uri: account.avatarUrl }}
-                style={styles.headerAvatarImage}
-                contentFit="cover"
-              />
-            ) : (
+          <View style={styles.headerRight}>
+            <Pressable
+              style={styles.notificationButton}
+              onPress={() => router.push("/account/notifications")}
+            >
               <SymbolView
                 name={{
-                  ios: "person.fill",
-                  android: "person",
-                  web: "person",
+                  ios: "bell.fill",
+                  android: "notifications",
+                  web: "notifications",
                 }}
-                size={25}
-                tintColor={BLUE}
+                size={21}
+                tintColor={NAVY}
               />
-            )}
-          </Pressable>
-        </View>
-      </View>
 
-      <View style={styles.reservationSection}>
-        <View style={styles.reservationHeader}>
-          <Text style={styles.reservationTitle}>Upcoming Reservation</Text>
+              {unreadCount > 0 ? <View style={styles.headerBadge} /> : null}
+            </Pressable>
+
+            <Pressable
+              style={styles.avatar}
+              onPress={() => router.push("/account/profile")}
+            >
+              {account.avatarUrl ? (
+                <Image
+                  source={{
+                    uri: account.avatarUrl,
+                  }}
+                  style={styles.headerAvatarImage}
+                  contentFit="cover"
+                />
+              ) : (
+                <SymbolView
+                  name={{
+                    ios: "person.fill",
+                    android: "person",
+                    web: "person",
+                  }}
+                  size={24}
+                  tintColor={BLUE}
+                />
+              )}
+            </Pressable>
+          </View>
+        </View>
+
+        <View style={styles.welcomeCard}>
+          <View>
+            <Text style={styles.welcomeTitle}>Smart Library</Text>
+
+            <Text style={styles.welcomeText}>Reserve. Study. Learn.</Text>
+          </View>
+
+          <View style={styles.welcomeIcon}>
+            <SymbolView
+              name={{
+                ios: "books.vertical.fill",
+                android: "local_library",
+                web: "local_library",
+              }}
+              size={28}
+              tintColor={BLUE}
+            />
+          </View>
+        </View>
+
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Upcoming Reservation</Text>
 
           <Pressable style={styles.viewAllButton}>
-            <Text style={styles.viewAllText}>View All</Text>
+            <Text style={styles.viewAllText}>View</Text>
 
             <SymbolView
               name={{
-                ios: "arrow.right",
-                android: "arrow_forward",
-                web: "arrow_forward",
+                ios: "chevron.right",
+                android: "chevron_right",
+                web: "chevron_right",
               }}
               size={16}
-              tintColor={TEXT}
+              tintColor={BLUE}
             />
           </Pressable>
         </View>
@@ -173,61 +194,174 @@ export default function HomeScreen() {
           />
 
           <View style={styles.reservationBody}>
-            <Text style={styles.roomName}>Seat - A8</Text>
+            <Text style={styles.roomName}>Seat A8</Text>
 
-            <Text style={styles.floor}>Floor - 2</Text>
+            <Text style={styles.floor}>Floor 2</Text>
 
-            <Text style={styles.metaText}>Date - 15 Sep 2026</Text>
+            <View style={styles.metaRow}>
+              <SymbolView
+                name={{
+                  ios: "calendar",
+                  android: "calendar_today",
+                  web: "calendar_today",
+                }}
+                size={15}
+                tintColor={MUTED}
+              />
 
-            <Text style={styles.metaText}>Time - 10.00 AM - 12.00 PM</Text>
+              <Text style={styles.metaText}>15 Sep 2026</Text>
+            </View>
+
+            <View style={styles.metaRow}>
+              <SymbolView
+                name={{
+                  ios: "clock",
+                  android: "schedule",
+                  web: "schedule",
+                }}
+                size={15}
+                tintColor={MUTED}
+              />
+
+              <Text style={styles.metaText}>10.00 AM - 12.00 PM</Text>
+            </View>
+          </View>
+
+          <View style={styles.arrowButton}>
+            <SymbolView
+              name={{
+                ios: "chevron.right",
+                android: "chevron_right",
+                web: "chevron_right",
+              }}
+              size={20}
+              tintColor={BLUE}
+            />
           </View>
         </View>
+
+        <Text style={styles.quickTitle}>Quick Access</Text>
+
+        <View style={styles.grid}>
+          {[ACTIONS.slice(0, 2), ACTIONS.slice(2)].map((row, rowIndex) => (
+            <View key={rowIndex} style={styles.actionRow}>
+              {row.map((action) => {
+                const isNotification = action.label === "Notifications";
+
+                return (
+                  <Pressable
+                    key={action.label}
+                    style={({ pressed }) => [
+                      styles.actionCard,
+                      pressed && styles.actionCardPressed,
+                    ]}
+                    onPress={() => {
+                      if (action.route) {
+                        router.push(action.route as never);
+                      }
+                    }}
+                  >
+                    <View style={styles.actionIcon}>
+                      <SymbolView
+                        name={{
+                          ios: action.ios,
+                          android: action.android,
+                          web: action.android,
+                        }}
+                        size={28}
+                        tintColor={BLUE}
+                      />
+
+                      {isNotification && unreadCount > 0 ? (
+                        <View style={styles.actionBadge}>
+                          <Text style={styles.actionBadgeText}>
+                            {unreadCount > 99 ? "99+" : unreadCount}
+                          </Text>
+                        </View>
+                      ) : null}
+                    </View>
+
+                    <Text style={styles.actionLabel}>{action.label}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+
+      <View
+        style={[
+          styles.bottomNav,
+          {
+            paddingBottom: Math.max(insets.bottom, 8),
+          },
+        ]}
+      >
+        <BottomNavItem
+          label="Home"
+          ios="house.fill"
+          android="home"
+          active
+          onPress={() => {}}
+        />
+
+        <BottomNavItem
+          label="Seat"
+          ios="chair.fill"
+          android="chair"
+          onPress={() => router.push("/booking")}
+        />
+
+        <BottomNavItem
+          label="Books"
+          ios="book.fill"
+          android="menu_book"
+          onPress={() => router.push("/(student)/book" as never)}
+        />
+
+        <BottomNavItem
+          label="Profile"
+          ios="person.fill"
+          android="person"
+          onPress={() => router.push("/account/profile")}
+        />
       </View>
+    </View>
+  );
+}
 
-      <View style={styles.grid}>
-        {[ACTIONS.slice(0, 2), ACTIONS.slice(2)].map((row, rowIndex) => (
-          <View key={rowIndex} style={styles.actionRow}>
-            {row.map((action) => {
-              const isNotification = action.label === "Notification";
+type BottomNavItemProps = {
+  label: string;
+  ios: "house.fill" | "chair.fill" | "book.fill" | "person.fill";
+  android: "home" | "chair" | "menu_book" | "person";
+  active?: boolean;
+  onPress: () => void;
+};
 
-              return (
-                <Pressable
-                  key={action.label}
-                  style={styles.actionCard}
-                  onPress={() => {
-                    if (action.route) {
-                      router.push(action.route as never);
-                    }
-                  }}
-                >
-                  <View style={styles.actionIcon}>
-                    <SymbolView
-                      name={{
-                        ios: action.ios,
-                        android: action.android,
-                        web: action.android,
-                      }}
-                      size={30}
-                      tintColor={BLUE}
-                    />
+function BottomNavItem({
+  label,
+  ios,
+  android,
+  active = false,
+  onPress,
+}: BottomNavItemProps) {
+  return (
+    <Pressable style={styles.navItem} onPress={onPress}>
+      <SymbolView
+        name={{
+          ios,
+          android,
+          web: android,
+        }}
+        size={23}
+        tintColor={active ? BLUE : "#8A94A6"}
+      />
 
-                    {isNotification && unreadCount > 0 ? (
-                      <View style={styles.actionBadge}>
-                        <Text style={styles.actionBadgeText}>
-                          {unreadCount > 99 ? "99+" : unreadCount}
-                        </Text>
-                      </View>
-                    ) : null}
-                  </View>
-
-                  <Text style={styles.actionLabel}>{action.label}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        ))}
-      </View>
-    </ScrollView>
+      <Text style={[styles.navLabel, active && styles.navLabelActive]}>
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -237,15 +371,19 @@ const styles = StyleSheet.create({
     backgroundColor: BACKGROUND,
   },
 
+  scrollView: {
+    flex: 1,
+  },
+
   content: {
-    paddingHorizontal: 18,
+    paddingHorizontal: 20,
   },
 
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 18,
+    marginBottom: 22,
   },
 
   greeting: {
@@ -253,13 +391,13 @@ const styles = StyleSheet.create({
   },
 
   hello: {
-    fontSize: 25,
+    fontSize: 26,
     fontWeight: "800",
-    color: TEXT,
+    color: NAVY,
   },
 
   subtitle: {
-    marginTop: 5,
+    marginTop: 4,
     fontSize: 14,
     color: MUTED,
   },
@@ -271,102 +409,235 @@ const styles = StyleSheet.create({
   },
 
   notificationButton: {
-    width: 38,
-    height: 38,
+    width: 42,
+    height: 42,
+
+    borderRadius: 21,
+
+    backgroundColor: "#FFFFFF",
+
     alignItems: "center",
     justifyContent: "center",
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.06,
+    shadowRadius: 5,
+
+    elevation: 2,
   },
 
   headerBadge: {
     position: "absolute",
-    top: 6,
-    right: 7,
+    top: 7,
+    right: 8,
+
     width: 8,
     height: 8,
+
     borderRadius: 4,
+
     backgroundColor: "#EF4444",
+
     borderWidth: 1.5,
-    borderColor: BACKGROUND,
+    borderColor: "#FFFFFF",
   },
 
   avatar: {
     width: 48,
     height: 48,
+
     borderRadius: 24,
+
     backgroundColor: "#FFFFFF",
+
     borderWidth: 2,
     borderColor: "#FFFFFF",
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    overflow: "hidden",
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 5,
+
+    elevation: 3,
+  },
+
+  headerAvatarImage: {
+    width: "100%",
+    height: "100%",
+  },
+
+  welcomeCard: {
+    minHeight: 94,
+
+    borderRadius: 22,
+
+    backgroundColor: "#DCEEFF",
+
+    paddingHorizontal: 20,
+    paddingVertical: 18,
+
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+
+    marginBottom: 24,
+  },
+
+  welcomeTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: NAVY,
+  },
+
+  welcomeText: {
+    marginTop: 5,
+    fontSize: 14,
+    color: MUTED,
+  },
+
+  welcomeIcon: {
+    width: 52,
+    height: 52,
+
+    borderRadius: 18,
+
+    backgroundColor: "#FFFFFF",
+
     alignItems: "center",
     justifyContent: "center",
   },
 
-  reservationSection: {
-    backgroundColor: "#8EA6D8",
-    borderRadius: 18,
-    padding: 12,
-    marginBottom: 18,
-  },
-
-  reservationHeader: {
+  sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+
     marginBottom: 10,
   },
 
-  reservationTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#FFFFFF",
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: NAVY,
   },
 
   viewAllButton: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 3,
+
+    backgroundColor: "#FFFFFF",
+
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+
+    borderRadius: 16,
   },
 
   viewAllText: {
-    fontSize: 11,
-    color: TEXT,
+    fontSize: 12,
+    fontWeight: "700",
+    color: BLUE,
   },
 
   reservationCard: {
     flexDirection: "row",
     alignItems: "center",
+
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 12,
+
+    borderRadius: 22,
+
+    padding: 14,
+
+    marginBottom: 24,
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.07,
+    shadowRadius: 8,
+
+    elevation: 3,
   },
 
   reservationPhoto: {
-    width: 76,
-    height: 76,
-    borderRadius: 10,
+    width: 82,
+    height: 82,
+
+    borderRadius: 14,
   },
 
   reservationBody: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: 14,
   },
 
   roomName: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: TEXT,
+    fontSize: 17,
+    fontWeight: "800",
+    color: NAVY,
   },
 
   floor: {
     marginTop: 2,
-    fontSize: 14,
-    color: TEXT,
-    marginBottom: 8,
+    marginBottom: 7,
+
+    fontSize: 13,
+    color: MUTED,
+  },
+
+  metaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+
+    gap: 5,
+
+    marginTop: 3,
   },
 
   metaText: {
     fontSize: 12,
-    lineHeight: 17,
-    color: TEXT,
+    color: MUTED,
+  },
+
+  arrowButton: {
+    width: 38,
+    height: 38,
+
+    borderRadius: 19,
+
+    backgroundColor: LIGHT_BLUE,
+
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  quickTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: NAVY,
+
+    marginBottom: 12,
   },
 
   grid: {
@@ -380,57 +651,134 @@ const styles = StyleSheet.create({
 
   actionCard: {
     flex: 1,
-    minHeight: 126,
+
+    minHeight: 120,
+
     backgroundColor: "#FFFFFF",
-    borderRadius: 14,
+
+    borderRadius: 20,
+
     alignItems: "center",
     justifyContent: "center",
+
     padding: 14,
+
     borderWidth: 1,
-    borderColor: "#DDE3EC",
+    borderColor: BORDER,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.06,
+    shadowRadius: 7,
+
+    elevation: 2,
+  },
+
+  actionCardPressed: {
+    opacity: 0.75,
   },
 
   actionIcon: {
     width: 58,
     height: 58,
-    borderRadius: 29,
+
+    borderRadius: 20,
+
     backgroundColor: LIGHT_BLUE,
+
     alignItems: "center",
     justifyContent: "center",
+
     marginBottom: 10,
   },
 
   actionLabel: {
     fontSize: 13,
-    fontWeight: "500",
-    color: TEXT,
+    fontWeight: "700",
+
+    color: NAVY,
+
     textAlign: "center",
   },
 
   actionBadge: {
     position: "absolute",
+
     top: -6,
     right: -6,
+
     minWidth: 20,
     height: 20,
+
     borderRadius: 10,
+
     paddingHorizontal: 5,
+
     backgroundColor: "#EF4444",
+
     alignItems: "center",
     justifyContent: "center",
+
     borderWidth: 2,
     borderColor: "#FFFFFF",
   },
 
   actionBadgeText: {
-    fontSize: 11,
-    fontWeight: "700",
+    fontSize: 10,
+    fontWeight: "800",
     color: "#FFFFFF",
   },
 
-  headerAvatarImage: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 24,
+  bottomNav: {
+    position: "absolute",
+
+    left: 0,
+    right: 0,
+    bottom: 0,
+
+    minHeight: 70,
+
+    backgroundColor: "#FFFFFF",
+
+    flexDirection: "row",
+
+    paddingTop: 9,
+    paddingHorizontal: 10,
+
+    borderTopWidth: 1,
+    borderTopColor: BORDER,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: -3,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+
+    elevation: 12,
+  },
+
+  navItem: {
+    flex: 1,
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    gap: 3,
+  },
+
+  navLabel: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#8A94A6",
+  },
+
+  navLabelActive: {
+    color: BLUE,
+    fontWeight: "800",
   },
 });

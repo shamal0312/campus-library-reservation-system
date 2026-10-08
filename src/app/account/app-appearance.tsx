@@ -2,21 +2,22 @@ import { router } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useState } from "react";
 import {
-    Alert,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
-    type AppearanceMode,
-    useAppearance,
+  type AppearanceMode,
+  useAppearance,
 } from "@/contexts/appearance-context";
 
-const BLUE = "#3B5CCC";
+const BLUE = "#2F80ED";
+const NAVY = "#102A43";
 
 const OPTIONS: {
   value: AppearanceMode;
@@ -28,14 +29,14 @@ const OPTIONS: {
   {
     value: "light",
     title: "Light Mode",
-    description: "Use the light appearance.",
+    description: "Use a bright and clean appearance.",
     ios: "sun.max.fill",
     android: "light_mode",
   },
   {
     value: "dark",
     title: "Dark Mode",
-    description: "Use the dark appearance.",
+    description: "Use a darker appearance for low-light environments.",
     ios: "moon.fill",
     android: "dark_mode",
   },
@@ -54,13 +55,19 @@ export default function AppAppearanceScreen() {
   const isDark = selectedAppearance === "dark";
 
   const colors = {
-    background: isDark ? "#111827" : "#E7EDF6",
+    background: isDark ? "#111827" : "#F2F6FC",
+
     card: isDark ? "#1F2937" : "#FFFFFF",
-    text: isDark ? "#F9FAFB" : "#111827",
-    muted: isDark ? "#9CA3AF" : "#6B7280",
-    border: isDark ? "#374151" : "#D9E0EA",
-    iconBackground: isDark ? "#283451" : "#DCE6FF",
-    divider: isDark ? "#374151" : "#E5E7EB",
+
+    text: isDark ? "#F9FAFB" : NAVY,
+
+    muted: isDark ? "#9CA3AF" : "#718096",
+
+    border: isDark ? "#374151" : "#E4EAF2",
+
+    iconBackground: isDark ? "#263244" : "#EAF4FF",
+
+    secondaryCard: isDark ? "#172033" : "#F8FAFD",
   };
 
   async function handleSave() {
@@ -99,15 +106,21 @@ export default function AppAppearanceScreen() {
       contentContainerStyle={[
         styles.content,
         {
-          paddingTop: insets.top + 10,
-          paddingBottom: insets.bottom + 30,
+          paddingTop: insets.top + 24,
+          paddingBottom: insets.bottom + 32,
         },
       ]}
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.header}>
         <Pressable
-          style={styles.headerButton}
+          style={[
+            styles.headerButton,
+            {
+              backgroundColor: colors.card,
+              borderColor: colors.border,
+            },
+          ]}
           onPress={() => router.back()}
           hitSlop={8}
         >
@@ -133,23 +146,74 @@ export default function AppAppearanceScreen() {
           App Appearance
         </Text>
 
-        <View style={styles.headerButton} />
+        <View style={styles.headerSpacer} />
+      </View>
+
+      <View
+        style={[
+          styles.previewCard,
+          {
+            backgroundColor: colors.card,
+            borderColor: colors.border,
+          },
+        ]}
+      >
+        <View
+          style={[
+            styles.previewIcon,
+            {
+              backgroundColor: colors.iconBackground,
+            },
+          ]}
+        >
+          <SymbolView
+            name={{
+              ios: isDark ? "moon.fill" : "sun.max.fill",
+              android: isDark ? "dark_mode" : "light_mode",
+              web: isDark ? "dark_mode" : "light_mode",
+            }}
+            size={34}
+            tintColor={BLUE}
+          />
+        </View>
+
+        <Text
+          style={[
+            styles.previewTitle,
+            {
+              color: colors.text,
+            },
+          ]}
+        >
+          {isDark ? "Dark Mode" : "Light Mode"}
+        </Text>
+
+        <Text
+          style={[
+            styles.previewDescription,
+            {
+              color: colors.muted,
+            },
+          ]}
+        >
+          Choose the appearance that feels most comfortable for you.
+        </Text>
       </View>
 
       <Text
         style={[
-          styles.description,
+          styles.sectionTitle,
           {
-            color: colors.muted,
+            color: colors.text,
           },
         ]}
       >
-        Choose the appearance you prefer for the Smart Library app.
+        Choose Appearance
       </Text>
 
       <View
         style={[
-          styles.card,
+          styles.optionsCard,
           {
             backgroundColor: colors.card,
             borderColor: colors.border,
@@ -162,12 +226,17 @@ export default function AppAppearanceScreen() {
           return (
             <View key={option.value}>
               <Pressable
-                style={styles.optionRow}
+                style={({ pressed }) => [
+                  styles.optionRow,
+                  pressed && {
+                    opacity: 0.75,
+                  },
+                ]}
                 onPress={() => setSelectedAppearance(option.value)}
               >
                 <View
                   style={[
-                    styles.iconCircle,
+                    styles.iconBox,
                     {
                       backgroundColor: colors.iconBackground,
                     },
@@ -212,7 +281,7 @@ export default function AppAppearanceScreen() {
                   style={[
                     styles.radioOuter,
                     {
-                      borderColor: selected ? BLUE : colors.muted,
+                      borderColor: selected ? BLUE : colors.border,
                     },
                   ]}
                 >
@@ -225,7 +294,7 @@ export default function AppAppearanceScreen() {
                   style={[
                     styles.divider,
                     {
-                      backgroundColor: colors.divider,
+                      backgroundColor: colors.border,
                     },
                   ]}
                 />
@@ -235,11 +304,65 @@ export default function AppAppearanceScreen() {
         })}
       </View>
 
+      <View
+        style={[
+          styles.infoCard,
+          {
+            backgroundColor: colors.secondaryCard,
+            borderColor: colors.border,
+          },
+        ]}
+      >
+        <View
+          style={[
+            styles.infoIcon,
+            {
+              backgroundColor: colors.iconBackground,
+            },
+          ]}
+        >
+          <SymbolView
+            name={{
+              ios: "info.circle.fill",
+              android: "info",
+              web: "info",
+            }}
+            size={19}
+            tintColor={BLUE}
+          />
+        </View>
+
+        <Text
+          style={[
+            styles.infoText,
+            {
+              color: colors.muted,
+            },
+          ]}
+        >
+          Your appearance preference will be saved on this device.
+        </Text>
+      </View>
+
       <Pressable
-        style={[styles.saveButton, isSaving && styles.disabledButton]}
+        style={({ pressed }) => [
+          styles.saveButton,
+          pressed && styles.saveButtonPressed,
+          isSaving && styles.disabledButton,
+        ]}
         onPress={handleSave}
         disabled={isSaving}
       >
+        <SymbolView
+          name={{
+            ios: "checkmark",
+            android: "check",
+            web: "check",
+          }}
+          size={19}
+          tintColor="#FFFFFF"
+        />
+
         <Text style={styles.saveButtonText}>
           {isSaving ? "Saving..." : "Save Appearance"}
         </Text>
@@ -262,51 +385,140 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 12,
+
+    marginBottom: 20,
   },
 
   headerButton: {
     width: 42,
     height: 42,
+
+    borderRadius: 21,
+
     alignItems: "center",
     justifyContent: "center",
+
+    borderWidth: 1,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+
+    elevation: 2,
+  },
+
+  headerSpacer: {
+    width: 42,
   },
 
   title: {
-    flex: 1,
-    textAlign: "center",
     fontSize: 21,
     fontWeight: "800",
   },
 
-  description: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 18,
+  previewCard: {
+    borderRadius: 24,
+
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+
+    alignItems: "center",
+
+    borderWidth: 1,
+
+    marginBottom: 24,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+
+    elevation: 3,
   },
 
-  card: {
-    borderRadius: 16,
-    paddingHorizontal: 16,
+  previewIcon: {
+    width: 76,
+    height: 76,
+
+    borderRadius: 24,
+
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  previewTitle: {
+    marginTop: 14,
+
+    fontSize: 20,
+    fontWeight: "800",
+  },
+
+  previewDescription: {
+    marginTop: 6,
+
+    maxWidth: 290,
+
+    fontSize: 13,
+    lineHeight: 19,
+
+    textAlign: "center",
+  },
+
+  sectionTitle: {
+    marginLeft: 3,
+    marginBottom: 9,
+
+    fontSize: 16,
+    fontWeight: "800",
+  },
+
+  optionsCard: {
+    borderRadius: 20,
+
+    paddingHorizontal: 15,
+
     borderWidth: 1,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+
+    elevation: 2,
   },
 
   optionRow: {
+    minHeight: 82,
+
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 18,
+
+    paddingVertical: 13,
   },
 
-  iconCircle: {
+  iconBox: {
     width: 46,
     height: 46,
-    borderRadius: 23,
+
+    borderRadius: 15,
+
     alignItems: "center",
     justifyContent: "center",
   },
 
   optionText: {
     flex: 1,
+
     marginLeft: 13,
     marginRight: 12,
   },
@@ -317,16 +529,20 @@ const styles = StyleSheet.create({
   },
 
   optionDescription: {
-    marginTop: 4,
+    marginTop: 3,
+
     fontSize: 12,
-    lineHeight: 18,
+    lineHeight: 17,
   },
 
   radioOuter: {
     width: 22,
     height: 22,
+
     borderRadius: 11,
+
     borderWidth: 2,
+
     alignItems: "center",
     justifyContent: "center",
   },
@@ -334,21 +550,78 @@ const styles = StyleSheet.create({
   radioInner: {
     width: 12,
     height: 12,
+
     borderRadius: 6,
+
     backgroundColor: BLUE,
   },
 
   divider: {
     height: 1,
+
+    marginLeft: 59,
+  },
+
+  infoCard: {
+    marginTop: 18,
+
+    borderRadius: 18,
+
+    borderWidth: 1,
+
+    padding: 14,
+
+    flexDirection: "row",
+    alignItems: "center",
+
+    gap: 10,
+  },
+
+  infoIcon: {
+    width: 38,
+    height: 38,
+
+    borderRadius: 13,
+
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  infoText: {
+    flex: 1,
+
+    fontSize: 12,
+    lineHeight: 18,
   },
 
   saveButton: {
-    height: 54,
-    borderRadius: 11,
+    marginTop: 20,
+
+    height: 52,
+
+    borderRadius: 16,
+
     backgroundColor: BLUE,
+
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 20,
+
+    gap: 8,
+
+    shadowColor: BLUE,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+
+    elevation: 3,
+  },
+
+  saveButtonPressed: {
+    opacity: 0.85,
   },
 
   disabledButton: {
@@ -356,8 +629,9 @@ const styles = StyleSheet.create({
   },
 
   saveButtonText: {
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: "700",
+
     color: "#FFFFFF",
   },
 });

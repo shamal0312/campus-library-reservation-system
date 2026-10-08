@@ -16,11 +16,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAuth } from "@/contexts/auth-context";
 
-const BLUE = "#3B5CCC";
-const BACKGROUND = "#E7EDF6";
-const FIELD_BACKGROUND = "#DDE3EA";
-const TEXT = "#111827";
-const MUTED = "#6B7280";
+const BLUE = "#2F80ED";
+const NAVY = "#102A43";
+const BACKGROUND = "#F2F6FC";
+const MUTED = "#718096";
+const LIGHT_BLUE = "#EAF4FF";
+const BORDER = "#E4EAF2";
+const FIELD_BACKGROUND = "#F8FAFD";
 
 export default function EditProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -61,13 +63,9 @@ export default function EditProfileScreen() {
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-
       allowsEditing: true,
-
       aspect: [1, 1],
-
       quality: 0.8,
-
       base64: true,
     });
 
@@ -79,7 +77,6 @@ export default function EditProfileScreen() {
 
     if (!selectedImage) {
       setErrorMessage("Could not select the image.");
-
       return;
     }
 
@@ -109,25 +106,21 @@ export default function EditProfileScreen() {
 
     if (!trimmedFullName) {
       setErrorMessage("Please enter your full name.");
-
       return;
     }
 
     if (!trimmedEmail) {
       setErrorMessage("Please enter your email.");
-
       return;
     }
 
     if (!trimmedEmail.includes("@")) {
       setErrorMessage("Please enter a valid email address.");
-
       return;
     }
 
     if (!trimmedPhone) {
       setErrorMessage("Please enter your phone number.");
-
       return;
     }
 
@@ -172,7 +165,6 @@ export default function EditProfileScreen() {
 
     if (result.error) {
       setErrorMessage(result.error);
-
       return;
     }
 
@@ -194,9 +186,8 @@ export default function EditProfileScreen() {
       contentContainerStyle={[
         styles.content,
         {
-          paddingTop: insets.top + 10,
-
-          paddingBottom: insets.bottom + 28,
+          paddingTop: insets.top + 24,
+          paddingBottom: insets.bottom + 32,
         },
       ]}
       showsVerticalScrollIndicator={false}
@@ -204,7 +195,7 @@ export default function EditProfileScreen() {
     >
       <View style={styles.header}>
         <Pressable
-          style={styles.backButton}
+          style={styles.headerButton}
           onPress={() => router.back()}
           hitSlop={8}
         >
@@ -215,7 +206,7 @@ export default function EditProfileScreen() {
               web: "arrow_back",
             }}
             size={22}
-            tintColor={TEXT}
+            tintColor={NAVY}
           />
         </Pressable>
 
@@ -224,18 +215,18 @@ export default function EditProfileScreen() {
         <View style={styles.headerSpacer} />
       </View>
 
-      <View style={styles.profileSection}>
+      <View style={styles.profileCard}>
         <View style={styles.avatarWrapper}>
-          <Image
-            source={
-              avatarUri
-                ? {
-                    uri: avatarUri,
-                  }
-                : require("@/assets/images/app-logo.png")
-            }
-            style={styles.avatar}
-          />
+          <View style={styles.avatarOuter}>
+            <Image
+              source={
+                avatarUri
+                  ? { uri: avatarUri }
+                  : require("@/assets/images/app-logo.png")
+              }
+              style={styles.avatar}
+            />
+          </View>
 
           <Pressable
             style={styles.editAvatarButton}
@@ -244,101 +235,181 @@ export default function EditProfileScreen() {
           >
             <SymbolView
               name={{
-                ios: "pencil",
-                android: "edit",
-                web: "edit",
+                ios: "camera.fill",
+                android: "photo_camera",
+                web: "photo_camera",
               }}
               size={16}
-              tintColor={BLUE}
+              tintColor="#FFFFFF"
             />
           </Pressable>
         </View>
 
-        <Text style={styles.profileName}>{fullName || "Nimal Perera"}</Text>
+        <Text style={styles.profileName}>{fullName || "Library User"}</Text>
 
-        <Text style={styles.roleText}>
-          {account?.role
-            ? account.role.charAt(0).toUpperCase() + account.role.slice(1)
-            : "Student"}
+        <View style={styles.roleBadge}>
+          <Text style={styles.roleText}>
+            {account?.role
+              ? account.role.charAt(0).toUpperCase() + account.role.slice(1)
+              : "Student"}
+          </Text>
+        </View>
+
+        <Text style={styles.photoHint}>
+          Tap the camera icon to change your profile photo
         </Text>
       </View>
 
-      <View style={styles.fieldGroup}>
-        <Text style={styles.label}>Full Name</Text>
+      <Text style={styles.sectionTitle}>Personal Information</Text>
 
-        <TextInput
-          style={styles.input}
-          value={fullName}
-          onChangeText={setFullName}
-          placeholder="Enter full name"
-          placeholderTextColor={MUTED}
-          editable={!isSaving}
-        />
-      </View>
+      <View style={styles.formCard}>
+        <View style={styles.fieldGroup}>
+          <Text style={styles.label}>Full Name</Text>
 
-      <View style={styles.fieldGroup}>
-        <Text style={styles.label}>User ID</Text>
+          <View style={styles.inputWrapper}>
+            <SymbolView
+              name={{
+                ios: "person",
+                android: "person",
+                web: "person",
+              }}
+              size={19}
+              tintColor={MUTED}
+            />
 
-        <View style={styles.readOnlyField}>
-          <Text
-            style={[styles.readOnlyText, !userId && styles.placeholderText]}
-          >
-            {userId || "IT23764556"}
-          </Text>
-
-          <SymbolView
-            name={{
-              ios: "lock.fill",
-              android: "lock",
-              web: "lock",
-            }}
-            size={15}
-            tintColor="#A0A8B5"
-          />
+            <TextInput
+              style={styles.input}
+              value={fullName}
+              onChangeText={setFullName}
+              placeholder="Enter full name"
+              placeholderTextColor={MUTED}
+              editable={!isSaving}
+            />
+          </View>
         </View>
-      </View>
 
-      <View style={styles.fieldGroup}>
-        <Text style={styles.label}>Email</Text>
+        <View style={styles.fieldGroup}>
+          <Text style={styles.label}>User ID</Text>
 
-        <TextInput
-          style={styles.input}
-          value={email}
-          onChangeText={setEmail}
-          placeholder="Enter email"
-          placeholderTextColor={MUTED}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
-          editable={!isSaving}
-        />
-      </View>
+          <View style={styles.readOnlyField}>
+            <SymbolView
+              name={{
+                ios: "person.text.rectangle",
+                android: "badge",
+                web: "badge",
+              }}
+              size={19}
+              tintColor={MUTED}
+            />
 
-      <View style={styles.fieldGroup}>
-        <Text style={styles.label}>Phone Number</Text>
+            <Text
+              style={[styles.readOnlyText, !userId && styles.placeholderText]}
+            >
+              {userId || "Not available"}
+            </Text>
 
-        <TextInput
-          style={styles.input}
-          value={phone}
-          onChangeText={setPhone}
-          placeholder="Enter phone number"
-          placeholderTextColor={MUTED}
-          keyboardType="phone-pad"
-          editable={!isSaving}
-        />
+            <SymbolView
+              name={{
+                ios: "lock.fill",
+                android: "lock",
+                web: "lock",
+              }}
+              size={14}
+              tintColor="#A0A8B5"
+            />
+          </View>
+        </View>
+
+        <View style={styles.fieldGroup}>
+          <Text style={styles.label}>Email</Text>
+
+          <View style={styles.inputWrapper}>
+            <SymbolView
+              name={{
+                ios: "envelope",
+                android: "mail",
+                web: "mail",
+              }}
+              size={19}
+              tintColor={MUTED}
+            />
+
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              placeholder="Enter email"
+              placeholderTextColor={MUTED}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+              editable={!isSaving}
+            />
+          </View>
+        </View>
+
+        <View style={[styles.fieldGroup, styles.lastFieldGroup]}>
+          <Text style={styles.label}>Phone Number</Text>
+
+          <View style={styles.inputWrapper}>
+            <SymbolView
+              name={{
+                ios: "phone",
+                android: "call",
+                web: "call",
+              }}
+              size={19}
+              tintColor={MUTED}
+            />
+
+            <TextInput
+              style={styles.input}
+              value={phone}
+              onChangeText={setPhone}
+              placeholder="Enter phone number"
+              placeholderTextColor={MUTED}
+              keyboardType="phone-pad"
+              editable={!isSaving}
+            />
+          </View>
+        </View>
       </View>
 
       {errorMessage ? (
         <View style={styles.errorBox}>
+          <SymbolView
+            name={{
+              ios: "exclamationmark.circle.fill",
+              android: "error",
+              web: "error",
+            }}
+            size={18}
+            tintColor="#DC2626"
+          />
+
           <Text style={styles.errorText}>{errorMessage}</Text>
         </View>
       ) : null}
 
       <Pressable
-        style={[styles.saveButton, isSaving && styles.disabledButton]}
+        style={({ pressed }) => [
+          styles.saveButton,
+          pressed && styles.saveButtonPressed,
+          isSaving && styles.disabledButton,
+        ]}
         onPress={handleSaveChanges}
         disabled={isSaving}
       >
+        <SymbolView
+          name={{
+            ios: "checkmark",
+            android: "check",
+            web: "check",
+          }}
+          size={19}
+          tintColor="#FFFFFF"
+        />
+
         <Text style={styles.saveButtonText}>
           {isSaving ? "Saving..." : "Save Changes"}
         </Text>
@@ -354,140 +425,340 @@ const styles = StyleSheet.create({
   },
 
   content: {
-    paddingHorizontal: 22,
+    paddingHorizontal: 20,
   },
 
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 16,
+
+    marginBottom: 20,
   },
 
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  headerButton: {
+    width: 42,
+    height: 42,
+
+    borderRadius: 21,
+
+    backgroundColor: "#FFFFFF",
+
     alignItems: "center",
     justifyContent: "center",
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+
+    elevation: 2,
   },
 
   title: {
-    fontSize: 23,
+    fontSize: 22,
     fontWeight: "800",
-    color: TEXT,
+
+    color: NAVY,
   },
 
   headerSpacer: {
-    width: 40,
+    width: 42,
   },
 
-  profileSection: {
+  profileCard: {
+    backgroundColor: "#FFFFFF",
+
+    borderRadius: 24,
+
+    paddingVertical: 20,
+    paddingHorizontal: 18,
+
     alignItems: "center",
-    marginBottom: 18,
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
+    marginBottom: 24,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+
+    elevation: 3,
   },
 
   avatarWrapper: {
     position: "relative",
   },
 
+  avatarOuter: {
+    width: 96,
+    height: 96,
+
+    borderRadius: 48,
+
+    backgroundColor: LIGHT_BLUE,
+
+    padding: 4,
+
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
   avatar: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
+    width: 88,
+    height: 88,
+
+    borderRadius: 44,
+
     backgroundColor: "#FFFFFF",
   },
 
   editAvatarButton: {
     position: "absolute",
+
     right: -2,
-    bottom: 3,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#FFFFFF",
+    bottom: 2,
+
+    width: 32,
+    height: 32,
+
+    borderRadius: 16,
+
+    backgroundColor: BLUE,
+
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#D5DCE5",
+
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+
+    elevation: 3,
   },
 
   profileName: {
-    marginTop: 10,
-    fontSize: 20,
-    fontWeight: "500",
-    color: TEXT,
+    marginTop: 12,
+
+    fontSize: 21,
+    fontWeight: "800",
+
+    color: NAVY,
+
+    textAlign: "center",
+  },
+
+  roleBadge: {
+    marginTop: 6,
+
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+
+    borderRadius: 14,
+
+    backgroundColor: LIGHT_BLUE,
   },
 
   roleText: {
-    marginTop: -1,
-    fontSize: 16,
+    fontSize: 12,
+    fontWeight: "700",
+
+    color: BLUE,
+  },
+
+  photoHint: {
+    marginTop: 10,
+
+    maxWidth: 250,
+
+    fontSize: 11,
+    lineHeight: 16,
+
     color: MUTED,
+
+    textAlign: "center",
+  },
+
+  sectionTitle: {
+    marginLeft: 3,
+    marginBottom: 9,
+
+    fontSize: 16,
+    fontWeight: "800",
+
+    color: NAVY,
+  },
+
+  formCard: {
+    backgroundColor: "#FFFFFF",
+
+    borderRadius: 20,
+
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 4,
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+
+    elevation: 2,
   },
 
   fieldGroup: {
-    marginBottom: 13,
+    marginBottom: 14,
+  },
+
+  lastFieldGroup: {
+    marginBottom: 12,
   },
 
   label: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: TEXT,
     marginBottom: 7,
+
+    fontSize: 13,
+    fontWeight: "700",
+
+    color: NAVY,
+  },
+
+  inputWrapper: {
+    minHeight: 52,
+
+    borderRadius: 14,
+
+    backgroundColor: FIELD_BACKGROUND,
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
+    paddingHorizontal: 14,
+
+    flexDirection: "row",
+    alignItems: "center",
+
+    gap: 10,
   },
 
   input: {
-    height: 50,
-    borderRadius: 6,
-    backgroundColor: FIELD_BACKGROUND,
-    borderWidth: 1,
-    borderColor: "#B9C2CE",
-    paddingHorizontal: 12,
-    fontSize: 15,
-    color: TEXT,
+    flex: 1,
+
+    minHeight: 50,
+
+    fontSize: 14,
+
+    color: NAVY,
   },
 
   readOnlyField: {
-    height: 50,
-    borderRadius: 6,
-    backgroundColor: FIELD_BACKGROUND,
+    minHeight: 52,
+
+    borderRadius: 14,
+
+    backgroundColor: "#F1F4F8",
+
     borderWidth: 1,
-    borderColor: "#B9C2CE",
-    paddingHorizontal: 12,
+    borderColor: BORDER,
+
+    paddingHorizontal: 14,
+
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+
+    gap: 10,
   },
 
   readOnlyText: {
-    fontSize: 15,
-    color: "#6B7280",
+    flex: 1,
+
+    fontSize: 14,
+
+    color: MUTED,
   },
 
   placeholderText: {
-    color: "#8B93A1",
+    color: "#9AA3B2",
   },
 
   errorBox: {
-    backgroundColor: "#FEE2E2",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 10,
+    marginTop: 16,
+
+    flexDirection: "row",
+    alignItems: "center",
+
+    gap: 8,
+
+    padding: 12,
+
+    borderRadius: 14,
+
+    backgroundColor: "#FEF2F2",
+
+    borderWidth: 1,
+    borderColor: "#FECACA",
   },
 
   errorText: {
+    flex: 1,
+
     fontSize: 13,
+
     color: "#DC2626",
   },
 
   saveButton: {
-    height: 54,
-    borderRadius: 11,
+    marginTop: 20,
+
+    height: 52,
+
+    borderRadius: 16,
+
     backgroundColor: BLUE,
+
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 4,
+
+    gap: 8,
+
+    shadowColor: BLUE,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+
+    elevation: 3,
+  },
+
+  saveButtonPressed: {
+    opacity: 0.85,
   },
 
   disabledButton: {
@@ -495,8 +766,9 @@ const styles = StyleSheet.create({
   },
 
   saveButtonText: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: "700",
+
     color: "#FFFFFF",
   },
 });

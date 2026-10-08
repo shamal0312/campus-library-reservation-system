@@ -6,10 +6,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAuth } from "@/contexts/auth-context";
 
-const BACKGROUND = "#E7EDF6";
-const TEXT = "#111827";
-const MUTED = "#6B7280";
-const BORDER = "#AEB8C5";
+const BLUE = "#2F80ED";
+const NAVY = "#102A43";
+const BACKGROUND = "#F2F6FC";
+const MUTED = "#718096";
+const LIGHT_BLUE = "#EAF4FF";
+const BORDER = "#E4EAF2";
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -17,14 +19,18 @@ export default function ProfileScreen() {
 
   const displayName = account?.fullName?.trim() || "Nimal Perera";
 
+  const displayRole = account?.role
+    ? account.role.charAt(0).toUpperCase() + account.role.slice(1)
+    : "Student";
+
   return (
     <ScrollView
       style={styles.screen}
       contentContainerStyle={[
         styles.content,
         {
-          paddingTop: insets.top + 10,
-          paddingBottom: insets.bottom + 28,
+          paddingTop: insets.top + 24,
+          paddingBottom: insets.bottom + 32,
         },
       ]}
       showsVerticalScrollIndicator={false}
@@ -41,8 +47,8 @@ export default function ProfileScreen() {
               android: "arrow_back",
               web: "arrow_back",
             }}
-            size={24}
-            tintColor={TEXT}
+            size={22}
+            tintColor={NAVY}
           />
         </Pressable>
 
@@ -61,82 +67,182 @@ export default function ProfileScreen() {
               android: "settings",
               web: "settings",
             }}
-            size={24}
-            tintColor={TEXT}
+            size={22}
+            tintColor={NAVY}
           />
         </Pressable>
       </View>
 
-      <View style={styles.profileSection}>
-        <Image
-          source={
-            account?.avatarUrl
-              ? { uri: account.avatarUrl }
-              : require("@/assets/images/app-logo.png")
-          }
-          style={styles.avatar}
-          contentFit="cover"
-        />
+      <View style={styles.profileCard}>
+        <View style={styles.avatarOuter}>
+          <Image
+            source={
+              account?.avatarUrl
+                ? { uri: account.avatarUrl }
+                : require("@/assets/images/app-logo.png")
+            }
+            style={styles.avatar}
+            contentFit="cover"
+          />
+        </View>
 
         <Text style={styles.name}>{displayName}</Text>
 
-        <Text style={styles.role}>
-          {account?.role
-            ? account.role.charAt(0).toUpperCase() + account.role.slice(1)
-            : "Student"}
-        </Text>
+        <View style={styles.roleBadge}>
+          <Text style={styles.role}>{displayRole}</Text>
+        </View>
+
+        <Pressable
+          style={styles.editProfileButton}
+          onPress={() => router.push("/account/edit-profile")}
+        >
+          <SymbolView
+            name={{
+              ios: "pencil",
+              android: "edit",
+              web: "edit",
+            }}
+            size={16}
+            tintColor={BLUE}
+          />
+
+          <Text style={styles.editProfileText}>Edit Profile</Text>
+        </Pressable>
       </View>
 
-      <ProfileMenuItem
-        label="Personal Information"
-        onPress={() => router.push("/account/profile-details")}
-      />
+      <Text style={styles.sectionTitle}>Account</Text>
 
-      <ProfileMenuItem
-        label="Book Reservation"
-        onPress={() => {
-          console.log("Open book reservation");
-        }}
-      />
+      <View style={styles.menuGroup}>
+        <ProfileMenuItem
+          label="Personal Information"
+          icon={{
+            ios: "person.text.rectangle",
+            android: "badge",
+            web: "badge",
+          }}
+          onPress={() => router.push("/account/profile-details")}
+        />
 
-      <ProfileMenuItem
-        label="Seat Reservation"
-        onPress={() => {
-          console.log("Open seat reservation");
-        }}
-      />
+        <Divider />
 
-      <ProfileMenuItem
-        label="Room reservation"
-        onPress={() => {
-          console.log("Open room reservation");
-        }}
-      />
+        <ProfileMenuItem
+          label="Change Password"
+          icon={{
+            ios: "lock.fill",
+            android: "lock",
+            web: "lock",
+          }}
+          onPress={() => router.push("/account/change-password")}
+        />
+      </View>
 
-      <ProfileMenuItem
-        label="Change Password"
-        onPress={() => router.push("/account/change-password")}
-      />
+      <Text style={styles.sectionTitle}>Reservations</Text>
 
-      <ProfileMenuItem
-        label="App appearance"
-        onPress={() => router.push("/account/app-appearance")}
-      />
+      <View style={styles.menuGroup}>
+        <ProfileMenuItem
+          label="Book Reservation"
+          icon={{
+            ios: "book.fill",
+            android: "menu_book",
+            web: "menu_book",
+          }}
+          onPress={() => {
+            console.log("Open book reservation");
+          }}
+        />
 
-      <ProfileMenuItem
-        label="Notification Preferences"
-        onPress={() => router.push("/account/notification-preferences")}
-      />
+        <Divider />
+
+        <ProfileMenuItem
+          label="Seat Reservation"
+          icon={{
+            ios: "chair.fill",
+            android: "chair",
+            web: "chair",
+          }}
+          onPress={() => {
+            console.log("Open seat reservation");
+          }}
+        />
+
+        <Divider />
+
+        <ProfileMenuItem
+          label="Room Reservation"
+          icon={{
+            ios: "door.left.hand.open",
+            android: "meeting_room",
+            web: "meeting_room",
+          }}
+          onPress={() => {
+            console.log("Open room reservation");
+          }}
+        />
+      </View>
+
+      <Text style={styles.sectionTitle}>Preferences</Text>
+
+      <View style={styles.menuGroup}>
+        <ProfileMenuItem
+          label="App Appearance"
+          icon={{
+            ios: "paintbrush.fill",
+            android: "palette",
+            web: "palette",
+          }}
+          onPress={() => router.push("/account/app-appearance")}
+        />
+
+        <Divider />
+
+        <ProfileMenuItem
+          label="Notification Preferences"
+          icon={{
+            ios: "bell.badge.fill",
+            android: "notifications",
+            web: "notifications",
+          }}
+          onPress={() => router.push("/account/notification-preferences")}
+        />
+      </View>
     </ScrollView>
   );
 }
 
+type MenuIcon = {
+  ios:
+    | "person.text.rectangle"
+    | "lock.fill"
+    | "book.fill"
+    | "chair.fill"
+    | "door.left.hand.open"
+    | "paintbrush.fill"
+    | "bell.badge.fill";
+  android:
+    | "badge"
+    | "lock"
+    | "menu_book"
+    | "chair"
+    | "meeting_room"
+    | "palette"
+    | "notifications";
+  web:
+    | "badge"
+    | "lock"
+    | "menu_book"
+    | "chair"
+    | "meeting_room"
+    | "palette"
+    | "notifications";
+};
+
 type ProfileMenuItemProps = {
   label: string;
+  icon: MenuIcon;
   onPress: () => void;
 };
 
-function ProfileMenuItem({ label, onPress }: ProfileMenuItemProps) {
+function ProfileMenuItem({ label, icon, onPress }: ProfileMenuItemProps) {
   return (
     <Pressable
       style={({ pressed }) => [
@@ -145,19 +251,29 @@ function ProfileMenuItem({ label, onPress }: ProfileMenuItemProps) {
       ]}
       onPress={onPress}
     >
+      <View style={styles.menuIconBox}>
+        <SymbolView name={icon} size={20} tintColor={BLUE} />
+      </View>
+
       <Text style={styles.menuText}>{label}</Text>
 
-      <SymbolView
-        name={{
-          ios: "chevron.right",
-          android: "chevron_right",
-          web: "chevron_right",
-        }}
-        size={20}
-        tintColor={TEXT}
-      />
+      <View style={styles.chevronBox}>
+        <SymbolView
+          name={{
+            ios: "chevron.right",
+            android: "chevron_right",
+            web: "chevron_right",
+          }}
+          size={18}
+          tintColor={BLUE}
+        />
+      </View>
     </Pressable>
   );
+}
+
+function Divider() {
+  return <View style={styles.divider} />;
 }
 
 const styles = StyleSheet.create({
@@ -167,74 +283,238 @@ const styles = StyleSheet.create({
   },
 
   content: {
-    paddingHorizontal: 18,
+    paddingHorizontal: 20,
   },
 
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+
+    marginBottom: 20,
   },
 
   headerButton: {
     width: 42,
     height: 42,
+
     borderRadius: 21,
+
+    backgroundColor: "#FFFFFF",
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+
+    elevation: 2,
+  },
+
+  title: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: NAVY,
+  },
+
+  profileCard: {
+    backgroundColor: "#FFFFFF",
+
+    borderRadius: 24,
+
+    paddingVertical: 22,
+    paddingHorizontal: 20,
+
+    alignItems: "center",
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
+    marginBottom: 24,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+
+    elevation: 3,
+  },
+
+  avatarOuter: {
+    width: 96,
+    height: 96,
+
+    borderRadius: 48,
+
+    padding: 4,
+
+    backgroundColor: LIGHT_BLUE,
+
     alignItems: "center",
     justifyContent: "center",
   },
 
-  title: {
-    fontSize: 23,
-    fontWeight: "800",
-    color: TEXT,
-  },
-
-  profileSection: {
-    alignItems: "center",
-    marginTop: 8,
-    marginBottom: 10,
-  },
-
   avatar: {
-    width: 86,
-    height: 86,
-    borderRadius: 43,
+    width: 88,
+    height: 88,
+
+    borderRadius: 44,
+
     backgroundColor: "#FFFFFF",
   },
 
   name: {
-    marginTop: 8,
+    marginTop: 13,
+
     fontSize: 22,
-    fontWeight: "500",
-    color: TEXT,
+    fontWeight: "800",
+
+    color: NAVY,
+
+    textAlign: "center",
+  },
+
+  roleBadge: {
+    marginTop: 7,
+
+    backgroundColor: LIGHT_BLUE,
+
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+
+    borderRadius: 14,
   },
 
   role: {
-    marginTop: -1,
-    fontSize: 17,
-    color: MUTED,
+    fontSize: 12,
+    fontWeight: "700",
+
+    color: BLUE,
+  },
+
+  editProfileButton: {
+    marginTop: 15,
+
+    flexDirection: "row",
+    alignItems: "center",
+
+    gap: 6,
+
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+
+    borderRadius: 18,
+
+    backgroundColor: "#F5F9FF",
+
+    borderWidth: 1,
+    borderColor: "#DCEBFF",
+  },
+
+  editProfileText: {
+    fontSize: 13,
+    fontWeight: "700",
+
+    color: BLUE,
+  },
+
+  sectionTitle: {
+    marginLeft: 3,
+    marginBottom: 9,
+
+    fontSize: 16,
+    fontWeight: "800",
+
+    color: NAVY,
+  },
+
+  menuGroup: {
+    backgroundColor: "#FFFFFF",
+
+    borderRadius: 20,
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
+    overflow: "hidden",
+
+    marginBottom: 22,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+
+    elevation: 2,
   },
 
   menuItem: {
-    minHeight: 52,
-    borderWidth: 1,
-    borderColor: BORDER,
-    borderRadius: 7,
-    paddingHorizontal: 12,
+    minHeight: 64,
+
+    paddingHorizontal: 14,
+
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 9,
   },
 
   menuItemPressed: {
-    opacity: 0.7,
+    backgroundColor: "#F8FAFD",
+  },
+
+  menuIconBox: {
+    width: 40,
+    height: 40,
+
+    borderRadius: 13,
+
+    backgroundColor: LIGHT_BLUE,
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    marginRight: 12,
   },
 
   menuText: {
     flex: 1,
-    fontSize: 17,
-    color: TEXT,
+
+    fontSize: 15,
+    fontWeight: "600",
+
+    color: NAVY,
+  },
+
+  chevronBox: {
+    width: 32,
+    height: 32,
+
+    borderRadius: 16,
+
+    backgroundColor: "#F5F9FF",
+
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  divider: {
+    height: 1,
+
+    backgroundColor: "#EEF2F6",
+
+    marginLeft: 66,
   },
 });

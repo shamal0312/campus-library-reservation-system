@@ -2,24 +2,25 @@ import { router } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useState } from "react";
 import {
-    Alert,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAuth } from "@/contexts/auth-context";
 
-const BLUE = "#3B5CCC";
-const LIGHT_BLUE = "#C9D9F7";
-const BACKGROUND = "#E7EDF6";
-const FIELD_BACKGROUND = "#DDE3EA";
-const TEXT = "#111827";
-const MUTED = "#6B7280";
+const BLUE = "#2F80ED";
+const NAVY = "#102A43";
+const BACKGROUND = "#F2F6FC";
+const MUTED = "#718096";
+const LIGHT_BLUE = "#EAF4FF";
+const BORDER = "#E4EAF2";
+const FIELD_BACKGROUND = "#F8FAFD";
 
 export default function ChangePasswordScreen() {
   const insets = useSafeAreaInsets();
@@ -30,10 +31,13 @@ export default function ChangePasswordScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+
   const [showNewPassword, setShowNewPassword] = useState(false);
+
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   function isValidPassword(password: string) {
@@ -103,15 +107,16 @@ export default function ChangePasswordScreen() {
       contentContainerStyle={[
         styles.content,
         {
-          paddingTop: insets.top + 10,
-          paddingBottom: insets.bottom + 28,
+          paddingTop: insets.top + 24,
+          paddingBottom: insets.bottom + 32,
         },
       ]}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
     >
       <View style={styles.header}>
         <Pressable
-          style={styles.backButton}
+          style={styles.headerButton}
           onPress={() => router.back()}
           hitSlop={8}
         >
@@ -122,7 +127,7 @@ export default function ChangePasswordScreen() {
               web: "arrow_back",
             }}
             size={22}
-            tintColor={TEXT}
+            tintColor={NAVY}
           />
         </Pressable>
 
@@ -131,132 +136,236 @@ export default function ChangePasswordScreen() {
         <View style={styles.headerSpacer} />
       </View>
 
-      <View style={styles.lockCircle}>
-        <SymbolView
-          name={{
-            ios: "lock.fill",
-            android: "lock",
-            web: "lock",
-          }}
-          size={48}
-          tintColor={BLUE}
-        />
-      </View>
-
-      <Text style={styles.subtitle}>Keep your app secure</Text>
-
-      <View style={styles.passwordField}>
-        <TextInput
-          style={styles.input}
-          value={currentPassword}
-          onChangeText={setCurrentPassword}
-          placeholder="Current password"
-          placeholderTextColor="#8B93A1"
-          secureTextEntry={!showCurrentPassword}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-
-        <Pressable
-          onPress={() => setShowCurrentPassword((current) => !current)}
-          hitSlop={8}
-        >
+      <View style={styles.securityCard}>
+        <View style={styles.lockCircle}>
           <SymbolView
             name={{
-              ios: showCurrentPassword ? "eye.slash" : "eye",
-              android: showCurrentPassword ? "visibility_off" : "visibility",
-              web: showCurrentPassword ? "visibility_off" : "visibility",
+              ios: "lock.shield.fill",
+              android: "lock",
+              web: "lock",
             }}
-            size={20}
-            tintColor={MUTED}
+            size={38}
+            tintColor={BLUE}
           />
-        </Pressable>
+        </View>
+
+        <Text style={styles.securityTitle}>Keep your account secure</Text>
+
+        <Text style={styles.subtitle}>
+          Choose a strong password that you do not use elsewhere.
+        </Text>
       </View>
 
-      <View style={styles.passwordField}>
-        <TextInput
-          style={styles.input}
-          value={newPassword}
-          onChangeText={setNewPassword}
-          placeholder="New Password"
-          placeholderTextColor="#8B93A1"
-          secureTextEntry={!showNewPassword}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
+      <Text style={styles.sectionTitle}>Password Details</Text>
 
-        <Pressable
-          onPress={() => setShowNewPassword((current) => !current)}
-          hitSlop={8}
-        >
+      <View style={styles.formCard}>
+        <Text style={styles.label}>Current Password</Text>
+
+        <View style={styles.passwordField}>
           <SymbolView
             name={{
-              ios: showNewPassword ? "eye.slash" : "eye",
-              android: showNewPassword ? "visibility_off" : "visibility",
-              web: showNewPassword ? "visibility_off" : "visibility",
+              ios: "lock",
+              android: "lock",
+              web: "lock",
             }}
-            size={20}
+            size={19}
             tintColor={MUTED}
           />
-        </Pressable>
-      </View>
 
-      <View style={styles.passwordField}>
-        <TextInput
-          style={styles.input}
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          placeholder="Confirm Password"
-          placeholderTextColor="#8B93A1"
-          secureTextEntry={!showConfirmPassword}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
+          <TextInput
+            style={styles.input}
+            value={currentPassword}
+            onChangeText={setCurrentPassword}
+            placeholder="Current password"
+            placeholderTextColor={MUTED}
+            secureTextEntry={!showCurrentPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+            editable={!isSubmitting}
+          />
 
-        <Pressable
-          onPress={() => setShowConfirmPassword((current) => !current)}
-          hitSlop={8}
-        >
+          <Pressable
+            onPress={() => setShowCurrentPassword((current) => !current)}
+            hitSlop={8}
+          >
+            <SymbolView
+              name={{
+                ios: showCurrentPassword ? "eye.slash" : "eye",
+                android: showCurrentPassword ? "visibility_off" : "visibility",
+                web: showCurrentPassword ? "visibility_off" : "visibility",
+              }}
+              size={20}
+              tintColor={MUTED}
+            />
+          </Pressable>
+        </View>
+
+        <Text style={styles.label}>New Password</Text>
+
+        <View style={styles.passwordField}>
           <SymbolView
             name={{
-              ios: showConfirmPassword ? "eye.slash" : "eye",
-              android: showConfirmPassword ? "visibility_off" : "visibility",
-              web: showConfirmPassword ? "visibility_off" : "visibility",
+              ios: "key.fill",
+              android: "key",
+              web: "key",
             }}
-            size={20}
+            size={19}
             tintColor={MUTED}
           />
-        </Pressable>
+
+          <TextInput
+            style={styles.input}
+            value={newPassword}
+            onChangeText={setNewPassword}
+            placeholder="New password"
+            placeholderTextColor={MUTED}
+            secureTextEntry={!showNewPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+            editable={!isSubmitting}
+          />
+
+          <Pressable
+            onPress={() => setShowNewPassword((current) => !current)}
+            hitSlop={8}
+          >
+            <SymbolView
+              name={{
+                ios: showNewPassword ? "eye.slash" : "eye",
+                android: showNewPassword ? "visibility_off" : "visibility",
+                web: showNewPassword ? "visibility_off" : "visibility",
+              }}
+              size={20}
+              tintColor={MUTED}
+            />
+          </Pressable>
+        </View>
+
+        <Text style={styles.label}>Confirm Password</Text>
+
+        <View style={[styles.passwordField, styles.lastField]}>
+          <SymbolView
+            name={{
+              ios: "checkmark.shield.fill",
+              android: "verified_user",
+              web: "verified_user",
+            }}
+            size={19}
+            tintColor={MUTED}
+          />
+
+          <TextInput
+            style={styles.input}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            placeholder="Confirm new password"
+            placeholderTextColor={MUTED}
+            secureTextEntry={!showConfirmPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+            editable={!isSubmitting}
+          />
+
+          <Pressable
+            onPress={() => setShowConfirmPassword((current) => !current)}
+            hitSlop={8}
+          >
+            <SymbolView
+              name={{
+                ios: showConfirmPassword ? "eye.slash" : "eye",
+                android: showConfirmPassword ? "visibility_off" : "visibility",
+                web: showConfirmPassword ? "visibility_off" : "visibility",
+              }}
+              size={20}
+              tintColor={MUTED}
+            />
+          </Pressable>
+        </View>
       </View>
 
       {errorMessage ? (
         <View style={styles.errorBox}>
+          <SymbolView
+            name={{
+              ios: "exclamationmark.circle.fill",
+              android: "error",
+              web: "error",
+            }}
+            size={18}
+            tintColor="#DC2626"
+          />
+
           <Text style={styles.errorText}>{errorMessage}</Text>
         </View>
       ) : null}
 
+      <View style={styles.requirementsCard}>
+        <View style={styles.requirementsHeader}>
+          <View style={styles.requirementIcon}>
+            <SymbolView
+              name={{
+                ios: "checkmark.shield.fill",
+                android: "verified_user",
+                web: "verified_user",
+              }}
+              size={20}
+              tintColor={BLUE}
+            />
+          </View>
+
+          <Text style={styles.requirementsTitle}>Password requirements</Text>
+        </View>
+
+        <Requirement text="At least 8 characters" />
+        <Requirement text="At least one number" />
+        <Requirement text="At least one uppercase letter" />
+        <Requirement text="At least one special character" />
+      </View>
+
       <Pressable
-        style={[styles.changeButton, isSubmitting && styles.disabledButton]}
+        style={({ pressed }) => [
+          styles.changeButton,
+          pressed && styles.changeButtonPressed,
+          isSubmitting && styles.disabledButton,
+        ]}
         onPress={handleChangePassword}
         disabled={isSubmitting}
       >
+        <SymbolView
+          name={{
+            ios: "lock.rotation",
+            android: "lock_reset",
+            web: "lock_reset",
+          }}
+          size={20}
+          tintColor="#FFFFFF"
+        />
+
         <Text style={styles.changeButtonText}>
-          {isSubmitting ? "Changing password..." : "Change password"}
+          {isSubmitting ? "Changing password..." : "Change Password"}
         </Text>
       </Pressable>
-
-      <View style={styles.requirementsCard}>
-        <Text style={styles.requirementsTitle}>Password must contain:</Text>
-
-        <Text style={styles.requirement}>At least 8 characters</Text>
-
-        <Text style={styles.requirement}>A number</Text>
-
-        <Text style={styles.requirement}>An uppercase letter</Text>
-
-        <Text style={styles.requirement}>A special character</Text>
-      </View>
     </ScrollView>
+  );
+}
+
+function Requirement({ text }: { text: string }) {
+  return (
+    <View style={styles.requirementRow}>
+      <View style={styles.requirementDot}>
+        <SymbolView
+          name={{
+            ios: "checkmark",
+            android: "check",
+            web: "check",
+          }}
+          size={12}
+          tintColor={BLUE}
+        />
+      </View>
+
+      <Text style={styles.requirement}>{text}</Text>
+    </View>
   );
 }
 
@@ -267,90 +376,312 @@ const styles = StyleSheet.create({
   },
 
   content: {
-    paddingHorizontal: 22,
+    paddingHorizontal: 20,
   },
 
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+
+    marginBottom: 20,
   },
 
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  headerButton: {
+    width: 42,
+    height: 42,
+
+    borderRadius: 21,
+
+    backgroundColor: "#FFFFFF",
+
     alignItems: "center",
     justifyContent: "center",
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+
+    elevation: 2,
   },
 
   headerSpacer: {
-    width: 40,
+    width: 42,
   },
 
   title: {
-    fontSize: 22,
+    fontSize: 21,
     fontWeight: "800",
-    color: TEXT,
+    color: NAVY,
+  },
+
+  securityCard: {
+    backgroundColor: "#FFFFFF",
+
+    borderRadius: 24,
+
+    paddingVertical: 22,
+    paddingHorizontal: 20,
+
+    alignItems: "center",
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
+    marginBottom: 24,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+
+    elevation: 3,
   },
 
   lockCircle: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: "#ABC6F6",
-    alignSelf: "center",
+    width: 76,
+    height: 76,
+
+    borderRadius: 24,
+
+    backgroundColor: LIGHT_BLUE,
+
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 18,
+  },
+
+  securityTitle: {
+    marginTop: 14,
+
+    fontSize: 19,
+    fontWeight: "800",
+
+    color: NAVY,
   },
 
   subtitle: {
-    marginTop: 12,
-    marginBottom: 14,
+    marginTop: 6,
+
+    maxWidth: 290,
+
     textAlign: "center",
-    fontSize: 16,
+
+    fontSize: 13,
+    lineHeight: 19,
+
     color: MUTED,
   },
 
-  passwordField: {
-    height: 50,
-    borderRadius: 6,
-    backgroundColor: FIELD_BACKGROUND,
+  sectionTitle: {
+    marginLeft: 3,
+    marginBottom: 9,
+
+    fontSize: 16,
+    fontWeight: "800",
+
+    color: NAVY,
+  },
+
+  formCard: {
+    backgroundColor: "#FFFFFF",
+
+    borderRadius: 20,
+
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 4,
+
     borderWidth: 1,
-    borderColor: "#B9C2CE",
+    borderColor: BORDER,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+
+    elevation: 2,
+  },
+
+  label: {
+    marginBottom: 7,
+
+    fontSize: 13,
+    fontWeight: "700",
+
+    color: NAVY,
+  },
+
+  passwordField: {
+    minHeight: 52,
+
+    borderRadius: 14,
+
+    backgroundColor: FIELD_BACKGROUND,
+
+    borderWidth: 1,
+    borderColor: BORDER,
+
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 12,
+
+    gap: 10,
+
+    paddingHorizontal: 14,
+
+    marginBottom: 14,
+  },
+
+  lastField: {
     marginBottom: 12,
   },
 
   input: {
     flex: 1,
-    fontSize: 15,
-    color: TEXT,
+
+    minHeight: 50,
+
+    fontSize: 14,
+
+    color: NAVY,
   },
 
   errorBox: {
-    backgroundColor: "#FEE2E2",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    marginBottom: 10,
+    marginTop: 16,
+
+    flexDirection: "row",
+    alignItems: "center",
+
+    gap: 8,
+
+    padding: 12,
+
+    borderRadius: 14,
+
+    backgroundColor: "#FEF2F2",
+
+    borderWidth: 1,
+    borderColor: "#FECACA",
   },
 
   errorText: {
-    fontSize: 12,
+    flex: 1,
+
+    fontSize: 13,
+
     color: "#DC2626",
   },
 
-  changeButton: {
-    height: 54,
-    borderRadius: 11,
-    backgroundColor: BLUE,
+  requirementsCard: {
+    marginTop: 18,
+
+    backgroundColor: LIGHT_BLUE,
+
+    borderRadius: 20,
+
+    padding: 16,
+
+    borderWidth: 1,
+    borderColor: "#D6E9FF",
+  },
+
+  requirementsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+
+    marginBottom: 12,
+  },
+
+  requirementIcon: {
+    width: 34,
+    height: 34,
+
+    borderRadius: 12,
+
+    backgroundColor: "#FFFFFF",
+
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 4,
+
+    marginRight: 10,
+  },
+
+  requirementsTitle: {
+    fontSize: 14,
+    fontWeight: "800",
+
+    color: NAVY,
+  },
+
+  requirementRow: {
+    flexDirection: "row",
+    alignItems: "center",
+
+    marginTop: 7,
+  },
+
+  requirementDot: {
+    width: 20,
+    height: 20,
+
+    borderRadius: 10,
+
+    backgroundColor: "#FFFFFF",
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    marginRight: 9,
+  },
+
+  requirement: {
+    flex: 1,
+
+    fontSize: 13,
+
+    color: NAVY,
+  },
+
+  changeButton: {
+    marginTop: 20,
+
+    height: 52,
+
+    borderRadius: 16,
+
+    backgroundColor: BLUE,
+
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+
+    gap: 8,
+
+    shadowColor: BLUE,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+
+    elevation: 3,
+  },
+
+  changeButtonPressed: {
+    opacity: 0.85,
   },
 
   disabledButton: {
@@ -359,28 +690,8 @@ const styles = StyleSheet.create({
 
   changeButtonText: {
     color: "#FFFFFF",
-    fontSize: 18,
+
+    fontSize: 15,
     fontWeight: "700",
-  },
-
-  requirementsCard: {
-    marginTop: 12,
-    backgroundColor: LIGHT_BLUE,
-    borderRadius: 6,
-    paddingHorizontal: 40,
-    paddingVertical: 22,
-  },
-
-  requirementsTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: TEXT,
-    marginBottom: 2,
-  },
-
-  requirement: {
-    fontSize: 14,
-    lineHeight: 17,
-    color: TEXT,
   },
 });
