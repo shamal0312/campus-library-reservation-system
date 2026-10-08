@@ -2,18 +2,21 @@ import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 
+import { useAuth } from '@/contexts/auth-context';
+import { SEATS } from './seat-layout';
 import { Booking, bookingDate, bookingTime, errorText } from './model';
 import { listBookings, updateSeatReservation } from './repository';
 import { Button, C, DateField, ErrorBox, Page, styles, TimeField } from './ui';
 
 export function UpdateReservationButton({ booking }: { booking: Booking }) {
+  const { account } = useAuth();
   const [now, setNow] = useState(() => Date.now());
   useFocusEffect(useCallback(() => {
     setNow(Date.now());
     const timer = setInterval(() => setNow(Date.now()), 30000);
     return () => clearInterval(timer);
   }, []));
-  if (booking.kind !== 'seat' || booking.status !== 'reserved' ||
+  if (!SEATS.some(seat => seat.id === booking.resource_id && seat.role === account?.role) || booking.kind !== 'seat' || booking.status !== 'reserved' ||
       new Date(booking.start_at).getTime() <= now) return null;
 
   return (
@@ -29,6 +32,8 @@ export function UpdateReservationButton({ booking }: { booking: Booking }) {
 }
 
 export default function UpdateReservationScreen() {
+  const { account, isLoading: authLoading } = useAuth();
+  const role = account?.role;
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const [booking, setBooking] = useState<Booking | null>(null);
@@ -42,6 +47,8 @@ export default function UpdateReservationScreen() {
 
   useFocusEffect(useCallback(() => {
     let mounted = true;
+    if (authLoading) { setLoading(true); return () => { mounted = false; }; }
+    if (!role) { setLoading(false); setBooking(null); setError('Select your account role before editing a seat.'); return () => { mounted = false; }; }
     setLoading(true);
     setError('');
     setSaved(false);
@@ -50,6 +57,7 @@ export default function UpdateReservationScreen() {
       if (!mounted) return;
       const found = rows.find(row => row.id === id);
       if (!found || found.kind !== 'seat') throw new Error('Seat reservation not found.');
+      if (!SEATS.some(seat => seat.id === found.resource_id && seat.role === role)) throw new Error('This seat is not available for your current account role.');
       if (found.status !== 'reserved' || new Date(found.start_at).getTime() <= Date.now()) {
         throw new Error('Only future reservations that have not been checked in can be updated.');
       }
@@ -63,15 +71,15 @@ export default function UpdateReservationScreen() {
       if (mounted) setLoading(false);
     });
     return () => { mounted = false; };
-  }, [id]));
+  }, [id, role, authLoading]));
 
   async function save() {
-    if (!booking || locked.current) return;
+    if (!booking || !role || locked.current) return;
     locked.current = true;
     setBusy(true);
     setError('');
     try {
-      const updated = await updateSeatReservation(booking.id, date, slot);
+      const updated = await updateSeatReservation(booking.id, date, slot, role);
       setBooking(updated);
       setSaved(true);
     } catch (cause) {
