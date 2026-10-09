@@ -50,7 +50,11 @@ const emptyStats: DashboardStats = {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-function Dashboard() {
+interface DashboardProps {
+  onNavigate: (page: string) => void
+}
+
+function Dashboard({ onNavigate }: DashboardProps) {
   const [stats,      setStats]      = useState<DashboardStats>(emptyStats)
   const [activity,   setActivity]   = useState<ActivityRow[]>([])
   const [loading,    setLoading]    = useState(true)
@@ -181,7 +185,7 @@ function Dashboard() {
       {/* ══════════ WIDGETS ══════════ */}
       <div className="dashboard-widgets">
         <RecentActivityTable rows={activity} loading={loading} onRefresh={fetchAll} />
-        <QuickActions stats={stats} loading={loading} />
+        <QuickActions stats={stats} loading={loading} onNavigate={onNavigate} />
       </div>
 
     </main>
