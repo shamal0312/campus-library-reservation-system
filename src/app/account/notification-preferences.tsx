@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useEffect, useState } from "react";
@@ -14,6 +13,13 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import {
+  DEFAULT_NOTIFICATION_PREFERENCES,
+  getNotificationPreferences,
+  saveNotificationPreferences,
+  type NotificationPreferences,
+} from "@/services/notifications";
+
 const BLUE = "#2F80ED";
 const NAVY = "#102A43";
 const BACKGROUND = "#F2F6FC";
@@ -21,27 +27,12 @@ const MUTED = "#718096";
 const LIGHT_BLUE = "#EAF4FF";
 const BORDER = "#E4EAF2";
 
-const STORAGE_KEY = "notification_preferences";
-
-type NotificationPreferences = {
-  reservationConfirmations: boolean;
-  reservationReminders: boolean;
-  reservationUpdates: boolean;
-  generalNotifications: boolean;
-};
-
-const DEFAULT_PREFERENCES: NotificationPreferences = {
-  reservationConfirmations: true,
-  reservationReminders: true,
-  reservationUpdates: true,
-  generalNotifications: true,
-};
-
 export default function NotificationPreferencesScreen() {
   const insets = useSafeAreaInsets();
 
-  const [preferences, setPreferences] =
-    useState<NotificationPreferences>(DEFAULT_PREFERENCES);
+  const [preferences, setPreferences] = useState<NotificationPreferences>(
+    DEFAULT_NOTIFICATION_PREFERENCES,
+  );
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -52,11 +43,16 @@ export default function NotificationPreferencesScreen() {
 
   async function loadPreferences() {
     try {
-      const stored = await AsyncStorage.getItem(STORAGE_KEY);
+      setIsLoading(true);
 
-      if (stored) {
-        setPreferences(JSON.parse(stored));
+      const result = await getNotificationPreferences();
+
+      if (result.error) {
+        Alert.alert("Error", result.error);
+        return;
       }
+
+      setPreferences(result.preferences);
     } catch {
       Alert.alert("Error", "Could not load notification preferences.");
     } finally {
@@ -78,7 +74,16 @@ export default function NotificationPreferencesScreen() {
     try {
       setIsSaving(true);
 
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
+      const result = await saveNotificationPreferences(preferences);
+
+      if (result.error) {
+        Alert.alert("Error", result.error);
+        return;
+      }
+
+      if (result.preferences) {
+        setPreferences(result.preferences);
+      }
 
       Alert.alert(
         "Preferences Saved",
@@ -256,15 +261,19 @@ export default function NotificationPreferencesScreen() {
         onPress={handleSave}
         disabled={isSaving}
       >
-        <SymbolView
-          name={{
-            ios: "checkmark",
-            android: "check",
-            web: "check",
-          }}
-          size={19}
-          tintColor="#FFFFFF"
-        />
+        {isSaving ? (
+          <ActivityIndicator size="small" color="#FFFFFF" />
+        ) : (
+          <SymbolView
+            name={{
+              ios: "checkmark",
+              android: "check",
+              web: "check",
+            }}
+            size={19}
+            tintColor="#FFFFFF"
+          />
+        )}
 
         <Text style={styles.saveButtonText}>
           {isSaving ? "Saving..." : "Save Preferences"}
@@ -280,7 +289,9 @@ type PreferenceIcon = {
     | "clock.fill"
     | "arrow.triangle.2.circlepath"
     | "bell.fill";
+
   android: "check_circle" | "schedule" | "sync" | "notifications";
+
   web: "check_circle" | "schedule" | "sync" | "notifications";
 };
 
@@ -325,33 +336,25 @@ function PreferenceRow({
 const styles = StyleSheet.create({
   loadingScreen: {
     flex: 1,
-
     alignItems: "center",
     justifyContent: "center",
-
     backgroundColor: BACKGROUND,
   },
 
   loadingIcon: {
     width: 74,
     height: 74,
-
     borderRadius: 24,
-
     backgroundColor: "#FFFFFF",
-
     alignItems: "center",
     justifyContent: "center",
-
     borderWidth: 1,
     borderColor: BORDER,
-
     elevation: 2,
   },
 
   loadingText: {
     marginTop: 12,
-
     fontSize: 13,
     color: MUTED,
   },
@@ -369,24 +372,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-
     marginBottom: 20,
   },
 
   headerButton: {
     width: 42,
     height: 42,
-
     borderRadius: 21,
-
     backgroundColor: "#FFFFFF",
-
     alignItems: "center",
     justifyContent: "center",
-
     borderWidth: 1,
     borderColor: BORDER,
-
     shadowColor: "#0F172A",
     shadowOffset: {
       width: 0,
@@ -394,7 +391,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 5,
-
     elevation: 2,
   },
 
@@ -404,30 +400,21 @@ const styles = StyleSheet.create({
 
   title: {
     flex: 1,
-
     textAlign: "center",
-
     fontSize: 20,
     fontWeight: "800",
-
     color: NAVY,
   },
 
   introCard: {
     backgroundColor: "#FFFFFF",
-
     borderRadius: 24,
-
     paddingVertical: 22,
     paddingHorizontal: 20,
-
     alignItems: "center",
-
     borderWidth: 1,
     borderColor: BORDER,
-
     marginBottom: 24,
-
     shadowColor: "#0F172A",
     shadowOffset: {
       width: 0,
@@ -435,64 +422,48 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.07,
     shadowRadius: 10,
-
     elevation: 3,
   },
 
   introIcon: {
     width: 70,
     height: 70,
-
     borderRadius: 23,
-
     backgroundColor: LIGHT_BLUE,
-
     alignItems: "center",
     justifyContent: "center",
   },
 
   introTitle: {
     marginTop: 13,
-
     fontSize: 19,
     fontWeight: "800",
-
     color: NAVY,
   },
 
   description: {
     marginTop: 6,
-
     maxWidth: 290,
-
     fontSize: 13,
     lineHeight: 19,
-
     textAlign: "center",
-
     color: MUTED,
   },
 
   sectionTitle: {
     marginLeft: 3,
     marginBottom: 9,
-
     fontSize: 16,
     fontWeight: "800",
-
     color: NAVY,
   },
 
   card: {
     backgroundColor: "#FFFFFF",
-
     borderRadius: 20,
-
     paddingHorizontal: 15,
-
     borderWidth: 1,
     borderColor: BORDER,
-
     shadowColor: "#0F172A",
     shadowOffset: {
       width: 0,
@@ -500,115 +471,86 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 8,
-
     elevation: 2,
   },
 
   preferenceRow: {
     flexDirection: "row",
     alignItems: "center",
-
     paddingVertical: 15,
   },
 
   preferenceIcon: {
     width: 42,
     height: 42,
-
     borderRadius: 13,
-
     backgroundColor: LIGHT_BLUE,
-
     alignItems: "center",
     justifyContent: "center",
-
     marginRight: 12,
   },
 
   preferenceText: {
     flex: 1,
-
     paddingRight: 10,
   },
 
   preferenceTitle: {
     fontSize: 14,
     fontWeight: "700",
-
     color: NAVY,
   },
 
   preferenceDescription: {
     marginTop: 4,
-
     fontSize: 11,
     lineHeight: 16,
-
     color: MUTED,
   },
 
   divider: {
     height: 1,
-
     backgroundColor: "#EEF2F6",
-
     marginLeft: 54,
   },
 
   infoCard: {
     marginTop: 18,
-
     borderRadius: 18,
-
     backgroundColor: "#F8FAFD",
-
     borderWidth: 1,
     borderColor: BORDER,
-
     padding: 14,
-
     flexDirection: "row",
     alignItems: "center",
-
     gap: 10,
   },
 
   infoIcon: {
     width: 38,
     height: 38,
-
     borderRadius: 13,
-
     backgroundColor: LIGHT_BLUE,
-
     alignItems: "center",
     justifyContent: "center",
   },
 
   infoText: {
     flex: 1,
-
     fontSize: 12,
     lineHeight: 18,
-
     color: MUTED,
   },
 
   saveButton: {
     marginTop: 20,
-
     height: 52,
-
     borderRadius: 16,
-
     backgroundColor: BLUE,
-
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-
     gap: 8,
-
     shadowColor: BLUE,
     shadowOffset: {
       width: 0,
@@ -616,7 +558,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.18,
     shadowRadius: 6,
-
     elevation: 3,
   },
 
@@ -631,7 +572,6 @@ const styles = StyleSheet.create({
   saveButtonText: {
     fontSize: 15,
     fontWeight: "700",
-
     color: "#FFFFFF",
   },
 });

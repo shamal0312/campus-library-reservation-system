@@ -4,18 +4,15 @@ import { SymbolView } from "expo-symbols";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useAppearance } from "@/contexts/appearance-context";
 import { useAuth } from "@/contexts/auth-context";
-
-const BLUE = "#2F80ED";
-const NAVY = "#102A43";
-const BACKGROUND = "#F2F6FC";
-const MUTED = "#718096";
-const LIGHT_BLUE = "#EAF4FF";
-const BORDER = "#E4EAF2";
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
+
   const { account } = useAuth();
+
+  const { theme } = useAppearance();
 
   const displayName = account?.fullName?.trim() || "Nimal Perera";
 
@@ -25,7 +22,12 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView
-      style={styles.screen}
+      style={[
+        styles.screen,
+        {
+          backgroundColor: theme.background,
+        },
+      ]}
       contentContainerStyle={[
         styles.content,
         {
@@ -37,7 +39,13 @@ export default function ProfileScreen() {
     >
       <View style={styles.header}>
         <Pressable
-          style={styles.headerButton}
+          style={[
+            styles.headerButton,
+            {
+              backgroundColor: theme.surface,
+              borderColor: theme.border,
+            },
+          ]}
           onPress={() => router.back()}
           hitSlop={8}
         >
@@ -48,14 +56,29 @@ export default function ProfileScreen() {
               web: "arrow_back",
             }}
             size={22}
-            tintColor={NAVY}
+            tintColor={theme.text}
           />
         </Pressable>
 
-        <Text style={styles.title}>My Profile</Text>
+        <Text
+          style={[
+            styles.title,
+            {
+              color: theme.text,
+            },
+          ]}
+        >
+          My Profile
+        </Text>
 
         <Pressable
-          style={styles.headerButton}
+          style={[
+            styles.headerButton,
+            {
+              backgroundColor: theme.surface,
+              borderColor: theme.border,
+            },
+          ]}
           onPress={() => {
             console.log("Open settings");
           }}
@@ -68,32 +91,83 @@ export default function ProfileScreen() {
               web: "settings",
             }}
             size={22}
-            tintColor={NAVY}
+            tintColor={theme.text}
           />
         </Pressable>
       </View>
 
-      <View style={styles.profileCard}>
-        <View style={styles.avatarOuter}>
+      <View
+        style={[
+          styles.profileCard,
+          {
+            backgroundColor: theme.surface,
+            borderColor: theme.border,
+          },
+        ]}
+      >
+        <View
+          style={[
+            styles.avatarOuter,
+            {
+              backgroundColor: theme.primarySoft,
+            },
+          ]}
+        >
           <Image
             source={
               account?.avatarUrl
                 ? { uri: account.avatarUrl }
                 : require("@/assets/images/app-logo.png")
             }
-            style={styles.avatar}
+            style={[
+              styles.avatar,
+              {
+                backgroundColor: theme.surface,
+              },
+            ]}
             contentFit="cover"
           />
         </View>
 
-        <Text style={styles.name}>{displayName}</Text>
+        <Text
+          style={[
+            styles.name,
+            {
+              color: theme.text,
+            },
+          ]}
+        >
+          {displayName}
+        </Text>
 
-        <View style={styles.roleBadge}>
-          <Text style={styles.role}>{displayRole}</Text>
+        <View
+          style={[
+            styles.roleBadge,
+            {
+              backgroundColor: theme.primarySoft,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.role,
+              {
+                color: theme.primary,
+              },
+            ]}
+          >
+            {displayRole}
+          </Text>
         </View>
 
         <Pressable
-          style={styles.editProfileButton}
+          style={[
+            styles.editProfileButton,
+            {
+              backgroundColor: theme.surfaceSecondary,
+              borderColor: theme.border,
+            },
+          ]}
           onPress={() => router.push("/account/edit-profile")}
         >
           <SymbolView
@@ -103,16 +177,42 @@ export default function ProfileScreen() {
               web: "edit",
             }}
             size={16}
-            tintColor={BLUE}
+            tintColor={theme.primary}
           />
 
-          <Text style={styles.editProfileText}>Edit Profile</Text>
+          <Text
+            style={[
+              styles.editProfileText,
+              {
+                color: theme.primary,
+              },
+            ]}
+          >
+            Edit Profile
+          </Text>
         </Pressable>
       </View>
 
-      <Text style={styles.sectionTitle}>Account</Text>
+      <Text
+        style={[
+          styles.sectionTitle,
+          {
+            color: theme.text,
+          },
+        ]}
+      >
+        Account
+      </Text>
 
-      <View style={styles.menuGroup}>
+      <View
+        style={[
+          styles.menuGroup,
+          {
+            backgroundColor: theme.surface,
+            borderColor: theme.border,
+          },
+        ]}
+      >
         <ProfileMenuItem
           label="Personal Information"
           icon={{
@@ -136,9 +236,26 @@ export default function ProfileScreen() {
         />
       </View>
 
-      <Text style={styles.sectionTitle}>Reservations</Text>
+      <Text
+        style={[
+          styles.sectionTitle,
+          {
+            color: theme.text,
+          },
+        ]}
+      >
+        Reservations
+      </Text>
 
-      <View style={styles.menuGroup}>
+      <View
+        style={[
+          styles.menuGroup,
+          {
+            backgroundColor: theme.surface,
+            borderColor: theme.border,
+          },
+        ]}
+      >
         <ProfileMenuItem
           label="Book Reservation"
           icon={{
@@ -180,9 +297,26 @@ export default function ProfileScreen() {
         />
       </View>
 
-      <Text style={styles.sectionTitle}>Preferences</Text>
+      <Text
+        style={[
+          styles.sectionTitle,
+          {
+            color: theme.text,
+          },
+        ]}
+      >
+        Preferences
+      </Text>
 
-      <View style={styles.menuGroup}>
+      <View
+        style={[
+          styles.menuGroup,
+          {
+            backgroundColor: theme.surface,
+            borderColor: theme.border,
+          },
+        ]}
+      >
         <ProfileMenuItem
           label="App Appearance"
           icon={{
@@ -218,6 +352,7 @@ type MenuIcon = {
     | "door.left.hand.open"
     | "paintbrush.fill"
     | "bell.badge.fill";
+
   android:
     | "badge"
     | "lock"
@@ -226,6 +361,7 @@ type MenuIcon = {
     | "meeting_room"
     | "palette"
     | "notifications";
+
   web:
     | "badge"
     | "lock"
@@ -243,21 +379,48 @@ type ProfileMenuItemProps = {
 };
 
 function ProfileMenuItem({ label, icon, onPress }: ProfileMenuItemProps) {
+  const { theme } = useAppearance();
+
   return (
     <Pressable
       style={({ pressed }) => [
         styles.menuItem,
-        pressed && styles.menuItemPressed,
+        pressed && {
+          backgroundColor: theme.surfaceSecondary,
+        },
       ]}
       onPress={onPress}
     >
-      <View style={styles.menuIconBox}>
-        <SymbolView name={icon} size={20} tintColor={BLUE} />
+      <View
+        style={[
+          styles.menuIconBox,
+          {
+            backgroundColor: theme.primarySoft,
+          },
+        ]}
+      >
+        <SymbolView name={icon} size={20} tintColor={theme.primary} />
       </View>
 
-      <Text style={styles.menuText}>{label}</Text>
+      <Text
+        style={[
+          styles.menuText,
+          {
+            color: theme.text,
+          },
+        ]}
+      >
+        {label}
+      </Text>
 
-      <View style={styles.chevronBox}>
+      <View
+        style={[
+          styles.chevronBox,
+          {
+            backgroundColor: theme.surfaceSecondary,
+          },
+        ]}
+      >
         <SymbolView
           name={{
             ios: "chevron.right",
@@ -265,7 +428,7 @@ function ProfileMenuItem({ label, icon, onPress }: ProfileMenuItemProps) {
             web: "chevron_right",
           }}
           size={18}
-          tintColor={BLUE}
+          tintColor={theme.primary}
         />
       </View>
     </Pressable>
@@ -273,13 +436,23 @@ function ProfileMenuItem({ label, icon, onPress }: ProfileMenuItemProps) {
 }
 
 function Divider() {
-  return <View style={styles.divider} />;
+  const { theme } = useAppearance();
+
+  return (
+    <View
+      style={[
+        styles.divider,
+        {
+          backgroundColor: theme.border,
+        },
+      ]}
+    />
+  );
 }
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: BACKGROUND,
   },
 
   content: {
@@ -290,23 +463,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-
     marginBottom: 20,
   },
 
   headerButton: {
     width: 42,
     height: 42,
-
     borderRadius: 21,
-
-    backgroundColor: "#FFFFFF",
 
     alignItems: "center",
     justifyContent: "center",
 
     borderWidth: 1,
-    borderColor: BORDER,
 
     shadowColor: "#0F172A",
     shadowOffset: {
@@ -322,12 +490,9 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: "800",
-    color: NAVY,
   },
 
   profileCard: {
-    backgroundColor: "#FFFFFF",
-
     borderRadius: 24,
 
     paddingVertical: 22,
@@ -336,7 +501,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
 
     borderWidth: 1,
-    borderColor: BORDER,
 
     marginBottom: 24,
 
@@ -359,8 +523,6 @@ const styles = StyleSheet.create({
 
     padding: 4,
 
-    backgroundColor: LIGHT_BLUE,
-
     alignItems: "center",
     justifyContent: "center",
   },
@@ -370,8 +532,6 @@ const styles = StyleSheet.create({
     height: 88,
 
     borderRadius: 44,
-
-    backgroundColor: "#FFFFFF",
   },
 
   name: {
@@ -380,15 +540,11 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "800",
 
-    color: NAVY,
-
     textAlign: "center",
   },
 
   roleBadge: {
     marginTop: 7,
-
-    backgroundColor: LIGHT_BLUE,
 
     paddingHorizontal: 14,
     paddingVertical: 5,
@@ -399,8 +555,6 @@ const styles = StyleSheet.create({
   role: {
     fontSize: 12,
     fontWeight: "700",
-
-    color: BLUE,
   },
 
   editProfileButton: {
@@ -416,17 +570,12 @@ const styles = StyleSheet.create({
 
     borderRadius: 18,
 
-    backgroundColor: "#F5F9FF",
-
     borderWidth: 1,
-    borderColor: "#DCEBFF",
   },
 
   editProfileText: {
     fontSize: 13,
     fontWeight: "700",
-
-    color: BLUE,
   },
 
   sectionTitle: {
@@ -435,17 +584,12 @@ const styles = StyleSheet.create({
 
     fontSize: 16,
     fontWeight: "800",
-
-    color: NAVY,
   },
 
   menuGroup: {
-    backgroundColor: "#FFFFFF",
-
     borderRadius: 20,
 
     borderWidth: 1,
-    borderColor: BORDER,
 
     overflow: "hidden",
 
@@ -471,17 +615,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  menuItemPressed: {
-    backgroundColor: "#F8FAFD",
-  },
-
   menuIconBox: {
     width: 40,
     height: 40,
 
     borderRadius: 13,
-
-    backgroundColor: LIGHT_BLUE,
 
     alignItems: "center",
     justifyContent: "center",
@@ -494,8 +632,6 @@ const styles = StyleSheet.create({
 
     fontSize: 15,
     fontWeight: "600",
-
-    color: NAVY,
   },
 
   chevronBox: {
@@ -504,17 +640,12 @@ const styles = StyleSheet.create({
 
     borderRadius: 16,
 
-    backgroundColor: "#F5F9FF",
-
     alignItems: "center",
     justifyContent: "center",
   },
 
   divider: {
     height: 1,
-
-    backgroundColor: "#EEF2F6",
-
     marginLeft: 66,
   },
 });

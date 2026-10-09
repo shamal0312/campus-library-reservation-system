@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { notifyReservation } from './notifications';
 
 export type Book = {
   id: string;
@@ -108,6 +109,11 @@ export async function createBookReservation({
     throw error;
   }
 
+  notifyReservation(
+    'reservation_confirmation',
+    'Reservation confirmed',
+    `${book.title} has been reserved.`,
+  );
   return data;
 }
 
@@ -174,6 +180,11 @@ export async function updateBookReservation(
     throw error;
   }
 
+  notifyReservation(
+    'reservation_update',
+    'Reservation updated',
+    'Your book reservation dates have been changed.',
+  );
   return data;
 }
 
@@ -237,6 +248,12 @@ export async function cancelBookReservation(
     console.error('Error cancelling reservation:', error);
     throw error;
   }
+
+  notifyReservation(
+    'reservation_update',
+    'Reservation updated',
+    'Your book reservation has been cancelled.',
+  );
 }
 
 // Get logged-in student's previous book reservations

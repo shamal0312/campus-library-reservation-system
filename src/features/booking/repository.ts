@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { notifyReservation } from '../../services/notifications';
 import { DEMO_MODE, requireSupabase } from '../../services/supabase';
 import { active, Booking, overlaps, RoomDraft, SEATS, validateRoom, validateSlot } from './model';
 
@@ -53,13 +54,17 @@ export async function reserveSeat(seatId: string, date: string, slot: string, ex
   if (!seat) throw new Error('Select an available seat.');
   if (!DEMO_MODE) {
     const { data, error } = await requireSupabase().rpc('booking_reserve_seat', { p_resource: seatId, p_start: times.start_at, p_end: times.end_at });
-    if (error) throw error; return data as Booking;
+    if (error) throw error;
+    notifyReservation('reservation_confirmation', 'Reservation confirmed', `${seat.label} has been reserved.`);
+    return data as Booking;
   }
   return serialize(async () => {
     const rows = await demoRows();
     if (rows.some(b => overlaps(b, times.start_at, times.end_at) && (b.resource_id === seatId || b.user_id === user))) throw new Error('The seat is booked, or you already have a booking during this time.');
     const booking: Booking = { id: `demo-${Date.now()}-${Math.random().toString(36).slice(2)}`, user_id: user, kind: 'seat', resource_id: seat.id, resource_label: `Seat ${seat.label}`, floor: seat.floor, ...times, status: 'reserved', purpose: '', student_ids: [], preference: '', notes: '', created_at: new Date().toISOString() };
-    await AsyncStorage.setItem(STORE, JSON.stringify([booking, ...rows])); return booking;
+    await AsyncStorage.setItem(STORE, JSON.stringify([booking, ...rows]));
+    notifyReservation('reservation_confirmation', 'Reservation confirmed', `${seat.label} has been reserved.`);
+    return booking;
   });
 }
 export async function requestRoom(draft: RoomDraft): Promise<Booking> {
@@ -67,20 +72,28 @@ export async function requestRoom(draft: RoomDraft): Promise<Booking> {
   const student_ids = draft.studentIds.map(s => s.trim().toUpperCase());
   if (!DEMO_MODE) {
     const { data, error } = await requireSupabase().rpc('booking_request_room', { p_start: times.start_at, p_end: times.end_at, p_purpose: draft.purpose.trim(), p_students: student_ids, p_preference: draft.preference, p_notes: draft.notes.trim() });
-    if (error) throw error; return data as Booking;
+    if (error) throw error;
+    notifyReservation('reservation_confirmation', 'Reservation confirmed', 'Your study room request has been submitted.');
+    return data as Booking;
   }
   return serialize(async () => {
     const rows = await demoRows();
     if (rows.some(b => b.user_id === user && overlaps(b, times.start_at, times.end_at))) throw new Error('You already have a booking during this time.');
     const booking: Booking = { id: `demo-${Date.now()}-${Math.random().toString(36).slice(2)}`, user_id: user, kind: 'room', resource_id: '', resource_label: 'Room awaiting allocation', floor: 0, ...times, status: 'pending', purpose: draft.purpose.trim(), student_ids, preference: draft.preference, notes: draft.notes.trim(), created_at: new Date().toISOString() };
-    await AsyncStorage.setItem(STORE, JSON.stringify([booking, ...rows])); return booking;
+    await AsyncStorage.setItem(STORE, JSON.stringify([booking, ...rows]));
+    notifyReservation('reservation_confirmation', 'Reservation confirmed', 'Your study room request has been submitted.');
+    return booking;
   });
 }
 export async function changeBooking(id: string, action: 'cancel' | 'checkin'): Promise<Booking> {
   const user = await currentUser();
   if (!DEMO_MODE) {
     const { data, error } = await requireSupabase().rpc('booking_change_status', { p_id: id, p_action: action });
-    if (error) throw error; return data as Booking;
+    if (error) throw error;
+    if (action === 'cancel') {
+      notifyReservation('reservation_update', 'Reservation updated', 'Your reservation has been cancelled.');
+    }
+    return data as Booking;
   }
   return serialize(async () => {
     const rows = await demoRows(); const booking = rows.find(b => b.id === id && b.user_id === user);
@@ -92,7 +105,11 @@ export async function changeBooking(id: string, action: 'cancel' | 'checkin'): P
       if (Date.now() < start - 15 * 60000 || Date.now() > start + 30 * 60000) throw new Error('Check in from 15 minutes before to 30 minutes after your booking starts.');
     }
     booking.status = action === 'cancel' ? 'cancelled' : 'checked_in';
-    await AsyncStorage.setItem(STORE, JSON.stringify(rows)); return booking;
+    await AsyncStorage.setItem(STORE, JSON.stringify(rows));
+    if (action === 'cancel') {
+      notifyReservation('reservation_update', 'Reservation updated', 'Your reservation has been cancelled.');
+    }
+    return booking;
   });
 }
 
@@ -109,6 +126,7 @@ export async function updateSeatReservation(id: string, date: string, slot: stri
       p_end: times.end_at,
     });
     if (error) throw error;
+    notifyReservation('reservation_update', 'Reservation updated', 'Your seat reservation time has been changed.');
     return data as Booking;
   }
   return serialize(async () => {
@@ -128,6 +146,7 @@ export async function updateSeatReservation(id: string, date: string, slot: stri
     booking.start_at = times.start_at;
     booking.end_at = times.end_at;
     await AsyncStorage.setItem(STORE, JSON.stringify(rows));
+    notifyReservation('reservation_update', 'Reservation updated', 'Your seat reservation time has been changed.');
     return booking;
   });
 }
