@@ -65,7 +65,7 @@ function App() {
           onLogout={handleLogout}
           onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
         />
-        {currentPage === 'Dashboard' && <Dashboard />}
+        {currentPage === 'Dashboard' && <Dashboard onNavigate={setCurrentPage} />}
         {currentPage === 'Books' && <Books />}
         {currentPage === 'Seats & Reading Room' && <SeatsReadingRoom />}
         {currentPage === 'Reservations & Fines' && <ReservationsFines />}

@@ -4,9 +4,10 @@ import type { DashboardStats } from '../../pages/Dashboard'
 interface Props {
   stats:   DashboardStats
   loading: boolean
+  onNavigate: (page: string) => void
 }
 
-function QuickActions({ stats, loading }: Props) {
+function QuickActions({ stats, loading, onNavigate }: Props) {
   const alerts: { text: string; severity: 'high' | 'medium' }[] = []
 
   if (!loading) {
@@ -26,11 +27,11 @@ function QuickActions({ stats, loading }: Props) {
 
       <div className="action-list">
         {[
-          { label: 'Add Book',        icon: BookPlus   },
-          { label: 'Update Seat Map', icon: LayoutGrid },
-          { label: 'Collect Fine',    icon: HandCoins  },
-        ].map(({ label, icon: Icon }) => (
-          <button className="action-btn" key={label} type="button">
+          { label: 'Add Book',        page: 'Books',                icon: BookPlus   },
+          { label: 'Update Seat Map', page: 'Seats & Reading Room', icon: LayoutGrid },
+          { label: 'Collect Fine',    page: 'Reservations & Fines', icon: HandCoins  },
+        ].map(({ label, page, icon: Icon }) => (
+          <button className="action-btn" key={label} type="button" onClick={() => onNavigate(page)}>
             <span className="action-btn-icon"><Icon size={14} strokeWidth={2} /></span>
             {label}
           </button>
