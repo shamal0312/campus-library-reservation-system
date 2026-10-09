@@ -5056,3 +5056,327 @@ select.modal-input {
   .rpt-export-btn   { flex: 1; justify-content: center; }
   .rpt-stats-grid   { grid-template-columns: 1fr; }
 }
+
+/* ==========================================================================
+   DASHBOARD — Hero banner + new component styles
+   ========================================================================== */
+
+/* ── Hero Banner ─────────────────────────────────────────────────────────── */
+.dash-hero {
+  position: relative;
+  margin-bottom: 22px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #2563eb 100%);
+  box-shadow: 0 4px 24px rgba(30, 58, 138, 0.22);
+}
+
+.dash-hero-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.dash-hero-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+}
+.dash-hero-c1 { width: 360px; height: 360px; right: -90px;  top: -140px; opacity: 0.05; }
+.dash-hero-c2 { width: 180px; height: 180px; right: 200px;  top: -50px;  opacity: 0.04; }
+.dash-hero-c3 { width: 100px; height: 100px; right: 420px;  bottom: -30px; opacity: 0.04; }
+
+.dash-hero-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 26px 32px;
+  flex-wrap: wrap;
+}
+
+.dash-hero-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dash-greeting {
+  margin: 0;
+  font-size: 13px;
+  color: #93c5fd;
+  font-weight: 500;
+}
+
+.dash-hero-title {
+  margin: 0;
+  font-family: 'Manrope', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.dash-hero-date {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+}
+
+/* ── KPI chips inside hero ───────────────────────────────────────────────── */
+.dash-hero-kpis {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dash-kpi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 12px 18px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.13);
+  min-width: 90px;
+  backdrop-filter: blur(4px);
+  transition: background 0.15s;
+}
+.dash-kpi:hover { background: rgba(255,255,255,0.13); }
+
+.dash-kpi-value {
+  font-family: 'Manrope', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.dash-kpi-label {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+/* accent border-top per chip */
+.dash-kpi-blue   { border-top: 2px solid #60a5fa; }
+.dash-kpi-purple { border-top: 2px solid #a78bfa; }
+.dash-kpi-teal   { border-top: 2px solid #34d399; }
+.dash-kpi-amber  { border-top: 2px solid #fbbf24; }
+
+/* ── Stat card skeleton ──────────────────────────────────────────────────── */
+.stat-skeleton {
+  height: 28px;
+  width: 90px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  margin-bottom: 7px;
+}
+
+/* ── Activity table extras ───────────────────────────────────────────────── */
+.dash-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  background: #fff;
+  color: #64748b;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.dash-icon-btn:hover {
+  background: #f1f5f9;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+
+.dash-table-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 36px 20px;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.dash-table-empty {
+  padding: 36px 20px;
+  text-align: center;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.dash-item-cell {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dash-date-cell {
+  font-size: 11.5px;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+/* ── Quick actions — alerts section ─────────────────────────────────────── */
+.dash-alerts-section {
+  margin-top: 16px;
+  padding: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+}
+
+.dash-alerts-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+}
+.dash-alerts-title svg { color: #f59e0b; }
+
+.dash-alert-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  margin-left: auto;
+}
+
+.dash-alerts-loading {
+  margin: 0;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.dash-no-alerts {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: #16a34a;
+  font-weight: 500;
+}
+.dash-no-alerts-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  flex-shrink: 0;
+}
+
+.dash-alert-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.dash-alert-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.dash-alert-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.dash-alert-high   { color: #dc2626; }
+.dash-alert-high   .dash-alert-dot { background: #ef4444; }
+.dash-alert-medium { color: #d97706; }
+.dash-alert-medium .dash-alert-dot { background: #f59e0b; }
+
+/* ── Seat occupancy bar ──────────────────────────────────────────────────── */
+.dash-occupancy {
+  margin-top: 14px;
+  padding: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+}
+
+.dash-occupancy-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.dash-occupancy-pct {
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.dash-occupancy-track {
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.dash-occupancy-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #60a5fa, #2563eb);
+  border-radius: 999px;
+  transition: width 0.6s ease;
+  min-width: 4px;
+}
+
+.dash-occupancy-sub {
+  margin-top: 5px;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 960px) {
+  .dash-hero-content { padding: 20px 20px; gap: 18px; }
+  .dash-hero-title   { font-size: 20px; }
+  .dash-hero-kpis    { gap: 8px; }
+  .dash-kpi          { padding: 10px 14px; min-width: 78px; }
+  .dash-kpi-value    { font-size: 16px; }
+}
+
+@media (max-width: 640px) {
+  .dash-hero-content { flex-direction: column; align-items: flex-start; }
+  .dash-hero-kpis    { width: 100%; justify-content: space-between; }
+  .dash-kpi          { flex: 1; }
+}

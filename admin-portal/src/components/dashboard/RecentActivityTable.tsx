@@ -1,48 +1,90 @@
-﻿import { ArrowRight } from 'lucide-react'
+﻿import { ArrowRight, Loader, RefreshCw } from 'lucide-react'
+import type { ActivityRow } from '../../pages/Dashboard'
 
-const activities = [
-  { student: 'Ankit Sharma', item: 'Atomic Habits',  status: 'Reserved',    date: '13 Sep, 10:24', tone: 'blue'    },
-  { student: 'Meera Patel',  item: 'Seat G-14',      status: 'Occupied',    date: '13 Sep, 10:19', tone: 'amber'   },
-  { student: 'Rohit Das',    item: 'The Alchemist',  status: 'Returned',    date: '13 Sep, 09:54', tone: 'emerald' },
-  { student: 'Zoya Khan',    item: 'Fine Rs. 250',   status: 'Payment due', date: '13 Sep, 09:43', tone: 'rose'    },
-  { student: 'Vikash Role',  item: 'Seat A-09',      status: 'Released',    date: '13 Sep, 08:01', tone: 'slate'   },
-] as const
+interface Props {
+  rows:      ActivityRow[]
+  loading:   boolean
+  onRefresh: () => void
+}
 
-function RecentActivityTable() {
+function statusTone(status: string, type: 'reservation' | 'fine'): string {
+  if (type === 'fine') return 'rose'
+  const s = status.toLowerCase()
+  if (s === 'reserved'  || s === 'pending')   return 'blue'
+  if (s === 'completed' || s === 'returned')  return 'emerald'
+  if (s === 'cancelled' || s === 'rejected')  return 'slate'
+  if (s === 'occupied')                       return 'amber'
+  return 'blue'
+}
+
+function fmtDate(iso: string): string {
+  const d = new Date(iso)
+  return d.toLocaleString('en-GB', {
+    day: '2-digit', month: 'short',
+    hour: '2-digit', minute: '2-digit',
+  })
+}
+
+function RecentActivityTable({ rows, loading, onRefresh }: Props) {
   return (
     <section className="activity-card">
       <div className="widget-heading">
         <h2>Recent Activity</h2>
-        <button className="view-all-btn" type="button">View all</button>
+        <button
+          className="dash-icon-btn"
+          onClick={onRefresh}
+          aria-label="Refresh activity"
+          title="Refresh"
+        >
+          <RefreshCw size={14} />
+        </button>
       </div>
-      <div className="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Student Name</th>
-              <th>Item</th>
-              <th>Status</th>
-              <th>Date</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {activities.map(({ student, item, status, date, tone }) => (
-              <tr key={`${student}-${date}`}>
-                <td className="student-name">{student}</td>
-                <td>{item}</td>
-                <td><span className={`status-tag ${tone}`}>{status}</span></td>
-                <td>{date}</td>
-                <td>
-                  <button className="view-button" type="button">
-                    View <ArrowRight size={12} />
-                  </button>
-                </td>
+
+      {loading ? (
+        <div className="dash-table-loading">
+          <Loader size={22} className="spin" />
+          <span>Loading activity…</span>
+        </div>
+      ) : rows.length === 0 ? (
+        <div className="dash-table-empty">
+          <p>No recent activity found.</p>
+        </div>
+      ) : (
+        <div className="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Item</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {rows.map(row => (
+                <tr key={row.id}>
+                  <td className="student-name">{row.student}</td>
+                  <td className="dash-item-cell" title={row.item}>
+                    {row.item.length > 28 ? row.item.slice(0, 28) + '…' : row.item}
+                  </td>
+                  <td>
+                    <span className={`status-tag ${statusTone(row.status, row.type)}`}>
+                      {row.status}
+                    </span>
+                  </td>
+                  <td className="dash-date-cell">{fmtDate(row.createdAt)}</td>
+                  <td>
+                    <button className="view-button" type="button">
+                      <ArrowRight size={12} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </section>
   )
 }
