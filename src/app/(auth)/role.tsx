@@ -56,6 +56,8 @@ export default function RoleScreen() {
       setErrorMessage(result.error);
       return;
     }
+
+    router.replace("/account");
   }
 
   return (

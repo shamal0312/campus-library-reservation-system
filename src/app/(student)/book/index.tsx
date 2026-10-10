@@ -1,5 +1,5 @@
-import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -11,13 +11,10 @@ import {
   Text,
   TextInput,
   View,
-} from 'react-native';
+} from "react-native";
 
-import {
-  Book,
-  getBooks,
-  searchBooks,
-} from '../../../services/bookService';
+import BottomNavBar from "@/components/BottomNavBar";
+import { Book, getBooks, searchBooks } from "../../../services/bookService";
 
 /*
   ============================================================
@@ -35,15 +32,14 @@ import {
 */
 
 const HEADER_IMAGE_URL =
-  'https://yavaxhzaegetmwgfsqzh.supabase.co/storage/v1/object/public/book-covers/b.png';
+  "https://yavaxhzaegetmwgfsqzh.supabase.co/storage/v1/object/public/book-covers/b.png";
 
 export default function BookSearchScreen() {
   const [books, setBooks] = useState<Book[]>([]);
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [selectedCategory, setSelectedCategory] =
-    useState('All');
+  const [error, setError] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
   /*
     Refresh books every time this screen becomes active.
@@ -54,20 +50,20 @@ export default function BookSearchScreen() {
   useFocusEffect(
     useCallback(() => {
       loadBooks();
-    }, [])
+    }, []),
   );
 
   async function loadBooks() {
     try {
       setLoading(true);
-      setError('');
+      setError("");
 
       const data = await getBooks();
 
       setBooks(data);
     } catch (err) {
       console.error(err);
-      setError('Could not load books.');
+      setError("Could not load books.");
     } finally {
       setLoading(false);
     }
@@ -77,20 +73,20 @@ export default function BookSearchScreen() {
     setSearchText(text);
 
     try {
-      setError('');
+      setError("");
 
       const data = await searchBooks(text);
 
       setBooks(data);
     } catch (err) {
       console.error(err);
-      setError('Could not search books.');
+      setError("Could not search books.");
     }
   }
 
   function openBookDetails(bookId: string) {
     router.push({
-      pathname: '/(student)/book/[id]',
+      pathname: "/(student)/book/[id]",
       params: {
         id: bookId,
       },
@@ -98,7 +94,7 @@ export default function BookSearchScreen() {
   }
 
   function openMyReservations() {
-    router.push('/(student)/book/reservations');
+    router.push("/(student)/book/reservations");
   }
 
   /*
@@ -112,13 +108,10 @@ export default function BookSearchScreen() {
       .map((book) => book.category)
       .filter(
         (category): category is string =>
-          !!category && category.trim().length > 0
+          !!category && category.trim().length > 0,
       );
 
-    return [
-      'All',
-      ...Array.from(new Set(bookCategories)),
-    ];
+    return ["All", ...Array.from(new Set(bookCategories))];
   }, [books]);
 
   /*
@@ -128,14 +121,11 @@ export default function BookSearchScreen() {
   */
 
   const filteredBooks = useMemo(() => {
-    if (selectedCategory === 'All') {
+    if (selectedCategory === "All") {
       return books;
     }
 
-    return books.filter(
-      (book) =>
-        book.category === selectedCategory
-    );
+    return books.filter((book) => book.category === selectedCategory);
   }, [books, selectedCategory]);
 
   /*
@@ -147,14 +137,9 @@ export default function BookSearchScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator
-          size="large"
-          color="#1677ff"
-        />
+        <ActivityIndicator size="large" color="#1677ff" />
 
-        <Text style={styles.loadingText}>
-          Loading books...
-        </Text>
+        <Text style={styles.loadingText}>Loading books...</Text>
       </View>
     );
   }
@@ -188,13 +173,9 @@ export default function BookSearchScreen() {
               <View style={styles.headerOverlay} />
 
               <View style={styles.headerContent}>
-                <Text style={styles.title}>
-                  Book Reservation
-                </Text>
+                <Text style={styles.title}>Book Reservation</Text>
 
-                <Text style={styles.subtitle}>
-                  Discover. Reserve. Read.
-                </Text>
+                <Text style={styles.subtitle}>Discover. Reserve. Read.</Text>
               </View>
             </ImageBackground>
 
@@ -203,9 +184,7 @@ export default function BookSearchScreen() {
             {/* ================================================= */}
 
             <View style={styles.searchContainer}>
-              <Text style={styles.searchIcon}>
-                ⌕
-              </Text>
+              <Text style={styles.searchIcon}>⌕</Text>
 
               <TextInput
                 style={styles.searchInput}
@@ -228,45 +207,24 @@ export default function BookSearchScreen() {
               >
                 <View style={styles.reservationLeft}>
                   <View style={styles.reservationSmallIcon}>
-                    <Text
-                      style={
-                        styles.reservationSmallIconText
-                      }
-                    >
-                      ◫
-                    </Text>
+                    <Text style={styles.reservationSmallIconText}>◫</Text>
                   </View>
 
                   <View style={styles.reservationTextArea}>
-                    <Text
-                      style={
-                        styles.reservationsButtonText
-                      }
-                    >
+                    <Text style={styles.reservationsButtonText}>
                       My Reservations
                     </Text>
 
-                    <Text
-                      style={
-                        styles.reservationsButtonSubtitle
-                      }
-                    >
-                      View, edit or cancel your book
-                      reservations
+                    <Text style={styles.reservationsButtonSubtitle}>
+                      View, edit or cancel your book reservations
                     </Text>
                   </View>
                 </View>
 
                 <View style={styles.reservationAction}>
-                  <Text
-                    style={styles.reservationActionText}
-                  >
-                    View
-                  </Text>
+                  <Text style={styles.reservationActionText}>View</Text>
 
-                  <Text style={styles.reservationArrow}>
-                    ›
-                  </Text>
+                  <Text style={styles.reservationArrow}>›</Text>
                 </View>
               </Pressable>
             </View>
@@ -278,31 +236,24 @@ export default function BookSearchScreen() {
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={
-                styles.categoryContainer
-              }
+              contentContainerStyle={styles.categoryContainer}
             >
               {categories.map((category) => {
-                const selected =
-                  selectedCategory === category;
+                const selected = selectedCategory === category;
 
                 return (
                   <Pressable
                     key={category}
                     style={[
                       styles.categoryButton,
-                      selected &&
-                        styles.categoryButtonSelected,
+                      selected && styles.categoryButtonSelected,
                     ]}
-                    onPress={() =>
-                      setSelectedCategory(category)
-                    }
+                    onPress={() => setSelectedCategory(category)}
                   >
                     <Text
                       style={[
                         styles.categoryButtonText,
-                        selected &&
-                          styles.categoryButtonTextSelected,
+                        selected && styles.categoryButtonTextSelected,
                       ]}
                     >
                       {category}
@@ -318,28 +269,18 @@ export default function BookSearchScreen() {
 
             <View style={styles.resultRow}>
               <Text style={styles.resultText}>
-                {filteredBooks.length}{' '}
-                {filteredBooks.length === 1
-                  ? 'book'
-                  : 'books'}{' '}
-                found
+                {filteredBooks.length}{" "}
+                {filteredBooks.length === 1 ? "book" : "books"} found
               </Text>
 
               <View style={styles.sortBox}>
-                <Text style={styles.sortText}>
-                  Title (A-Z)
-                </Text>
+                <Text style={styles.sortText}>Title (A-Z)</Text>
               </View>
             </View>
 
-            {error ? (
-              <Text style={styles.error}>
-                {error}
-              </Text>
-            ) : null}
+            {error ? <Text style={styles.error}>{error}</Text> : null}
           </>
         }
-
         /*
           =========================================================
           EMPTY
@@ -348,16 +289,11 @@ export default function BookSearchScreen() {
 
         ListEmptyComponent={
           <View style={styles.emptyBox}>
-            <Text style={styles.emptyTitle}>
-              No books found
-            </Text>
+            <Text style={styles.emptyTitle}>No books found</Text>
 
-            <Text style={styles.empty}>
-              Try another search or category.
-            </Text>
+            <Text style={styles.empty}>Try another search or category.</Text>
           </View>
         }
-
         /*
           =========================================================
           BOOK CARDS
@@ -365,15 +301,12 @@ export default function BookSearchScreen() {
         */
 
         renderItem={({ item }) => {
-          const available =
-            item.available_copies > 0;
+          const available = item.available_copies > 0;
 
           return (
             <Pressable
               style={styles.bookCard}
-              onPress={() =>
-                openBookDetails(item.id)
-              }
+              onPress={() => openBookDetails(item.id)}
             >
               {/* BOOK COVER */}
 
@@ -386,21 +319,10 @@ export default function BookSearchScreen() {
                   resizeMode="cover"
                 />
               ) : (
-                <View
-                  style={
-                    styles.coverPlaceholder
-                  }
-                >
-                  <Text style={styles.coverIcon}>
-                    📚
-                  </Text>
+                <View style={styles.coverPlaceholder}>
+                  <Text style={styles.coverIcon}>📚</Text>
 
-                  <Text
-                    style={
-                      styles.coverPlaceholderText
-                    }
-                    numberOfLines={2}
-                  >
+                  <Text style={styles.coverPlaceholderText} numberOfLines={2}>
                     {item.title}
                   </Text>
                 </View>
@@ -409,53 +331,29 @@ export default function BookSearchScreen() {
               {/* BOOK INFO */}
 
               <View style={styles.bookInfo}>
-                <Text
-                  style={styles.bookTitle}
-                  numberOfLines={2}
-                >
+                <Text style={styles.bookTitle} numberOfLines={2}>
                   {item.title}
                 </Text>
 
-                <Text
-                  style={styles.author}
-                  numberOfLines={1}
-                >
+                <Text style={styles.author} numberOfLines={1}>
                   {item.author}
                 </Text>
 
                 <View style={styles.categoryBadge}>
-                  <Text
-                    style={
-                      styles.categoryBadgeText
-                    }
-                    numberOfLines={1}
-                  >
-                    {item.category ?? 'Other'}
+                  <Text style={styles.categoryBadgeText} numberOfLines={1}>
+                    {item.category ?? "Other"}
                   </Text>
                 </View>
 
-                <View
-                  style={
-                    styles.availabilityRow
-                  }
-                >
-                  <Text style={styles.bookStack}>
-                    ▤
-                  </Text>
+                <View style={styles.availabilityRow}>
+                  <Text style={styles.bookStack}>▤</Text>
 
-                  <Text
-                    style={
-                      styles.availableLabel
-                    }
-                  >
-                    Available:
-                  </Text>
+                  <Text style={styles.availableLabel}>Available:</Text>
 
                   <Text
                     style={[
                       styles.availableNumber,
-                      !available &&
-                        styles.unavailableNumber,
+                      !available && styles.unavailableNumber,
                     ]}
                   >
                     {item.available_copies}
@@ -466,14 +364,14 @@ export default function BookSearchScreen() {
               {/* ARROW */}
 
               <View style={styles.arrowCircle}>
-                <Text style={styles.arrow}>
-                  ›
-                </Text>
+                <Text style={styles.arrow}>›</Text>
               </View>
             </Pressable>
           );
         }}
       />
+
+      <BottomNavBar active="books" />
     </View>
   );
 }
@@ -487,11 +385,11 @@ export default function BookSearchScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#f5f8fc',
+    backgroundColor: "#f5f8fc",
   },
 
   listContent: {
-    paddingBottom: 30,
+    paddingBottom: 110,
   },
 
   /*
@@ -500,14 +398,14 @@ const styles = StyleSheet.create({
 
   center: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f8fc',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f8fc",
   },
 
   loadingText: {
     marginTop: 8,
-    color: '#526581',
+    color: "#526581",
     fontSize: 13,
   },
 
@@ -519,17 +417,17 @@ const styles = StyleSheet.create({
 
   header: {
     height: 150,
-    justifyContent: 'flex-end',
-    overflow: 'hidden',
-    backgroundColor: '#172b4d',
+    justifyContent: "flex-end",
+    overflow: "hidden",
+    backgroundColor: "#172b4d",
   },
 
   headerImage: {
-    resizeMode: 'cover',
+    resizeMode: "cover",
   },
 
   headerOverlay: {
-     ...StyleSheet.absoluteFill,
+    ...StyleSheet.absoluteFill,
 
     /*
       This is NOT the old blue header.
@@ -538,7 +436,7 @@ const styles = StyleSheet.create({
       so white text stays readable.
     */
 
-    backgroundColor: 'rgba(10, 25, 50, 0.38)',
+    backgroundColor: "rgba(10, 25, 50, 0.38)",
   },
 
   headerContent: {
@@ -547,11 +445,11 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 27,
-    fontWeight: '800',
+    fontWeight: "800",
 
-    textShadowColor: 'rgba(0,0,0,0.25)',
+    textShadowColor: "rgba(0,0,0,0.25)",
     textShadowOffset: {
       width: 0,
       height: 1,
@@ -560,11 +458,11 @@ const styles = StyleSheet.create({
   },
 
   subtitle: {
-    color: '#f1f5fb',
+    color: "#f1f5fb",
     fontSize: 15,
     marginTop: 3,
 
-    textShadowColor: 'rgba(0,0,0,0.25)',
+    textShadowColor: "rgba(0,0,0,0.25)",
     textShadowOffset: {
       width: 0,
       height: 1,
@@ -582,18 +480,18 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: -18,
 
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
 
     borderRadius: 17,
 
     minHeight: 55,
 
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
 
     paddingHorizontal: 16,
 
-    shadowColor: '#000',
+    shadowColor: "#000",
 
     shadowOffset: {
       width: 0,
@@ -608,7 +506,7 @@ const styles = StyleSheet.create({
 
   searchIcon: {
     fontSize: 27,
-    color: '#24436d',
+    color: "#24436d",
     marginRight: 9,
   },
 
@@ -617,7 +515,7 @@ const styles = StyleSheet.create({
 
     fontSize: 14,
 
-    color: '#172b4d',
+    color: "#172b4d",
   },
 
   /*
@@ -632,7 +530,7 @@ const styles = StyleSheet.create({
   },
 
   reservationCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
 
     borderRadius: 17,
 
@@ -641,14 +539,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
 
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
 
     borderWidth: 1,
-    borderColor: '#e3e9f2',
+    borderColor: "#e3e9f2",
 
-    shadowColor: '#000',
+    shadowColor: "#000",
 
     shadowOffset: {
       width: 0,
@@ -664,8 +562,8 @@ const styles = StyleSheet.create({
   reservationLeft: {
     flex: 1,
 
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
 
   reservationSmallIcon: {
@@ -674,19 +572,19 @@ const styles = StyleSheet.create({
 
     borderRadius: 13,
 
-    backgroundColor: '#f1f4f8',
+    backgroundColor: "#f1f4f8",
 
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
 
     marginRight: 11,
   },
 
   reservationSmallIconText: {
-    color: '#1d4f91',
+    color: "#1d4f91",
 
     fontSize: 22,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 
   reservationTextArea: {
@@ -694,14 +592,14 @@ const styles = StyleSheet.create({
   },
 
   reservationsButtonText: {
-    color: '#172b4d',
+    color: "#172b4d",
 
     fontSize: 15,
-    fontWeight: '800',
+    fontWeight: "800",
   },
 
   reservationsButtonSubtitle: {
-    color: '#718198',
+    color: "#718198",
 
     fontSize: 10,
 
@@ -709,10 +607,10 @@ const styles = StyleSheet.create({
   },
 
   reservationAction: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
 
-    backgroundColor: '#f4f6f9',
+    backgroundColor: "#f4f6f9",
 
     borderRadius: 15,
 
@@ -724,14 +622,14 @@ const styles = StyleSheet.create({
   },
 
   reservationActionText: {
-    color: '#365779',
+    color: "#365779",
 
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: "700",
   },
 
   reservationArrow: {
-    color: '#365779',
+    color: "#365779",
 
     fontSize: 20,
     lineHeight: 20,
@@ -754,7 +652,7 @@ const styles = StyleSheet.create({
   },
 
   categoryButton: {
-    backgroundColor: '#e8f0fa',
+    backgroundColor: "#e8f0fa",
 
     borderRadius: 20,
 
@@ -763,19 +661,19 @@ const styles = StyleSheet.create({
   },
 
   categoryButtonSelected: {
-    backgroundColor: '#2180f5',
+    backgroundColor: "#2180f5",
   },
 
   categoryButtonText: {
-    color: '#385477',
+    color: "#385477",
 
     fontSize: 12,
 
-    fontWeight: '600',
+    fontWeight: "600",
   },
 
   categoryButtonTextSelected: {
-    color: '#ffffff',
+    color: "#ffffff",
   },
 
   /*
@@ -790,22 +688,22 @@ const styles = StyleSheet.create({
     marginTop: 5,
     marginBottom: 12,
 
-    flexDirection: 'row',
+    flexDirection: "row",
 
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 
   resultText: {
-    color: '#16294a',
+    color: "#16294a",
 
     fontSize: 14,
 
-    fontWeight: '700',
+    fontWeight: "700",
   },
 
   sortBox: {
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
 
     borderRadius: 16,
 
@@ -814,11 +712,11 @@ const styles = StyleSheet.create({
   },
 
   sortText: {
-    color: '#304d74',
+    color: "#304d74",
 
     fontSize: 11,
 
-    fontWeight: '600',
+    fontWeight: "600",
   },
 
   /*
@@ -828,7 +726,7 @@ const styles = StyleSheet.create({
   */
 
   bookCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
 
     marginHorizontal: 20,
     marginBottom: 12,
@@ -837,10 +735,10 @@ const styles = StyleSheet.create({
 
     padding: 11,
 
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
 
-    shadowColor: '#000',
+    shadowColor: "#000",
 
     shadowOffset: {
       width: 0,
@@ -859,7 +757,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 8,
 
-    backgroundColor: '#e8e8e8',
+    backgroundColor: "#e8e8e8",
   },
 
   coverPlaceholder: {
@@ -868,10 +766,10 @@ const styles = StyleSheet.create({
 
     borderRadius: 8,
 
-    backgroundColor: '#e8f0fa',
+    backgroundColor: "#e8f0fa",
 
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
 
     padding: 6,
   },
@@ -883,13 +781,13 @@ const styles = StyleSheet.create({
   },
 
   coverPlaceholderText: {
-    textAlign: 'center',
+    textAlign: "center",
 
-    color: '#415b7d',
+    color: "#415b7d",
 
     fontSize: 9,
 
-    fontWeight: '700',
+    fontWeight: "700",
   },
 
   bookInfo: {
@@ -901,23 +799,23 @@ const styles = StyleSheet.create({
   bookTitle: {
     fontSize: 16,
 
-    fontWeight: '800',
+    fontWeight: "800",
 
-    color: '#10254a',
+    color: "#10254a",
   },
 
   author: {
     fontSize: 13,
 
-    color: '#52698a',
+    color: "#52698a",
 
     marginTop: 2,
   },
 
   categoryBadge: {
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
 
-    backgroundColor: '#e7f1ff',
+    backgroundColor: "#e7f1ff",
 
     borderRadius: 14,
 
@@ -926,20 +824,20 @@ const styles = StyleSheet.create({
 
     marginTop: 7,
 
-    maxWidth: '95%',
+    maxWidth: "95%",
   },
 
   categoryBadgeText: {
-    color: '#1672e8',
+    color: "#1672e8",
 
     fontSize: 10,
 
-    fontWeight: '700',
+    fontWeight: "700",
   },
 
   availabilityRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
 
     marginTop: 7,
   },
@@ -947,29 +845,29 @@ const styles = StyleSheet.create({
   bookStack: {
     fontSize: 15,
 
-    color: '#45658d',
+    color: "#45658d",
 
     marginRight: 6,
   },
 
   availableLabel: {
-    color: '#405b7d',
+    color: "#405b7d",
 
     fontSize: 12,
   },
 
   availableNumber: {
-    color: '#0c9a42',
+    color: "#0c9a42",
 
     fontSize: 14,
 
-    fontWeight: '800',
+    fontWeight: "800",
 
     marginLeft: 4,
   },
 
   unavailableNumber: {
-    color: '#e32626',
+    color: "#e32626",
   },
 
   arrowCircle: {
@@ -978,16 +876,16 @@ const styles = StyleSheet.create({
 
     borderRadius: 17,
 
-    backgroundColor: '#edf4fd',
+    backgroundColor: "#edf4fd",
 
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
 
     marginLeft: 5,
   },
 
   arrow: {
-    color: '#255990',
+    color: "#255990",
 
     fontSize: 27,
 
@@ -1001,7 +899,7 @@ const styles = StyleSheet.create({
   */
 
   error: {
-    color: '#d82323',
+    color: "#d82323",
 
     marginHorizontal: 20,
     marginBottom: 12,
@@ -1012,29 +910,29 @@ const styles = StyleSheet.create({
   emptyBox: {
     marginHorizontal: 20,
 
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
 
     padding: 25,
 
     borderRadius: 17,
 
-    alignItems: 'center',
+    alignItems: "center",
   },
 
   emptyTitle: {
     fontSize: 15,
 
-    fontWeight: '700',
+    fontWeight: "700",
 
-    color: '#172b4d',
+    color: "#172b4d",
   },
 
   empty: {
     marginTop: 5,
 
-    color: '#718198',
+    color: "#718198",
 
-    textAlign: 'center',
+    textAlign: "center",
 
     fontSize: 12,
   },
