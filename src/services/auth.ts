@@ -67,6 +67,18 @@ export async function saveRole(role: UserRole) {
 export async function updateProfile(input: UpdateProfileInput) {
   const supabase = requireSupabase();
 
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return {
+      user: null,
+      error: userError?.message ?? "User not found.",
+    };
+  }
+
   const metadata: {
     full_name: string;
     phone: string;
@@ -85,9 +97,31 @@ export async function updateProfile(input: UpdateProfileInput) {
     data: metadata,
   });
 
+  if (error) {
+    return {
+      user: data.user,
+      error: error.message,
+    };
+  }
+
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .update({
+      full_name: input.fullName.trim(),
+      email: input.email.trim(),
+    })
+    .eq("id", user.id);
+
+  if (profileError) {
+    return {
+      user: data.user,
+      error: profileError.message,
+    };
+  }
+
   return {
     user: data.user,
-    error: error?.message ?? null,
+    error: null,
   };
 }
 

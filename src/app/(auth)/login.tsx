@@ -115,6 +115,13 @@ export default function LoginScreen() {
       return;
     }
 
+    const universityId = result.session.user.user_metadata?.university_id;
+
+    if (!universityId) {
+      router.replace("/complete-profile");
+      return;
+    }
+
     const role = result.session.user.user_metadata?.role;
 
     if (role !== "student" && role !== "lecturer") {
@@ -336,8 +343,7 @@ export default function LoginScreen() {
           />
 
           <Text style={styles.infoText}>
-            Sign in using your registered library account or continue with
-            Google.
+            Sign in using your email address or continue with Google.
           </Text>
         </View>
 
@@ -371,12 +377,9 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 13,
-
     backgroundColor: "#FFFFFF",
-
     alignItems: "center",
     justifyContent: "center",
-
     borderWidth: 1,
     borderColor: BORDER,
   },
@@ -395,19 +398,13 @@ const styles = StyleSheet.create({
   logoBox: {
     width: 84,
     height: 84,
-
     borderRadius: 24,
-
     backgroundColor: "#FFFFFF",
-
     alignItems: "center",
     justifyContent: "center",
-
     borderWidth: 1,
     borderColor: BORDER,
-
     marginBottom: 10,
-
     shadowColor: "#64748B",
     shadowOffset: {
       width: 0,
@@ -415,7 +412,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-
     elevation: 4,
   },
 
@@ -432,19 +428,15 @@ const styles = StyleSheet.create({
 
   brandSub: {
     marginTop: 2,
-
     fontSize: 12,
     fontWeight: "500",
-
     color: MUTED,
   },
 
   title: {
     marginTop: 18,
-
     fontSize: 27,
     fontWeight: "800",
-
     color: TEXT,
   },
 
@@ -455,26 +447,19 @@ const styles = StyleSheet.create({
 
   subtitle: {
     marginTop: 5,
-
     fontSize: 14,
-
     color: MUTED,
     textAlign: "center",
   },
 
   formCard: {
     width: "100%",
-
     backgroundColor: "#FFFFFF",
-
     borderRadius: 20,
-
     paddingHorizontal: 18,
     paddingVertical: 18,
-
     borderWidth: 1,
     borderColor: BORDER,
-
     shadowColor: "#64748B",
     shadowOffset: {
       width: 0,
@@ -482,92 +467,67 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.06,
     shadowRadius: 10,
-
     elevation: 2,
   },
 
   label: {
     fontSize: 13,
     fontWeight: "700",
-
     color: "#374151",
-
     marginBottom: 7,
     marginTop: 2,
   },
 
   field: {
     minHeight: 52,
-
     borderRadius: 14,
-
     backgroundColor: "#F8FAFC",
-
     borderWidth: 1,
     borderColor: BORDER,
-
     flexDirection: "row",
     alignItems: "center",
-
     paddingHorizontal: 14,
-
     gap: 10,
-
     marginBottom: 14,
   },
 
   input: {
     flex: 1,
-
     minHeight: 50,
-
     fontSize: 15,
-
     color: TEXT,
   },
 
   errorBox: {
     flexDirection: "row",
     alignItems: "center",
-
     gap: 8,
-
     borderRadius: 12,
-
     backgroundColor: "#FEF2F2",
-
     paddingHorizontal: 12,
     paddingVertical: 10,
-
     marginBottom: 13,
   },
 
   error: {
     flex: 1,
-
     color: "#DC2626",
-
     fontSize: 13,
     lineHeight: 18,
   },
 
   buttonWrapper: {
     height: 52,
-
     borderRadius: 14,
-
     overflow: "hidden",
-
     marginTop: 2,
   },
 
   button: {
     flex: 1,
-
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-
     gap: 8,
   },
 
@@ -577,7 +537,6 @@ const styles = StyleSheet.create({
 
   buttonText: {
     color: "#FFFFFF",
-
     fontSize: 16,
     fontWeight: "700",
   },
@@ -585,89 +544,66 @@ const styles = StyleSheet.create({
   dividerRow: {
     flexDirection: "row",
     alignItems: "center",
-
     marginVertical: 15,
   },
 
   dividerLine: {
     flex: 1,
-
     height: 1,
-
     backgroundColor: BORDER,
   },
 
   dividerText: {
     marginHorizontal: 12,
-
     fontSize: 12,
     fontWeight: "600",
-
     color: ICON,
   },
 
   googleButton: {
     minHeight: 52,
-
     borderRadius: 14,
-
     borderWidth: 1,
     borderColor: BORDER,
-
     backgroundColor: "#FFFFFF",
-
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-
     gap: 10,
-
     paddingHorizontal: 12,
   },
 
   googleButtonText: {
     fontSize: 15,
     fontWeight: "700",
-
     color: TEXT,
   },
 
   infoCard: {
     marginTop: 14,
-
     borderRadius: 14,
-
     backgroundColor: "#EEF3FF",
-
     borderWidth: 1,
     borderColor: "#D7E1FA",
-
     paddingHorizontal: 13,
     paddingVertical: 12,
-
     flexDirection: "row",
     alignItems: "flex-start",
-
     gap: 9,
   },
 
   infoText: {
     flex: 1,
-
     fontSize: 12,
     lineHeight: 18,
-
     color: "#4B5563",
   },
 
   footer: {
     marginTop: 18,
     marginBottom: 8,
-
     textAlign: "center",
-
     color: MUTED,
-
     fontSize: 14,
   },
 
