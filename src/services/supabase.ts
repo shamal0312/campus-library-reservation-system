@@ -1,12 +1,8 @@
-import 'react-native-url-polyfill/auto';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
-  createClient,
-  processLock,
-  type SupabaseClient,
-} from '@supabase/supabase-js';
-import { Platform } from 'react-native';
+  requireSupabase as getSharedSupabase,
+} from '../lib/supabase';
 
 export const DEMO_MODE =
   process.env.EXPO_PUBLIC_BOOKING_DEMO !== 'false';
@@ -14,22 +10,9 @@ export const DEMO_MODE =
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const key = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
-const isServer =
-  Platform.OS === 'web' && typeof window === 'undefined';
-
 export const supabase: SupabaseClient | null =
   !DEMO_MODE && url && key
-    ? createClient(url, key, {
-        auth: {
-          ...(Platform.OS !== 'web'
-            ? { storage: AsyncStorage }
-            : {}),
-          autoRefreshToken: !isServer,
-          persistSession: !isServer,
-          detectSessionInUrl: false,
-          lock: processLock,
-        },
-      })
+    ? getSharedSupabase()
     : null;
 
 export function requireSupabase(): SupabaseClient {
