@@ -1,10 +1,17 @@
 import { Image } from "expo-image";
+
 import { router } from "expo-router";
+
 import { SymbolView } from "expo-symbols";
+
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import BottomNavBar from "@/components/BottomNavBar";
+
 import { useAppearance } from "@/contexts/appearance-context";
+
 import { useAuth } from "@/contexts/auth-context";
 
 export default function ProfileScreen() {
@@ -21,325 +28,331 @@ export default function ProfileScreen() {
     : "Student";
 
   return (
-    <ScrollView
+    <View
       style={[
         styles.screen,
         {
           backgroundColor: theme.background,
         },
       ]}
-      contentContainerStyle={[
-        styles.content,
-        {
-          paddingTop: insets.top + 24,
-          paddingBottom: insets.bottom + 32,
-        },
-      ]}
-      showsVerticalScrollIndicator={false}
     >
-      <View style={styles.header}>
-        <Pressable
-          style={[
-            styles.headerButton,
-            {
-              backgroundColor: theme.surface,
-              borderColor: theme.border,
-            },
-          ]}
-          onPress={() => router.back()}
-          hitSlop={8}
-        >
-          <SymbolView
-            name={{
-              ios: "chevron.left",
-              android: "arrow_back",
-              web: "arrow_back",
-            }}
-            size={22}
-            tintColor={theme.text}
-          />
-        </Pressable>
-
-        <Text
-          style={[
-            styles.title,
-            {
-              color: theme.text,
-            },
-          ]}
-        >
-          My Profile
-        </Text>
-
-        <Pressable
-          style={[
-            styles.headerButton,
-            {
-              backgroundColor: theme.surface,
-              borderColor: theme.border,
-            },
-          ]}
-          onPress={() => {
-            console.log("Open settings");
-          }}
-          hitSlop={8}
-        >
-          <SymbolView
-            name={{
-              ios: "gearshape",
-              android: "settings",
-              web: "settings",
-            }}
-            size={22}
-            tintColor={theme.text}
-          />
-        </Pressable>
-      </View>
-
-      <View
-        style={[
-          styles.profileCard,
+      <ScrollView
+        style={styles.screen}
+        contentContainerStyle={[
+          styles.content,
           {
-            backgroundColor: theme.surface,
-            borderColor: theme.border,
+            paddingTop: insets.top + 24,
+            paddingBottom: insets.bottom + 110,
           },
         ]}
+        showsVerticalScrollIndicator={false}
       >
-        <View
-          style={[
-            styles.avatarOuter,
-            {
-              backgroundColor: theme.primarySoft,
-            },
-          ]}
-        >
-          <Image
-            source={
-              account?.avatarUrl
-                ? { uri: account.avatarUrl }
-                : require("@/assets/images/app-logo.png")
-            }
+        <View style={styles.header}>
+          <Pressable
             style={[
-              styles.avatar,
+              styles.headerButton,
               {
                 backgroundColor: theme.surface,
+                borderColor: theme.border,
               },
             ]}
-            contentFit="cover"
-          />
+            onPress={() => router.back()}
+            hitSlop={8}
+          >
+            <SymbolView
+              name={{
+                ios: "chevron.left",
+                android: "arrow_back",
+                web: "arrow_back",
+              }}
+              size={22}
+              tintColor={theme.text}
+            />
+          </Pressable>
+
+          <Text
+            style={[
+              styles.title,
+              {
+                color: theme.text,
+              },
+            ]}
+          >
+            My Profile
+          </Text>
+
+          <Pressable
+            style={[
+              styles.headerButton,
+              {
+                backgroundColor: theme.surface,
+                borderColor: theme.border,
+              },
+            ]}
+            onPress={() => {
+              console.log("Open settings");
+            }}
+            hitSlop={8}
+          >
+            <SymbolView
+              name={{
+                ios: "gearshape",
+                android: "settings",
+                web: "settings",
+              }}
+              size={22}
+              tintColor={theme.text}
+            />
+          </Pressable>
+        </View>
+
+        <View
+          style={[
+            styles.profileCard,
+            {
+              backgroundColor: theme.surface,
+              borderColor: theme.border,
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.avatarOuter,
+              {
+                backgroundColor: theme.primarySoft,
+              },
+            ]}
+          >
+            <Image
+              source={
+                account?.avatarUrl
+                  ? { uri: account.avatarUrl }
+                  : require("@/assets/images/app-logo.png")
+              }
+              style={[
+                styles.avatar,
+                {
+                  backgroundColor: theme.surface,
+                },
+              ]}
+              contentFit="cover"
+            />
+          </View>
+
+          <Text
+            style={[
+              styles.name,
+              {
+                color: theme.text,
+              },
+            ]}
+          >
+            {displayName}
+          </Text>
+
+          <View
+            style={[
+              styles.roleBadge,
+              {
+                backgroundColor: theme.primarySoft,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.role,
+                {
+                  color: theme.primary,
+                },
+              ]}
+            >
+              {displayRole}
+            </Text>
+          </View>
+
+          <Pressable
+            style={[
+              styles.editProfileButton,
+              {
+                backgroundColor: theme.surfaceSecondary,
+                borderColor: theme.border,
+              },
+            ]}
+            onPress={() => router.push("/account/edit-profile")}
+          >
+            <SymbolView
+              name={{
+                ios: "pencil",
+                android: "edit",
+                web: "edit",
+              }}
+              size={16}
+              tintColor={theme.primary}
+            />
+
+            <Text
+              style={[
+                styles.editProfileText,
+                {
+                  color: theme.primary,
+                },
+              ]}
+            >
+              Edit Profile
+            </Text>
+          </Pressable>
         </View>
 
         <Text
           style={[
-            styles.name,
+            styles.sectionTitle,
             {
               color: theme.text,
             },
           ]}
         >
-          {displayName}
+          Account
         </Text>
 
         <View
           style={[
-            styles.roleBadge,
+            styles.menuGroup,
             {
-              backgroundColor: theme.primarySoft,
-            },
-          ]}
-        >
-          <Text
-            style={[
-              styles.role,
-              {
-                color: theme.primary,
-              },
-            ]}
-          >
-            {displayRole}
-          </Text>
-        </View>
-
-        <Pressable
-          style={[
-            styles.editProfileButton,
-            {
-              backgroundColor: theme.surfaceSecondary,
+              backgroundColor: theme.surface,
               borderColor: theme.border,
             },
           ]}
-          onPress={() => router.push("/account/edit-profile")}
         >
-          <SymbolView
-            name={{
-              ios: "pencil",
-              android: "edit",
-              web: "edit",
+          <ProfileMenuItem
+            label="Personal Information"
+            icon={{
+              ios: "person.text.rectangle",
+              android: "badge",
+              web: "badge",
             }}
-            size={16}
-            tintColor={theme.primary}
+            onPress={() => router.push("/account/profile-details")}
           />
 
-          <Text
-            style={[
-              styles.editProfileText,
-              {
-                color: theme.primary,
-              },
-            ]}
-          >
-            Edit Profile
-          </Text>
-        </Pressable>
-      </View>
+          <Divider />
 
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: theme.text,
-          },
-        ]}
-      >
-        Account
-      </Text>
+          <ProfileMenuItem
+            label="Change Password"
+            icon={{
+              ios: "lock.fill",
+              android: "lock",
+              web: "lock",
+            }}
+            onPress={() => router.push("/account/change-password")}
+          />
+        </View>
 
-      <View
-        style={[
-          styles.menuGroup,
-          {
-            backgroundColor: theme.surface,
-            borderColor: theme.border,
-          },
-        ]}
-      >
-        <ProfileMenuItem
-          label="Personal Information"
-          icon={{
-            ios: "person.text.rectangle",
-            android: "badge",
-            web: "badge",
-          }}
-          onPress={() => router.push("/account/profile-details")}
-        />
+        <Text
+          style={[
+            styles.sectionTitle,
+            {
+              color: theme.text,
+            },
+          ]}
+        >
+          Reservations
+        </Text>
 
-        <Divider />
+        <View
+          style={[
+            styles.menuGroup,
+            {
+              backgroundColor: theme.surface,
+              borderColor: theme.border,
+            },
+          ]}
+        >
+          <ProfileMenuItem
+            label="Book Reservation"
+            icon={{
+              ios: "book.fill",
+              android: "menu_book",
+              web: "menu_book",
+            }}
+            onPress={() => {
+              console.log("Open book reservation");
+            }}
+          />
 
-        <ProfileMenuItem
-          label="Change Password"
-          icon={{
-            ios: "lock.fill",
-            android: "lock",
-            web: "lock",
-          }}
-          onPress={() => router.push("/account/change-password")}
-        />
-      </View>
+          <Divider />
 
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: theme.text,
-          },
-        ]}
-      >
-        Reservations
-      </Text>
+          <ProfileMenuItem
+            label="Seat Reservation"
+            icon={{
+              ios: "chair.fill",
+              android: "chair",
+              web: "chair",
+            }}
+            onPress={() => {
+              console.log("Open seat reservation");
+            }}
+          />
 
-      <View
-        style={[
-          styles.menuGroup,
-          {
-            backgroundColor: theme.surface,
-            borderColor: theme.border,
-          },
-        ]}
-      >
-        <ProfileMenuItem
-          label="Book Reservation"
-          icon={{
-            ios: "book.fill",
-            android: "menu_book",
-            web: "menu_book",
-          }}
-          onPress={() => {
-            console.log("Open book reservation");
-          }}
-        />
+          <Divider />
 
-        <Divider />
+          <ProfileMenuItem
+            label="Room Reservation"
+            icon={{
+              ios: "door.left.hand.open",
+              android: "meeting_room",
+              web: "meeting_room",
+            }}
+            onPress={() => {
+              console.log("Open room reservation");
+            }}
+          />
+        </View>
 
-        <ProfileMenuItem
-          label="Seat Reservation"
-          icon={{
-            ios: "chair.fill",
-            android: "chair",
-            web: "chair",
-          }}
-          onPress={() => {
-            console.log("Open seat reservation");
-          }}
-        />
+        <Text
+          style={[
+            styles.sectionTitle,
+            {
+              color: theme.text,
+            },
+          ]}
+        >
+          Preferences
+        </Text>
 
-        <Divider />
+        <View
+          style={[
+            styles.menuGroup,
+            {
+              backgroundColor: theme.surface,
+              borderColor: theme.border,
+            },
+          ]}
+        >
+          <ProfileMenuItem
+            label="App Appearance"
+            icon={{
+              ios: "paintbrush.fill",
+              android: "palette",
+              web: "palette",
+            }}
+            onPress={() => router.push("/account/app-appearance")}
+          />
 
-        <ProfileMenuItem
-          label="Room Reservation"
-          icon={{
-            ios: "door.left.hand.open",
-            android: "meeting_room",
-            web: "meeting_room",
-          }}
-          onPress={() => {
-            console.log("Open room reservation");
-          }}
-        />
-      </View>
+          <Divider />
 
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: theme.text,
-          },
-        ]}
-      >
-        Preferences
-      </Text>
+          <ProfileMenuItem
+            label="Notification Preferences"
+            icon={{
+              ios: "bell.badge.fill",
+              android: "notifications",
+              web: "notifications",
+            }}
+            onPress={() => router.push("/account/notification-preferences")}
+          />
+        </View>
+      </ScrollView>
 
-      <View
-        style={[
-          styles.menuGroup,
-          {
-            backgroundColor: theme.surface,
-            borderColor: theme.border,
-          },
-        ]}
-      >
-        <ProfileMenuItem
-          label="App Appearance"
-          icon={{
-            ios: "paintbrush.fill",
-            android: "palette",
-            web: "palette",
-          }}
-          onPress={() => router.push("/account/app-appearance")}
-        />
-
-        <Divider />
-
-        <ProfileMenuItem
-          label="Notification Preferences"
-          icon={{
-            ios: "bell.badge.fill",
-            android: "notifications",
-            web: "notifications",
-          }}
-          onPress={() => router.push("/account/notification-preferences")}
-        />
-      </View>
-    </ScrollView>
+      <BottomNavBar active="profile" />
+    </View>
   );
 }
 

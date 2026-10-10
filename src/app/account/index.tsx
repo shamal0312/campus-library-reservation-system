@@ -1,17 +1,26 @@
 import { Image } from "expo-image";
+
 import { LinearGradient } from "expo-linear-gradient";
+
 import { router, useFocusEffect } from "expo-router";
+
 import { SymbolView } from "expo-symbols";
+
 import { useCallback, useState } from "react";
+
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import BottomNavBar from "@/components/BottomNavBar";
 import AppScreen from "@/components/themes/AppScreen";
+
 import { useAppearance } from "@/contexts/appearance-context";
+
 import { useAuth } from "@/contexts/auth-context";
-import type { Booking } from "@/features/booking/model";
-import { listBookings } from "@/features/booking/repository";
+
 import { getUnreadNotificationCount } from "@/services/notifications";
+
 import { syncUpcomingReservationReminders } from "@/services/reservation-reminders";
 
 import GetStartedScreen from "../(auth)/get-started";
@@ -53,6 +62,39 @@ const ACTIONS: {
   },
 ];
 
+const SAMPLE_RESERVATIONS = [
+  {
+    id: "1",
+    title: "Seat A8",
+    subtitle: "Floor 2",
+    date: "15 Sep",
+    time: "10:00 - 12:00",
+    type: "Seat",
+    ios: "chair.fill" as const,
+    android: "chair" as const,
+  },
+  {
+    id: "2",
+    title: "Study Room 03",
+    subtitle: "Floor 1",
+    date: "18 Sep",
+    time: "02:00 - 04:00",
+    type: "Room",
+    ios: "door.left.hand.open" as const,
+    android: "meeting_room" as const,
+  },
+  {
+    id: "3",
+    title: "Database Systems",
+    subtitle: "Book Reservation",
+    date: "20 Sep",
+    time: "Pickup",
+    type: "Book",
+    ios: "book.fill" as const,
+    android: "menu_book" as const,
+  },
+];
+
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
 
@@ -63,10 +105,6 @@ export default function HomeScreen() {
   const isDark = appearance === "dark";
 
   const [unreadCount, setUnreadCount] = useState(0);
-
-  const [upcomingReservations, setUpcomingReservations] = useState<Booking[]>(
-    [],
-  );
 
   const isSignedIn = !isLoading && !!session && !!account?.role;
 
@@ -85,48 +123,10 @@ export default function HomeScreen() {
     }
   }, [session]);
 
-  const loadUpcomingReservations = useCallback(async () => {
-    if (!session) {
-      setUpcomingReservations([]);
-      return;
-    }
-
-    try {
-      const bookings = await listBookings();
-
-      const now = new Date();
-
-      const upcoming = bookings
-        .filter((booking) => {
-          const endTime = new Date(booking.end_at);
-
-          const activeStatus =
-            booking.status === "reserved" ||
-            booking.status === "approved" ||
-            booking.status === "pending" ||
-            booking.status === "checked_in";
-
-          return activeStatus && endTime > now;
-        })
-        .sort(
-          (a, b) =>
-            new Date(a.start_at).getTime() - new Date(b.start_at).getTime(),
-        )
-        .slice(0, 5);
-
-      setUpcomingReservations(upcoming);
-    } catch (error) {
-      console.log("Could not load upcoming reservations:", error);
-
-      setUpcomingReservations([]);
-    }
-  }, [session]);
-
   useFocusEffect(
     useCallback(() => {
       loadUnreadCount();
-      loadUpcomingReservations();
-    }, [loadUnreadCount, loadUpcomingReservations]),
+    }, [loadUnreadCount]),
   );
 
   if (!isSignedIn) {
@@ -427,7 +427,6 @@ export default function HomeScreen() {
                 borderColor: theme.border,
               },
             ]}
-            onPress={() => router.push("/booking/reservations")}
           >
             <Text
               style={[
@@ -447,252 +446,164 @@ export default function HomeScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.reservationList}
         >
-          {upcomingReservations.length === 0 ? (
-            <View
-              style={[
-                styles.emptyReservationCard,
+          {SAMPLE_RESERVATIONS.map((reservation) => (
+            <Pressable
+              key={reservation.id}
+              style={({ pressed }) => [
+                styles.reservationCard,
                 {
                   backgroundColor: theme.surface,
                   borderColor: theme.border,
                 },
+                pressed && styles.reservationCardPressed,
               ]}
             >
-              <View
-                style={[
-                  styles.emptyReservationIcon,
-                  {
-                    backgroundColor: theme.primarySoft,
-                  },
-                ]}
-              >
-                <SymbolView
-                  name={{
-                    ios: "calendar",
-                    android: "event",
-                    web: "event",
-                  }}
-                  size={27}
-                  tintColor={theme.primary}
-                />
+              <View style={styles.reservationTop}>
+                <View
+                  style={[
+                    styles.reservationIcon,
+                    {
+                      backgroundColor: theme.primarySoft,
+                    },
+                  ]}
+                >
+                  <SymbolView
+                    name={{
+                      ios: reservation.ios,
+                      android: reservation.android,
+                      web: reservation.android,
+                    }}
+                    size={23}
+                    tintColor={theme.primary}
+                  />
+                </View>
+
+                <View
+                  style={[
+                    styles.statusBadge,
+                    {
+                      backgroundColor: isDark ? "#143322" : "#ECFDF3",
+                    },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.statusDot,
+                      {
+                        backgroundColor: theme.success,
+                      },
+                    ]}
+                  />
+
+                  <Text
+                    style={[
+                      styles.statusText,
+                      {
+                        color: isDark ? "#86EFAC" : "#15803D",
+                      },
+                    ]}
+                  >
+                    Upcoming
+                  </Text>
+                </View>
               </View>
 
               <Text
                 style={[
-                  styles.emptyReservationTitle,
+                  styles.reservationName,
                   {
                     color: theme.text,
                   },
                 ]}
               >
-                No upcoming reservations
+                {reservation.title}
               </Text>
 
               <Text
                 style={[
-                  styles.emptyReservationText,
+                  styles.reservationSubtitle,
                   {
                     color: theme.textSecondary,
                   },
                 ]}
               >
-                Your upcoming seat and study room bookings will appear here.
+                {reservation.subtitle}
               </Text>
-            </View>
-          ) : (
-            upcomingReservations.map((reservation) => {
-              const start = new Date(reservation.start_at);
-              const end = new Date(reservation.end_at);
 
-              const date = start.toLocaleDateString(undefined, {
-                day: "2-digit",
-                month: "short",
-              });
+              <View
+                style={[
+                  styles.reservationDivider,
+                  {
+                    backgroundColor: theme.border,
+                  },
+                ]}
+              />
 
-              const time = `${start.toLocaleTimeString(undefined, {
-                hour: "2-digit",
-                minute: "2-digit",
-              })} - ${end.toLocaleTimeString(undefined, {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}`;
-
-              const isSeat = reservation.kind === "seat";
-
-              return (
-                <Pressable
-                  key={reservation.id}
-                  style={({ pressed }) => [
-                    styles.reservationCard,
+              <View style={styles.reservationMetaRow}>
+                <View
+                  style={[
+                    styles.smallMetaIcon,
                     {
-                      backgroundColor: theme.surface,
-                      borderColor: theme.border,
+                      backgroundColor: theme.primarySoft,
                     },
-                    pressed && styles.reservationCardPressed,
                   ]}
-                  onPress={() => {
-                    if (isSeat) {
-                      router.push("/booking/reservations");
-                    } else {
-                      router.push("/booking/room-bookings");
-                    }
-                  }}
                 >
-                  <View style={styles.reservationTop}>
-                    <View
-                      style={[
-                        styles.reservationIcon,
-                        {
-                          backgroundColor: theme.primarySoft,
-                        },
-                      ]}
-                    >
-                      <SymbolView
-                        name={{
-                          ios: isSeat ? "chair.fill" : "door.left.hand.open",
-                          android: isSeat ? "chair" : "meeting_room",
-                          web: isSeat ? "chair" : "meeting_room",
-                        }}
-                        size={23}
-                        tintColor={theme.primary}
-                      />
-                    </View>
-
-                    <View
-                      style={[
-                        styles.statusBadge,
-                        {
-                          backgroundColor: isDark ? "#143322" : "#ECFDF3",
-                        },
-                      ]}
-                    >
-                      <View
-                        style={[
-                          styles.statusDot,
-                          {
-                            backgroundColor: theme.success,
-                          },
-                        ]}
-                      />
-
-                      <Text
-                        style={[
-                          styles.statusText,
-                          {
-                            color: isDark ? "#86EFAC" : "#15803D",
-                          },
-                        ]}
-                      >
-                        {reservation.status === "pending"
-                          ? "Pending"
-                          : reservation.status === "checked_in"
-                            ? "Checked In"
-                            : reservation.status === "approved"
-                              ? "Approved"
-                              : "Upcoming"}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <Text
-                    style={[
-                      styles.reservationName,
-                      {
-                        color: theme.text,
-                      },
-                    ]}
-                  >
-                    {reservation.resource_label}
-                  </Text>
-
-                  <Text
-                    style={[
-                      styles.reservationSubtitle,
-                      {
-                        color: theme.textSecondary,
-                      },
-                    ]}
-                  >
-                    {isSeat
-                      ? `Floor ${reservation.floor}`
-                      : reservation.purpose || "Study Room Booking"}
-                  </Text>
-
-                  <View
-                    style={[
-                      styles.reservationDivider,
-                      {
-                        backgroundColor: theme.border,
-                      },
-                    ]}
+                  <SymbolView
+                    name={{
+                      ios: "calendar",
+                      android: "calendar_today",
+                      web: "calendar_today",
+                    }}
+                    size={14}
+                    tintColor={theme.primary}
                   />
+                </View>
 
-                  <View style={styles.reservationMetaRow}>
-                    <View
-                      style={[
-                        styles.smallMetaIcon,
-                        {
-                          backgroundColor: theme.primarySoft,
-                        },
-                      ]}
-                    >
-                      <SymbolView
-                        name={{
-                          ios: "calendar",
-                          android: "calendar_today",
-                          web: "calendar_today",
-                        }}
-                        size={14}
-                        tintColor={theme.primary}
-                      />
-                    </View>
+                <Text
+                  style={[
+                    styles.metaValue,
+                    {
+                      color: theme.text,
+                    },
+                  ]}
+                >
+                  {reservation.date}
+                </Text>
+              </View>
 
-                    <Text
-                      style={[
-                        styles.metaValue,
-                        {
-                          color: theme.text,
-                        },
-                      ]}
-                    >
-                      {date}
-                    </Text>
-                  </View>
+              <View style={styles.reservationMetaRow}>
+                <View
+                  style={[
+                    styles.smallMetaIcon,
+                    {
+                      backgroundColor: theme.primarySoft,
+                    },
+                  ]}
+                >
+                  <SymbolView
+                    name={{
+                      ios: "clock.fill",
+                      android: "schedule",
+                      web: "schedule",
+                    }}
+                    size={14}
+                    tintColor={theme.primary}
+                  />
+                </View>
 
-                  <View style={styles.reservationMetaRow}>
-                    <View
-                      style={[
-                        styles.smallMetaIcon,
-                        {
-                          backgroundColor: theme.primarySoft,
-                        },
-                      ]}
-                    >
-                      <SymbolView
-                        name={{
-                          ios: "clock.fill",
-                          android: "schedule",
-                          web: "schedule",
-                        }}
-                        size={14}
-                        tintColor={theme.primary}
-                      />
-                    </View>
-
-                    <Text
-                      style={[
-                        styles.metaValue,
-                        {
-                          color: theme.text,
-                        },
-                      ]}
-                    >
-                      {time}
-                    </Text>
-                  </View>
-                </Pressable>
-              );
-            })
-          )}
+                <Text
+                  style={[
+                    styles.metaValue,
+                    {
+                      color: theme.text,
+                    },
+                  ]}
+                >
+                  {reservation.time}
+                </Text>
+              </View>
+            </Pressable>
+          ))}
         </ScrollView>
 
         <View
@@ -749,99 +660,8 @@ export default function HomeScreen() {
         </View>
       </ScrollView>
 
-      <View
-        style={[
-          styles.bottomNav,
-          {
-            paddingBottom: Math.max(insets.bottom, 8),
-            backgroundColor: theme.navBackground,
-            borderTopColor: theme.border,
-          },
-        ]}
-      >
-        <BottomNavItem
-          label="Home"
-          ios="house.fill"
-          android="home"
-          active
-          onPress={() => {}}
-        />
-
-        <BottomNavItem
-          label="Seat"
-          ios="chair.fill"
-          android="chair"
-          onPress={() => router.push("/booking")}
-        />
-
-        <BottomNavItem
-          label="Books"
-          ios="book.fill"
-          android="menu_book"
-          onPress={() => router.push("/(student)/book" as never)}
-        />
-
-        <BottomNavItem
-          label="Profile"
-          ios="person.fill"
-          android="person"
-          onPress={() => router.push("/account/profile")}
-        />
-      </View>
+      <BottomNavBar active="home" />
     </AppScreen>
-  );
-}
-
-type BottomNavItemProps = {
-  label: string;
-  ios: "house.fill" | "chair.fill" | "book.fill" | "person.fill";
-  android: "home" | "chair" | "menu_book" | "person";
-  active?: boolean;
-  onPress: () => void;
-};
-
-function BottomNavItem({
-  label,
-  ios,
-  android,
-  active = false,
-  onPress,
-}: BottomNavItemProps) {
-  const { theme } = useAppearance();
-
-  return (
-    <Pressable style={styles.navItem} onPress={onPress}>
-      <View
-        style={[
-          styles.navIconWrapper,
-          active && {
-            backgroundColor: theme.primarySoft,
-          },
-        ]}
-      >
-        <SymbolView
-          name={{
-            ios,
-            android,
-            web: android,
-          }}
-          size={22}
-          tintColor={active ? theme.primary : theme.iconInactive}
-        />
-      </View>
-
-      <Text
-        style={[
-          styles.navLabel,
-          {
-            color: active ? theme.primary : theme.iconInactive,
-            fontWeight: active ? "800" : "600",
-          },
-        ]}
-      >
-        {label}
-      </Text>
-    </Pressable>
   );
 }
 
@@ -1209,38 +1029,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  emptyReservationCard: {
-    width: 260,
-    minHeight: 180,
-    borderRadius: 20,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
-  },
-
-  emptyReservationIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  emptyReservationTitle: {
-    marginTop: 10,
-    fontSize: 14,
-    fontWeight: "800",
-    textAlign: "center",
-  },
-
-  emptyReservationText: {
-    marginTop: 5,
-    fontSize: 11,
-    lineHeight: 16,
-    textAlign: "center",
-  },
-
   tipCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -1271,44 +1059,5 @@ const styles = StyleSheet.create({
     marginTop: 3,
     fontSize: 11,
     lineHeight: 16,
-  },
-
-  bottomNav: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    minHeight: 70,
-    flexDirection: "row",
-    paddingTop: 8,
-    paddingHorizontal: 10,
-    borderTopWidth: 1,
-    shadowColor: "#0F172A",
-    shadowOffset: {
-      width: 0,
-      height: -3,
-    },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 12,
-  },
-
-  navItem: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 2,
-  },
-
-  navIconWrapper: {
-    width: 42,
-    height: 28,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  navLabel: {
-    fontSize: 10,
   },
 });
