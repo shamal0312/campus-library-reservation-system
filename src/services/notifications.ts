@@ -209,6 +209,40 @@ export async function markNotificationAsRead(notificationId: string) {
   };
 }
 
+export async function deleteNotification(notificationId: string) {
+  const supabase = requireSupabase();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return {
+      success: false,
+      error: userError?.message ?? "User not found.",
+    };
+  }
+
+  const { error } = await supabase
+    .from("notifications")
+    .delete()
+    .eq("id", notificationId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+
+  return {
+    success: true,
+    error: null,
+  };
+}
+
 export async function createNotification(input: {
   title: string;
   message: string;
@@ -261,7 +295,10 @@ export async function createNotification(input: {
 }
 
 export function notifyReservation(
-  type: Extract<NotificationType, "reservation_confirmation" | "reservation_update">,
+  type: Extract<
+    NotificationType,
+    "reservation_confirmation" | "reservation_update"
+  >,
   title: string,
   message: string,
 ) {

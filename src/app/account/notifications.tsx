@@ -3,6 +3,7 @@ import { SymbolView } from "expo-symbols";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -12,6 +13,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
+  deleteNotification,
   getNotifications,
   markNotificationAsRead,
   type NotificationItem,
@@ -30,6 +32,7 @@ export default function NotificationsScreen() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const loadNotifications = useCallback(async () => {
     setIsLoading(true);
@@ -50,6 +53,40 @@ export default function NotificationsScreen() {
   useEffect(() => {
     loadNotifications();
   }, [loadNotifications]);
+
+  function handleDeleteNotification(item: NotificationItem) {
+    Alert.alert(
+      "Delete Notification",
+      "Are you sure you want to delete this notification?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            setDeletingId(item.id);
+            setErrorMessage(null);
+
+            const result = await deleteNotification(item.id);
+
+            setDeletingId(null);
+
+            if (!result.success) {
+              setErrorMessage(result.error ?? "Could not delete notification.");
+              return;
+            }
+
+            setNotifications((current) =>
+              current.filter((notification) => notification.id !== item.id),
+            );
+          },
+        },
+      ],
+    );
+  }
 
   async function handleNotificationPress(item: NotificationItem) {
     if (!item.is_read) {
@@ -226,75 +263,95 @@ export default function NotificationsScreen() {
       ) : (
         <View style={styles.list}>
           {notifications.map((item) => (
-            <Pressable
+            <View
               key={item.id}
-              style={({ pressed }) => [
-                styles.card,
-                !item.is_read && styles.unreadCard,
-                pressed && styles.cardPressed,
-              ]}
-              onPress={() => handleNotificationPress(item)}
+              style={[styles.card, !item.is_read && styles.unreadCard]}
             >
-              <View
-                style={[styles.iconBox, !item.is_read && styles.unreadIconBox]}
+              <Pressable
+                style={({ pressed }) => [
+                  styles.notificationContent,
+                  pressed && styles.cardPressed,
+                ]}
+                onPress={() => handleNotificationPress(item)}
               >
-                <SymbolView
-                  name={{
-                    ios: "bell.fill",
-                    android: "notifications",
-                    web: "notifications",
-                  }}
-                  size={21}
-                  tintColor={BLUE}
-                />
-              </View>
-
-              <View style={styles.cardContent}>
-                <View style={styles.cardTop}>
-                  <Text
-                    style={[
-                      styles.cardTitle,
-                      !item.is_read && styles.unreadTitle,
-                    ]}
-                    numberOfLines={1}
-                  >
-                    {item.title}
-                  </Text>
-
-                  {!item.is_read ? <View style={styles.unreadDot} /> : null}
-                </View>
-
-                <Text style={styles.message} numberOfLines={2}>
-                  {item.message}
-                </Text>
-
-                <View style={styles.timeRow}>
+                <View
+                  style={[
+                    styles.iconBox,
+                    !item.is_read && styles.unreadIconBox,
+                  ]}
+                >
                   <SymbolView
                     name={{
-                      ios: "clock",
-                      android: "schedule",
-                      web: "schedule",
+                      ios: "bell.fill",
+                      android: "notifications",
+                      web: "notifications",
                     }}
-                    size={13}
-                    tintColor={MUTED}
+                    size={21}
+                    tintColor={BLUE}
                   />
-
-                  <Text style={styles.time}>
-                    {formatNotificationTime(item.created_at)}
-                  </Text>
                 </View>
-              </View>
 
-              <SymbolView
-                name={{
-                  ios: "chevron.right",
-                  android: "chevron_right",
-                  web: "chevron_right",
-                }}
-                size={18}
-                tintColor="#A0AEC0"
-              />
-            </Pressable>
+                <View style={styles.cardContent}>
+                  <View style={styles.cardTop}>
+                    <Text
+                      style={[
+                        styles.cardTitle,
+                        !item.is_read && styles.unreadTitle,
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {item.title}
+                    </Text>
+
+                    {!item.is_read ? <View style={styles.unreadDot} /> : null}
+                  </View>
+
+                  <Text style={styles.message} numberOfLines={2}>
+                    {item.message}
+                  </Text>
+
+                  <View style={styles.timeRow}>
+                    <SymbolView
+                      name={{
+                        ios: "clock",
+                        android: "schedule",
+                        web: "schedule",
+                      }}
+                      size={13}
+                      tintColor={MUTED}
+                    />
+
+                    <Text style={styles.time}>
+                      {formatNotificationTime(item.created_at)}
+                    </Text>
+                  </View>
+                </View>
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.deleteButton,
+                  pressed && styles.deleteButtonPressed,
+                ]}
+                onPress={() => handleDeleteNotification(item)}
+                disabled={deletingId === item.id}
+                hitSlop={6}
+              >
+                {deletingId === item.id ? (
+                  <ActivityIndicator size="small" color="#DC2626" />
+                ) : (
+                  <SymbolView
+                    name={{
+                      ios: "trash",
+                      android: "delete",
+                      web: "delete",
+                    }}
+                    size={19}
+                    tintColor="#DC2626"
+                  />
+                )}
+              </Pressable>
+            </View>
           ))}
         </View>
       )}
@@ -514,6 +571,30 @@ const styles = StyleSheet.create({
 
   cardPressed: {
     opacity: 0.75,
+  },
+
+  notificationContent: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  deleteButton: {
+    width: 40,
+    height: 40,
+
+    borderRadius: 12,
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    backgroundColor: "#FEF2F2",
+
+    marginLeft: 4,
+  },
+
+  deleteButtonPressed: {
+    backgroundColor: "#FEE2E2",
   },
 
   iconBox: {
