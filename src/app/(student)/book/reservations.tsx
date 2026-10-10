@@ -1,31 +1,25 @@
-import { useAuth } from '@/contexts/auth-context';
+import { useAuth } from "@/contexts/auth-context";
 
 import {
-    getMyBookReservations,
-    getPreviousBookReservations,
-} from '@/services/bookService';
+  getMyBookReservations,
+  getPreviousBookReservations,
+} from "@/services/bookService";
+
+import { router, useFocusEffect } from "expo-router";
+
+import { useCallback, useState } from "react";
 
 import {
-    router,
-    useFocusEffect,
-} from 'expo-router';
+  ActivityIndicator,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
-import {
-    useCallback,
-    useState,
-} from 'react';
-
-import {
-    ActivityIndicator,
-    Image,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
-} from 'react-native';
-
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type BookInfo = {
   id: string;
@@ -49,14 +43,16 @@ type Reservation = {
 export default function MyReservationsScreen() {
   const { account } = useAuth();
 
-  const [currentReservations, setCurrentReservations] =
-    useState<Reservation[]>([]);
+  const [currentReservations, setCurrentReservations] = useState<Reservation[]>(
+    [],
+  );
 
-  const [previousReservations, setPreviousReservations] =
-    useState<Reservation[]>([]);
+  const [previousReservations, setPreviousReservations] = useState<
+    Reservation[]
+  >([]);
 
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   /*
    * REFRESH FIX
@@ -71,7 +67,7 @@ export default function MyReservationsScreen() {
   useFocusEffect(
     useCallback(() => {
       loadReservations();
-    }, [account?.id])
+    }, [account?.id]),
   );
 
   async function loadReservations() {
@@ -81,41 +77,31 @@ export default function MyReservationsScreen() {
     }
 
     try {
-      setError('');
+      setError("");
 
-      const [currentData, previousData] =
-        await Promise.all([
-          getMyBookReservations(account.id),
-          getPreviousBookReservations(account.id),
-        ]);
+      const [currentData, previousData] = await Promise.all([
+        getMyBookReservations(account.id),
+        getPreviousBookReservations(account.id),
+      ]);
 
-      setCurrentReservations(
-        currentData as unknown as Reservation[]
-      );
+      setCurrentReservations(currentData as unknown as Reservation[]);
 
-      setPreviousReservations(
-        previousData as unknown as Reservation[]
-      );
+      setPreviousReservations(previousData as unknown as Reservation[]);
     } catch (err) {
       console.error(err);
 
-      setError(
-        'Could not load your reservations.'
-      );
+      setError("Could not load your reservations.");
     } finally {
       setLoading(false);
     }
   }
 
   function formatDate(date: string) {
-    return new Date(date).toLocaleDateString(
-      'en-GB',
-      {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-      }
-    );
+    return new Date(date).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   }
 
   /*
@@ -123,99 +109,81 @@ export default function MyReservationsScreen() {
    */
 
   function goBackToBooks() {
-    router.replace('/(student)/book');
+    router.back();
   }
 
-  function openReservationDetails(
-    reservation: Reservation
-  ) {
+  function openReservationDetails(reservation: Reservation) {
     router.push({
-      pathname:
-        '/(student)/book/reservation-details',
+      pathname: "/(student)/book/reservation-details",
       params: {
         reservationId: reservation.id,
       },
     });
   }
 
-  function getDisplayStatus(
-    item: Reservation,
-    previous: boolean
-  ) {
+  function getDisplayStatus(item: Reservation, previous: boolean) {
     if (!previous) {
-      return 'Upcoming';
+      return "Upcoming";
     }
 
-    if (item.status === 'Returned') {
-      return 'Completed';
+    if (item.status === "Returned") {
+      return "Completed";
     }
 
-    if (item.status === 'Cancelled') {
-      return 'Cancelled';
+    if (item.status === "Cancelled") {
+      return "Cancelled";
     }
 
     return item.status;
   }
 
-  function getStatusBadgeStyle(
-    item: Reservation,
-    previous: boolean
-  ) {
+  function getStatusBadgeStyle(item: Reservation, previous: boolean) {
     if (!previous) {
       return styles.upcomingBadge;
     }
 
-    if (item.status === 'Returned') {
+    if (item.status === "Returned") {
       return styles.completedBadge;
     }
 
-    if (item.status === 'Cancelled') {
+    if (item.status === "Cancelled") {
       return styles.cancelledBadge;
     }
 
     return styles.previousBadge;
   }
 
-  function getStatusTextStyle(
-    item: Reservation,
-    previous: boolean
-  ) {
+  function getStatusTextStyle(item: Reservation, previous: boolean) {
     if (!previous) {
       return styles.upcomingText;
     }
 
-    if (item.status === 'Returned') {
+    if (item.status === "Returned") {
       return styles.completedText;
     }
 
-    if (item.status === 'Cancelled') {
+    if (item.status === "Cancelled") {
       return styles.cancelledText;
     }
 
     return styles.previousText;
   }
 
-  function renderReservationCard(
-    item: Reservation,
-    previous = false
-  ) {
+  function renderReservationCard(item: Reservation, previous = false) {
     const book = item.books;
 
     return (
       <Pressable
         key={item.id}
         style={styles.card}
-        onPress={() =>
-          openReservationDetails(item)
-        }
+        onPress={() => openReservationDetails(item)}
       >
         {/* LEFT ACCENT */}
 
         <View
           style={[
             styles.leftAccent,
-            previous &&
-            item.status === 'Returned'
+            previous && item.status === "Returned"
               ? styles.completedAccent
               : styles.blueAccent,
           ]}
@@ -232,16 +200,8 @@ export default function MyReservationsScreen() {
             resizeMode="cover"
           />
         ) : (
-          <View
-            style={styles.coverPlaceholder}
-          >
-            <Text
-              style={
-                styles.coverPlaceholderText
-              }
-            >
-              BOOK
-            </Text>
+          <View style={styles.coverPlaceholder}>
+            <Text style={styles.coverPlaceholderText}>BOOK</Text>
           </View>
         )}
 
@@ -249,75 +209,42 @@ export default function MyReservationsScreen() {
 
         <View style={styles.bookInfo}>
           <View style={styles.topRow}>
-            <Text
-              style={styles.bookTitle}
-              numberOfLines={1}
-            >
-              {book?.title ||
-                item.item_name}
+            <Text style={styles.bookTitle} numberOfLines={1}>
+              {book?.title || item.item_name}
             </Text>
 
             <View
-              style={[
-                styles.statusBadge,
-                getStatusBadgeStyle(
-                  item,
-                  previous
-                ),
-              ]}
+              style={[styles.statusBadge, getStatusBadgeStyle(item, previous)]}
             >
               <Text
-                style={[
-                  styles.statusText,
-                  getStatusTextStyle(
-                    item,
-                    previous
-                  ),
-                ]}
+                style={[styles.statusText, getStatusTextStyle(item, previous)]}
               >
-                {getDisplayStatus(
-                  item,
-                  previous
-                )}
+                {getDisplayStatus(item, previous)}
               </Text>
             </View>
           </View>
 
-          <Text
-            style={styles.author}
-            numberOfLines={1}
-          >
-            {book?.author ||
-              'Unknown Author'}
+          <Text style={styles.author} numberOfLines={1}>
+            {book?.author || "Unknown Author"}
           </Text>
 
           {/* DATE ROW */}
 
           <View style={styles.dateRow}>
-            <Text style={styles.calendarIcon}>
-              ▣
-            </Text>
+            <Text style={styles.calendarIcon}>▣</Text>
 
-            <Text style={styles.dateText}>
-              {formatDate(item.start_time)}
-            </Text>
+            <Text style={styles.dateText}>{formatDate(item.start_time)}</Text>
 
-            <Text style={styles.dateArrow}>
-              →
-            </Text>
+            <Text style={styles.dateArrow}>→</Text>
 
-            <Text style={styles.dateText}>
-              {formatDate(item.end_time)}
-            </Text>
+            <Text style={styles.dateText}>{formatDate(item.end_time)}</Text>
           </View>
         </View>
 
         {/* ARROW */}
 
         <View style={styles.arrowContainer}>
-          <Text style={styles.arrow}>
-            ›
-          </Text>
+          <Text style={styles.arrow}>›</Text>
         </View>
       </Pressable>
     );
@@ -325,32 +252,19 @@ export default function MyReservationsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView
-        style={styles.center}
-        edges={['top']}
-      >
-        <ActivityIndicator
-          size="large"
-          color="#1464ff"
-        />
+      <SafeAreaView style={styles.center} edges={["top"]}>
+        <ActivityIndicator size="large" color="#1464ff" />
 
-        <Text style={styles.loadingText}>
-          Loading reservations...
-        </Text>
+        <Text style={styles.loadingText}>Loading reservations...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView
-      style={styles.safeArea}
-      edges={['top']}
-    >
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <ScrollView
         style={styles.screen}
-        contentContainerStyle={
-          styles.container
-        }
+        contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="automatic"
       >
@@ -365,30 +279,20 @@ export default function MyReservationsScreen() {
               onPress={goBackToBooks}
               hitSlop={10}
             >
-              <Text style={styles.backArrow}>
-                ‹
-              </Text>
+              <Text style={styles.backArrow}>‹</Text>
             </Pressable>
 
             {/* TITLE */}
 
             <View style={styles.headerTextContainer}>
-              <Text style={styles.title}>
-                My Reservations
-              </Text>
+              <Text style={styles.title}>My Reservations</Text>
 
-              <Text style={styles.subtitle}>
-                Manage your book reservations
-              </Text>
+              <Text style={styles.subtitle}>Manage your book reservations</Text>
             </View>
           </View>
 
           <View style={styles.headerIcon}>
-            <Text
-              style={styles.headerIconText}
-            >
-              ⌕
-            </Text>
+            <Text style={styles.headerIconText}>⌕</Text>
           </View>
         </View>
 
@@ -396,9 +300,7 @@ export default function MyReservationsScreen() {
 
         <View style={styles.summaryContainer}>
           <View style={styles.activeSummary}>
-            <Text
-              style={styles.activeSummaryText}
-            >
+            <Text style={styles.activeSummaryText}>
               Current ({currentReservations.length})
             </Text>
           </View>
@@ -414,25 +316,19 @@ export default function MyReservationsScreen() {
 
         {error ? (
           <View style={styles.errorBox}>
-            <Text style={styles.error}>
-              {error}
-            </Text>
+            <Text style={styles.error}>{error}</Text>
           </View>
         ) : null}
 
         {/* CURRENT RESERVATIONS */}
 
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>
-            Current Reservations
-          </Text>
+          <Text style={styles.sectionTitle}>Current Reservations</Text>
 
           {currentReservations.length > 0 ? (
             <Text style={styles.countText}>
-              {currentReservations.length}{' '}
-              {currentReservations.length === 1
-                ? 'book'
-                : 'books'}
+              {currentReservations.length}{" "}
+              {currentReservations.length === 1 ? "book" : "books"}
             </Text>
           ) : null}
         </View>
@@ -440,61 +336,42 @@ export default function MyReservationsScreen() {
         {currentReservations.length === 0 ? (
           <View style={styles.emptyBox}>
             <View style={styles.emptyIcon}>
-              <Text style={styles.emptyIconText}>
-                📚
-              </Text>
+              <Text style={styles.emptyIconText}>📚</Text>
             </View>
 
-            <Text style={styles.emptyTitle}>
-              No current reservations
-            </Text>
+            <Text style={styles.emptyTitle}>No current reservations</Text>
 
             <Text style={styles.empty}>
-              Your upcoming book reservations
-              will appear here.
+              Your upcoming book reservations will appear here.
             </Text>
           </View>
         ) : (
-          currentReservations.map((item) =>
-            renderReservationCard(item)
-          )
+          currentReservations.map((item) => renderReservationCard(item))
         )}
 
         {/* PREVIOUS RESERVATIONS */}
 
         <View style={styles.previousHeader}>
-          <Text style={styles.sectionTitle}>
-            Previous Reservations
-          </Text>
+          <Text style={styles.sectionTitle}>Previous Reservations</Text>
 
           {previousReservations.length > 0 ? (
             <Text style={styles.countText}>
-              {previousReservations.length}{' '}
-              {previousReservations.length === 1
-                ? 'book'
-                : 'books'}
+              {previousReservations.length}{" "}
+              {previousReservations.length === 1 ? "book" : "books"}
             </Text>
           ) : null}
         </View>
 
         {previousReservations.length === 0 ? (
           <View style={styles.emptyBox}>
-            <Text style={styles.emptyTitle}>
-              No previous reservations
-            </Text>
+            <Text style={styles.emptyTitle}>No previous reservations</Text>
 
             <Text style={styles.empty}>
-              Completed and cancelled
-              reservations will appear here.
+              Completed and cancelled reservations will appear here.
             </Text>
           </View>
         ) : (
-          previousReservations.map((item) =>
-            renderReservationCard(
-              item,
-              true
-            )
-          )
+          previousReservations.map((item) => renderReservationCard(item, true))
         )}
       </ScrollView>
     </SafeAreaView>
@@ -504,12 +381,12 @@ export default function MyReservationsScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f4f7fb',
+    backgroundColor: "#f4f7fb",
   },
 
   screen: {
     flex: 1,
-    backgroundColor: '#f4f7fb',
+    backgroundColor: "#f4f7fb",
   },
 
   container: {
@@ -531,14 +408,14 @@ const styles = StyleSheet.create({
 
   center: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f4f7fb',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f4f7fb",
     gap: 10,
   },
 
   loadingText: {
-    color: '#64748b',
+    color: "#64748b",
     fontSize: 13,
   },
 
@@ -547,17 +424,17 @@ const styles = StyleSheet.create({
   ========================= */
 
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 20,
     minHeight: 52,
   },
 
   headerLeft: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     minWidth: 0,
   },
 
@@ -568,17 +445,17 @@ const styles = StyleSheet.create({
     height: 34,
     borderRadius: 17,
 
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
 
     borderWidth: 1,
-    borderColor: '#d9e5f7',
+    borderColor: "#d9e5f7",
 
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
 
     marginRight: 10,
 
-    shadowColor: '#315b9f',
+    shadowColor: "#315b9f",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -589,10 +466,10 @@ const styles = StyleSheet.create({
   },
 
   backArrow: {
-    color: '#1464ff',
+    color: "#1464ff",
     fontSize: 29,
     lineHeight: 30,
-    fontWeight: '400',
+    fontWeight: "400",
     marginTop: -2,
   },
 
@@ -603,13 +480,13 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: 25,
-    fontWeight: '800',
-    color: '#0645c4',
+    fontWeight: "800",
+    color: "#0645c4",
     letterSpacing: -0.5,
   },
 
   subtitle: {
-    color: '#74829a',
+    color: "#74829a",
     fontSize: 11.5,
     marginTop: 3,
   },
@@ -618,16 +495,16 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: '#e5efff',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#e5efff",
+    justifyContent: "center",
+    alignItems: "center",
     marginLeft: 8,
   },
 
   headerIconText: {
-    color: '#1464ff',
+    color: "#1464ff",
     fontSize: 22,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 
   /* =========================
@@ -635,8 +512,8 @@ const styles = StyleSheet.create({
   ========================= */
 
   summaryContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#e8eef8',
+    flexDirection: "row",
+    backgroundColor: "#e8eef8",
     borderRadius: 11,
     padding: 4,
     marginBottom: 25,
@@ -644,28 +521,28 @@ const styles = StyleSheet.create({
 
   activeSummary: {
     flex: 1,
-    backgroundColor: '#1464ff',
+    backgroundColor: "#1464ff",
     borderRadius: 8,
     paddingVertical: 9,
-    alignItems: 'center',
+    alignItems: "center",
   },
 
   activeSummaryText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "700",
   },
 
   summary: {
     flex: 1,
     paddingVertical: 9,
-    alignItems: 'center',
+    alignItems: "center",
   },
 
   summaryText: {
-    color: '#72809a',
+    color: "#72809a",
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 
   /* =========================
@@ -673,30 +550,30 @@ const styles = StyleSheet.create({
   ========================= */
 
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 11,
   },
 
   previousHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginTop: 24,
     marginBottom: 11,
   },
 
   sectionTitle: {
     fontSize: 16,
-    fontWeight: '800',
-    color: '#12203b',
+    fontWeight: "800",
+    color: "#12203b",
   },
 
   countText: {
-    color: '#7c8aa2',
+    color: "#7c8aa2",
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 
   /* =========================
@@ -704,13 +581,13 @@ const styles = StyleSheet.create({
   ========================= */
 
   card: {
-    position: 'relative',
-    overflow: 'hidden',
+    position: "relative",
+    overflow: "hidden",
 
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
 
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
 
     borderRadius: 14,
 
@@ -721,9 +598,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
 
     borderWidth: 1,
-    borderColor: '#e2e9f4',
+    borderColor: "#e2e9f4",
 
-    shadowColor: '#000000',
+    shadowColor: "#000000",
     shadowOffset: {
       width: 0,
       height: 3,
@@ -734,7 +611,7 @@ const styles = StyleSheet.create({
   },
 
   leftAccent: {
-    position: 'absolute',
+    position: "absolute",
 
     left: 0,
     top: 12,
@@ -747,11 +624,11 @@ const styles = StyleSheet.create({
   },
 
   blueAccent: {
-    backgroundColor: '#1464ff',
+    backgroundColor: "#1464ff",
   },
 
   completedAccent: {
-    backgroundColor: '#39b75d',
+    backgroundColor: "#39b75d",
   },
 
   /* =========================
@@ -764,7 +641,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 7,
 
-    backgroundColor: '#e8e8e8',
+    backgroundColor: "#e8e8e8",
   },
 
   coverPlaceholder: {
@@ -773,16 +650,16 @@ const styles = StyleSheet.create({
 
     borderRadius: 7,
 
-    backgroundColor: '#1f1f1f',
+    backgroundColor: "#1f1f1f",
 
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   coverPlaceholderText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 8,
-    fontWeight: '800',
+    fontWeight: "800",
   },
 
   /* =========================
@@ -796,8 +673,8 @@ const styles = StyleSheet.create({
   },
 
   topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 2,
   },
 
@@ -805,15 +682,15 @@ const styles = StyleSheet.create({
     flex: 1,
 
     fontSize: 14,
-    fontWeight: '800',
-    color: '#111827',
+    fontWeight: "800",
+    color: "#111827",
 
     marginRight: 6,
   },
 
   author: {
     fontSize: 11,
-    color: '#718096',
+    color: "#718096",
     marginBottom: 9,
   },
 
@@ -831,51 +708,51 @@ const styles = StyleSheet.create({
 
   statusText: {
     fontSize: 9,
-    fontWeight: '700',
+    fontWeight: "700",
   },
 
   /* UPCOMING */
 
   upcomingBadge: {
-    backgroundColor: '#edf4ff',
-    borderColor: '#8bb4ff',
+    backgroundColor: "#edf4ff",
+    borderColor: "#8bb4ff",
   },
 
   upcomingText: {
-    color: '#1464ff',
+    color: "#1464ff",
   },
 
   /* CANCELLED - BLUE */
 
   cancelledBadge: {
-    backgroundColor: '#edf4ff',
-    borderColor: '#8bb4ff',
+    backgroundColor: "#edf4ff",
+    borderColor: "#8bb4ff",
   },
 
   cancelledText: {
-    color: '#1464ff',
+    color: "#1464ff",
   },
 
   /* COMPLETED - GREEN */
 
   completedBadge: {
-    backgroundColor: '#e9f9ed',
-    borderColor: '#7bd28e',
+    backgroundColor: "#e9f9ed",
+    borderColor: "#7bd28e",
   },
 
   completedText: {
-    color: '#279143',
+    color: "#279143",
   },
 
   /* FALLBACK */
 
   previousBadge: {
-    backgroundColor: '#f1f3f5',
-    borderColor: '#d3d8df',
+    backgroundColor: "#f1f3f5",
+    borderColor: "#d3d8df",
   },
 
   previousText: {
-    color: '#657080',
+    color: "#657080",
   },
 
   /* =========================
@@ -883,24 +760,24 @@ const styles = StyleSheet.create({
   ========================= */
 
   dateRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
 
   calendarIcon: {
-    color: '#1464ff',
+    color: "#1464ff",
     fontSize: 11,
     marginRight: 5,
   },
 
   dateText: {
-    color: '#45546d',
+    color: "#45546d",
     fontSize: 9.5,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 
   dateArrow: {
-    color: '#9aa7ba',
+    color: "#9aa7ba",
     fontSize: 11,
     marginHorizontal: 5,
   },
@@ -915,19 +792,19 @@ const styles = StyleSheet.create({
 
     borderRadius: 14,
 
-    backgroundColor: '#edf4ff',
+    backgroundColor: "#edf4ff",
 
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
 
     marginLeft: 5,
   },
 
   arrow: {
-    color: '#1464ff',
+    color: "#1464ff",
 
     fontSize: 24,
-    fontWeight: '500',
+    fontWeight: "500",
 
     lineHeight: 25,
   },
@@ -937,17 +814,17 @@ const styles = StyleSheet.create({
   ========================= */
 
   emptyBox: {
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
 
     borderWidth: 1,
-    borderColor: '#e2e9f4',
+    borderColor: "#e2e9f4",
 
     borderRadius: 14,
 
     paddingVertical: 25,
     paddingHorizontal: 20,
 
-    alignItems: 'center',
+    alignItems: "center",
   },
 
   emptyIcon: {
@@ -956,10 +833,10 @@ const styles = StyleSheet.create({
 
     borderRadius: 23,
 
-    backgroundColor: '#edf4ff',
+    backgroundColor: "#edf4ff",
 
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
 
     marginBottom: 10,
   },
@@ -969,19 +846,19 @@ const styles = StyleSheet.create({
   },
 
   emptyTitle: {
-    color: '#17233b',
+    color: "#17233b",
 
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: "700",
 
     marginBottom: 5,
   },
 
   empty: {
-    color: '#7c899c',
+    color: "#7c899c",
 
     fontSize: 11,
-    textAlign: 'center',
+    textAlign: "center",
 
     lineHeight: 16,
   },
@@ -991,7 +868,7 @@ const styles = StyleSheet.create({
   ========================= */
 
   errorBox: {
-    backgroundColor: '#edf4ff',
+    backgroundColor: "#edf4ff",
 
     borderRadius: 10,
 
@@ -1000,7 +877,7 @@ const styles = StyleSheet.create({
   },
 
   error: {
-    color: '#1464ff',
+    color: "#1464ff",
     fontSize: 12,
   },
 });

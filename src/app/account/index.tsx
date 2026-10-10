@@ -1,26 +1,27 @@
 import { Image } from "expo-image";
-
 import { LinearGradient } from "expo-linear-gradient";
-
 import { router, useFocusEffect } from "expo-router";
-
 import { SymbolView } from "expo-symbols";
-
 import { useCallback, useState } from "react";
-
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import BottomNavBar from "@/components/BottomNavBar";
 import AppScreen from "@/components/themes/AppScreen";
 
 import { useAppearance } from "@/contexts/appearance-context";
-
 import { useAuth } from "@/contexts/auth-context";
 
+import { listBookings } from "@/features/booking/repository";
+import { getMyBookReservations } from "@/services/bookService";
 import { getUnreadNotificationCount } from "@/services/notifications";
-
 import { syncUpcomingReservationReminders } from "@/services/reservation-reminders";
 
 import GetStartedScreen from "../(auth)/get-started";
@@ -62,49 +63,55 @@ const ACTIONS: {
   },
 ];
 
-const SAMPLE_RESERVATIONS = [
-  {
-    id: "1",
-    title: "Seat A8",
-    subtitle: "Floor 2",
-    date: "15 Sep",
-    time: "10:00 - 12:00",
-    type: "Seat",
-    ios: "chair.fill" as const,
-    android: "chair" as const,
-  },
-  {
-    id: "2",
-    title: "Study Room 03",
-    subtitle: "Floor 1",
-    date: "18 Sep",
-    time: "02:00 - 04:00",
-    type: "Room",
-    ios: "door.left.hand.open" as const,
-    android: "meeting_room" as const,
-  },
-  {
-    id: "3",
-    title: "Database Systems",
-    subtitle: "Book Reservation",
-    date: "20 Sep",
-    time: "Pickup",
-    type: "Book",
-    ios: "book.fill" as const,
-    android: "menu_book" as const,
-  },
-];
+type HomeReservation = {
+  id: string;
+  title: string;
+  subtitle: string;
+  date: string;
+  time: string;
+  type: "Seat" | "Room" | "Book";
+  ios: "chair.fill" | "door.left.hand.open" | "book.fill";
+  android: "chair" | "meeting_room" | "menu_book";
+  sortTime: number;
+};
+
+type BookReservationRow = {
+  id: string;
+  item_name?: string | null;
+  start_time?: string | null;
+  end_time?: string | null;
+  created_at?: string | null;
+  books?:
+    | {
+        id?: string;
+        title?: string;
+        author?: string;
+        category?: string;
+        cover_url?: string;
+      }
+    | {
+        id?: string;
+        title?: string;
+        author?: string;
+        category?: string;
+        cover_url?: string;
+      }[]
+    | null;
+};
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
 
   const { session, account, isLoading } = useAuth();
-
   const { appearance, theme } = useAppearance();
 
   const isDark = appearance === "dark";
 
   const [unreadCount, setUnreadCount] = useState(0);
+
+  const [reservations, setReservations] = useState<HomeReservation[]>([]);
+  const [isReservationsLoading, setIsReservationsLoading] = useState(true);
+  const [reservationError, setReservationError] = useState<string | null>(null);
 
   const isSignedIn = !isLoading && !!session && !!account?.role;
 
@@ -123,10 +130,146 @@ export default function HomeScreen() {
     }
   }, [session]);
 
+  const loadReservations = useCallback(async () => {
+    if (!session?.user?.id) {
+      setReservations([]);
+      setIsReservationsLoading(false);
+      setReservationError(null);
+      return;
+    }
+
+    setIsReservationsLoading(true);
+    setReservationError(null);
+
+    try {
+      const userId = session.user.id;
+
+      const [bookingResult, bookResult] = await Promise.allSettled([
+        listBookings(),
+        getMyBookReservations(userId),
+      ]);
+
+      const combinedReservations: HomeReservation[] = [];
+
+      const now = new Date();
+
+      const todayStart = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+      ).getTime();
+
+      if (bookingResult.status === "fulfilled") {
+        bookingResult.value
+          .filter((booking) => {
+            const startTime = new Date(booking.start_at).getTime();
+
+            const inactiveStatuses = ["cancelled", "rejected"];
+
+            return (
+              !inactiveStatuses.includes(booking.status) &&
+              Number.isFinite(startTime) &&
+              startTime >= todayStart
+            );
+          })
+          .forEach((booking) => {
+            const isSeat = booking.kind === "seat";
+
+            combinedReservations.push({
+              id: `booking-${booking.id}`,
+
+              title: booking.resource_label,
+
+              subtitle: isSeat
+                ? booking.floor > 0
+                  ? `Floor ${booking.floor}`
+                  : "Seat Reservation"
+                : booking.floor > 0
+                  ? `Study Room · Floor ${booking.floor}`
+                  : "Study Room Reservation",
+
+              date: formatReservationDate(booking.start_at),
+
+              time: formatReservationTime(booking.start_at, booking.end_at),
+
+              type: isSeat ? "Seat" : "Room",
+
+              ios: isSeat ? "chair.fill" : "door.left.hand.open",
+
+              android: isSeat ? "chair" : "meeting_room",
+
+              sortTime: new Date(booking.start_at).getTime(),
+            });
+          });
+      }
+
+      if (bookResult.status === "fulfilled") {
+        const bookReservations = bookResult.value as BookReservationRow[];
+
+        bookReservations
+          .filter((reservation) => {
+            if (!reservation.start_time) {
+              return false;
+            }
+
+            const startTime = new Date(reservation.start_time).getTime();
+
+            return Number.isFinite(startTime) && startTime >= todayStart;
+          })
+          .forEach((reservation) => {
+            const book = getBookDetails(reservation.books);
+
+            combinedReservations.push({
+              id: `book-${reservation.id}`,
+
+              title: book?.title || reservation.item_name || "Book Reservation",
+
+              subtitle: book?.author || "Book Reservation",
+
+              date: reservation.start_time
+                ? formatReservationDate(reservation.start_time)
+                : "",
+
+              time: "Pickup",
+
+              type: "Book",
+
+              ios: "book.fill",
+
+              android: "menu_book",
+
+              sortTime: reservation.start_time
+                ? new Date(reservation.start_time).getTime()
+                : Number.MAX_SAFE_INTEGER,
+            });
+          });
+      }
+
+      combinedReservations.sort((a, b) => a.sortTime - b.sortTime);
+
+      setReservations(combinedReservations.slice(0, 6));
+
+      if (
+        bookingResult.status === "rejected" &&
+        bookResult.status === "rejected"
+      ) {
+        setReservationError("Could not load your reservations.");
+      }
+    } catch (error) {
+      console.error("Error loading home reservations:", error);
+
+      setReservations([]);
+      setReservationError("Could not load your reservations.");
+    } finally {
+      setIsReservationsLoading(false);
+    }
+  }, [session]);
+
   useFocusEffect(
     useCallback(() => {
       loadUnreadCount();
-    }, [loadUnreadCount]),
+      loadReservations();
+    }, [loadUnreadCount, loadReservations]),
   );
 
   if (!isSignedIn) {
@@ -395,7 +538,7 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.reservationHeader}>
-          <View>
+          <View style={styles.reservationHeaderText}>
             <Text
               style={[
                 styles.sectionTitle,
@@ -420,13 +563,15 @@ export default function HomeScreen() {
           </View>
 
           <Pressable
-            style={[
+            style={({ pressed }) => [
               styles.viewAllButton,
               {
                 backgroundColor: theme.surface,
                 borderColor: theme.border,
               },
+              pressed && styles.viewAllButtonPressed,
             ]}
+            onPress={() => router.push("/account/all-reservations" as never)}
           >
             <Text
               style={[
@@ -438,173 +583,325 @@ export default function HomeScreen() {
             >
               View All
             </Text>
+
+            <SymbolView
+              name={{
+                ios: "chevron.right",
+                android: "chevron_right",
+                web: "chevron_right",
+              }}
+              size={14}
+              tintColor={theme.primary}
+            />
           </Pressable>
         </View>
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.reservationList}
-        >
-          {SAMPLE_RESERVATIONS.map((reservation) => (
-            <Pressable
-              key={reservation.id}
-              style={({ pressed }) => [
-                styles.reservationCard,
+        {isReservationsLoading ? (
+          <View
+            style={[
+              styles.reservationLoadingCard,
+              {
+                backgroundColor: theme.surface,
+                borderColor: theme.border,
+              },
+            ]}
+          >
+            <ActivityIndicator size="small" color={theme.primary} />
+
+            <Text
+              style={[
+                styles.reservationLoadingText,
                 {
-                  backgroundColor: theme.surface,
-                  borderColor: theme.border,
+                  color: theme.textSecondary,
                 },
-                pressed && styles.reservationCardPressed,
               ]}
             >
-              <View style={styles.reservationTop}>
-                <View
-                  style={[
-                    styles.reservationIcon,
-                    {
-                      backgroundColor: theme.primarySoft,
-                    },
-                  ]}
-                >
-                  <SymbolView
-                    name={{
-                      ios: reservation.ios,
-                      android: reservation.android,
-                      web: reservation.android,
-                    }}
-                    size={23}
-                    tintColor={theme.primary}
-                  />
-                </View>
+              Loading reservations...
+            </Text>
+          </View>
+        ) : reservationError && reservations.length === 0 ? (
+          <View
+            style={[
+              styles.emptyReservationCard,
+              {
+                backgroundColor: theme.surface,
+                borderColor: theme.border,
+              },
+            ]}
+          >
+            <View
+              style={[
+                styles.emptyReservationIcon,
+                {
+                  backgroundColor: isDark ? "#3A2020" : "#FEF2F2",
+                },
+              ]}
+            >
+              <SymbolView
+                name={{
+                  ios: "exclamationmark.circle.fill",
+                  android: "error",
+                  web: "error",
+                }}
+                size={26}
+                tintColor={theme.danger}
+              />
+            </View>
 
-                <View
-                  style={[
-                    styles.statusBadge,
-                    {
-                      backgroundColor: isDark ? "#143322" : "#ECFDF3",
-                    },
-                  ]}
-                >
+            <Text
+              style={[
+                styles.emptyReservationTitle,
+                {
+                  color: theme.text,
+                },
+              ]}
+            >
+              Could not load reservations
+            </Text>
+
+            <Text
+              style={[
+                styles.emptyReservationText,
+                {
+                  color: theme.textSecondary,
+                },
+              ]}
+            >
+              {reservationError}
+            </Text>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.reservationRetryButton,
+                {
+                  backgroundColor: theme.primary,
+                },
+                pressed && styles.reservationRetryPressed,
+              ]}
+              onPress={loadReservations}
+            >
+              <Text style={styles.reservationRetryText}>Try Again</Text>
+            </Pressable>
+          </View>
+        ) : reservations.length === 0 ? (
+          <View
+            style={[
+              styles.emptyReservationCard,
+              {
+                backgroundColor: theme.surface,
+                borderColor: theme.border,
+              },
+            ]}
+          >
+            <View
+              style={[
+                styles.emptyReservationIcon,
+                {
+                  backgroundColor: theme.primarySoft,
+                },
+              ]}
+            >
+              <SymbolView
+                name={{
+                  ios: "calendar",
+                  android: "calendar_today",
+                  web: "calendar_today",
+                }}
+                size={26}
+                tintColor={theme.primary}
+              />
+            </View>
+
+            <Text
+              style={[
+                styles.emptyReservationTitle,
+                {
+                  color: theme.text,
+                },
+              ]}
+            >
+              No Upcoming Reservations
+            </Text>
+
+            <Text
+              style={[
+                styles.emptyReservationText,
+                {
+                  color: theme.textSecondary,
+                },
+              ]}
+            >
+              Your upcoming book, seat and study room reservations will appear
+              here.
+            </Text>
+          </View>
+        ) : (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.reservationList}
+          >
+            {reservations.map((reservation) => (
+              <View
+                key={reservation.id}
+                style={[
+                  styles.reservationCard,
+                  {
+                    backgroundColor: theme.surface,
+                    borderColor: theme.border,
+                  },
+                ]}
+              >
+                <View style={styles.reservationTop}>
                   <View
                     style={[
-                      styles.statusDot,
+                      styles.reservationIcon,
                       {
-                        backgroundColor: theme.success,
-                      },
-                    ]}
-                  />
-
-                  <Text
-                    style={[
-                      styles.statusText,
-                      {
-                        color: isDark ? "#86EFAC" : "#15803D",
+                        backgroundColor: theme.primarySoft,
                       },
                     ]}
                   >
-                    Upcoming
+                    <SymbolView
+                      name={{
+                        ios: reservation.ios,
+                        android: reservation.android,
+                        web: reservation.android,
+                      }}
+                      size={23}
+                      tintColor={theme.primary}
+                    />
+                  </View>
+
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      {
+                        backgroundColor: isDark ? "#143322" : "#ECFDF3",
+                      },
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.statusDot,
+                        {
+                          backgroundColor: theme.success,
+                        },
+                      ]}
+                    />
+
+                    <Text
+                      style={[
+                        styles.statusText,
+                        {
+                          color: isDark ? "#86EFAC" : "#15803D",
+                        },
+                      ]}
+                    >
+                      Upcoming
+                    </Text>
+                  </View>
+                </View>
+
+                <Text
+                  style={[
+                    styles.reservationName,
+                    {
+                      color: theme.text,
+                    },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {reservation.title}
+                </Text>
+
+                <Text
+                  style={[
+                    styles.reservationSubtitle,
+                    {
+                      color: theme.textSecondary,
+                    },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {reservation.subtitle}
+                </Text>
+
+                <View
+                  style={[
+                    styles.reservationDivider,
+                    {
+                      backgroundColor: theme.border,
+                    },
+                  ]}
+                />
+
+                <View style={styles.reservationMetaRow}>
+                  <View
+                    style={[
+                      styles.smallMetaIcon,
+                      {
+                        backgroundColor: theme.primarySoft,
+                      },
+                    ]}
+                  >
+                    <SymbolView
+                      name={{
+                        ios: "calendar",
+                        android: "calendar_today",
+                        web: "calendar_today",
+                      }}
+                      size={14}
+                      tintColor={theme.primary}
+                    />
+                  </View>
+
+                  <Text
+                    style={[
+                      styles.metaValue,
+                      {
+                        color: theme.text,
+                      },
+                    ]}
+                  >
+                    {reservation.date}
+                  </Text>
+                </View>
+
+                <View style={styles.reservationMetaRow}>
+                  <View
+                    style={[
+                      styles.smallMetaIcon,
+                      {
+                        backgroundColor: theme.primarySoft,
+                      },
+                    ]}
+                  >
+                    <SymbolView
+                      name={{
+                        ios: "clock.fill",
+                        android: "schedule",
+                        web: "schedule",
+                      }}
+                      size={14}
+                      tintColor={theme.primary}
+                    />
+                  </View>
+
+                  <Text
+                    style={[
+                      styles.metaValue,
+                      {
+                        color: theme.text,
+                      },
+                    ]}
+                  >
+                    {reservation.time}
                   </Text>
                 </View>
               </View>
-
-              <Text
-                style={[
-                  styles.reservationName,
-                  {
-                    color: theme.text,
-                  },
-                ]}
-              >
-                {reservation.title}
-              </Text>
-
-              <Text
-                style={[
-                  styles.reservationSubtitle,
-                  {
-                    color: theme.textSecondary,
-                  },
-                ]}
-              >
-                {reservation.subtitle}
-              </Text>
-
-              <View
-                style={[
-                  styles.reservationDivider,
-                  {
-                    backgroundColor: theme.border,
-                  },
-                ]}
-              />
-
-              <View style={styles.reservationMetaRow}>
-                <View
-                  style={[
-                    styles.smallMetaIcon,
-                    {
-                      backgroundColor: theme.primarySoft,
-                    },
-                  ]}
-                >
-                  <SymbolView
-                    name={{
-                      ios: "calendar",
-                      android: "calendar_today",
-                      web: "calendar_today",
-                    }}
-                    size={14}
-                    tintColor={theme.primary}
-                  />
-                </View>
-
-                <Text
-                  style={[
-                    styles.metaValue,
-                    {
-                      color: theme.text,
-                    },
-                  ]}
-                >
-                  {reservation.date}
-                </Text>
-              </View>
-
-              <View style={styles.reservationMetaRow}>
-                <View
-                  style={[
-                    styles.smallMetaIcon,
-                    {
-                      backgroundColor: theme.primarySoft,
-                    },
-                  ]}
-                >
-                  <SymbolView
-                    name={{
-                      ios: "clock.fill",
-                      android: "schedule",
-                      web: "schedule",
-                    }}
-                    size={14}
-                    tintColor={theme.primary}
-                  />
-                </View>
-
-                <Text
-                  style={[
-                    styles.metaValue,
-                    {
-                      color: theme.text,
-                    },
-                  ]}
-                >
-                  {reservation.time}
-                </Text>
-              </View>
-            </Pressable>
-          ))}
-        </ScrollView>
+            ))}
+          </ScrollView>
+        )}
 
         <View
           style={[
@@ -663,6 +960,52 @@ export default function HomeScreen() {
       <BottomNavBar active="home" />
     </AppScreen>
   );
+}
+
+function getBookDetails(books: BookReservationRow["books"]) {
+  if (!books) {
+    return null;
+  }
+
+  if (Array.isArray(books)) {
+    return books[0] ?? null;
+  }
+
+  return books;
+}
+
+function formatReservationDate(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+  });
+}
+
+function formatReservationTime(startValue: string, endValue: string) {
+  const start = new Date(startValue);
+  const end = new Date(endValue);
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return "";
+  }
+
+  const startTime = start.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  const endTime = end.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  return `${startTime} - ${endTime}`;
 }
 
 const styles = StyleSheet.create({
@@ -919,13 +1262,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 12,
+    gap: 10,
+  },
+
+  reservationHeaderText: {
+    flex: 1,
   },
 
   viewAllButton: {
-    paddingHorizontal: 12,
+    minHeight: 34,
+    paddingHorizontal: 11,
     paddingVertical: 7,
     borderRadius: 14,
     borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 3,
+  },
+
+  viewAllButtonPressed: {
+    opacity: 0.75,
   },
 
   viewAllText: {
@@ -953,10 +1310,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
-  },
-
-  reservationCardPressed: {
-    opacity: 0.78,
   },
 
   reservationTop: {
@@ -1027,6 +1380,79 @@ const styles = StyleSheet.create({
   metaValue: {
     fontSize: 11,
     fontWeight: "600",
+    flexShrink: 1,
+  },
+
+  reservationLoadingCard: {
+    minHeight: 120,
+    borderRadius: 20,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 22,
+    gap: 10,
+  },
+
+  reservationLoadingText: {
+    fontSize: 12,
+  },
+
+  emptyReservationCard: {
+    minHeight: 150,
+    borderRadius: 20,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+    marginBottom: 22,
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+
+  emptyReservationIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 10,
+  },
+
+  emptyReservationTitle: {
+    fontSize: 15,
+    fontWeight: "800",
+    textAlign: "center",
+  },
+
+  emptyReservationText: {
+    marginTop: 5,
+    maxWidth: 290,
+    fontSize: 12,
+    lineHeight: 18,
+    textAlign: "center",
+  },
+
+  reservationRetryButton: {
+    marginTop: 13,
+    paddingHorizontal: 17,
+    paddingVertical: 10,
+    borderRadius: 13,
+  },
+
+  reservationRetryPressed: {
+    opacity: 0.8,
+  },
+
+  reservationRetryText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "700",
   },
 
   tipCard: {
