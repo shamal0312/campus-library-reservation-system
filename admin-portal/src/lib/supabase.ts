@@ -7,6 +7,7 @@ const supabaseUrl =
 
 const supabaseAnonKey =
   import.meta.env.VITE_SUPABASE_ANON_KEY ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlhdmF4aHphZWdldG13Z2ZzcXpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMjQxMzYsImV4cCI6MjEwNTcwMDEzNn0.Mjkj8pZQK1Vgu-OF7k5klEObp3pt0rtytk7gteT_wx8';
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
   'sb_publishable_uSQT3JJUy4vC81rCC9iEBw_GEhrIV2oS';
 
