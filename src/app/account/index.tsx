@@ -35,7 +35,7 @@ const ACTIONS: {
     description: "Book a seat",
     ios: "chair.fill",
     android: "chair",
-    route: "/booking",
+    route: "/booking/seat-availability",
   },
   {
     label: "Study Rooms",
