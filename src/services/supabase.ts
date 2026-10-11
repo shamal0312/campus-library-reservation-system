@@ -3,9 +3,17 @@ import { createClient, processLock } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 import 'react-native-url-polyfill/auto';
 
-export const DEMO_MODE = process.env.EXPO_PUBLIC_BOOKING_DEMO !== 'false';
-const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const key = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+// 1. False the demo mode
+export const DEMO_MODE = false;
+
+// 2.Add Fallback values to url and key, so that the app can run without .env file (for demo purposes)
+const url =
+  process.env.EXPO_PUBLIC_SUPABASE_URL ||
+  'https://yavaxhzaegetmwgfsqzh.supabase.co';
+
+const key =
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlhdmF4aHphZWdldG13Z2ZzcXpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMjQxMzYsImV4cCI6MjEwNTcwMDEzNn0.Mjkj8pZQK1Vgu-OF7k5klEObp3pt0rtytk7gteT_wx8';
 
 let supabaseClient: any = null;
 
@@ -14,7 +22,8 @@ export function requireSupabase(): any {
     return supabaseClient;
   }
 
-  if (DEMO_MODE || !url || !key) {
+  // if the url or key is missing, throw an error to inform the developer to add them to the .env file
+  if (!url || !key) {
     throw new Error('Add Supabase URL and anon/publishable key to the root .env, then restart Expo.');
   }
 
@@ -31,4 +40,4 @@ export function requireSupabase(): any {
   return supabaseClient;
 }
 
-export const supabase: any = null;
+export const supabase: any = requireSupabase();
